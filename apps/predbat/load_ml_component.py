@@ -76,7 +76,7 @@ class LoadMLComponent(ComponentBase):
         self.ml_learning_rate = 0.001
         self.ml_epochs_initial = 100
         self.ml_epochs_update = 30
-        self.ml_patience_initial = 20
+        self.ml_patience_initial = 10
         self.ml_patience_update = 10
         self.ml_min_days = 1
         self.ml_validation_threshold = 2.0
@@ -84,9 +84,14 @@ class LoadMLComponent(ComponentBase):
         self.ml_max_load_kw = 50.0
         self.ml_max_model_age_hours = 48
         self.ml_weight_decay = 0.01
+        self.ml_dropout_rate = 0.1
         self.ml_max_days_history = load_ml_max_days_history
+        # Curriculum learning: expand training window from oldest week forward
+        self.ml_curriculum_window_days = 7  # Initial window size in days
+        self.ml_curriculum_step_days = 1  # Days added per subsequent pass
+        self.ml_curriculum_max_passes = 4  # Max intermediate passes (0 = no limit)
         self.load_ml_database_days = load_ml_database_days
-        self.ml_validation_holdout_hours = 24
+        self.ml_validation_holdout_hours = 48
 
         # Data state
         self.load_data = None
@@ -124,7 +129,7 @@ class LoadMLComponent(ComponentBase):
 
     def _init_predictor(self):
         """Initialize or reinitialize the predictor."""
-        self.predictor = LoadPredictor(log_func=self.log, learning_rate=self.ml_learning_rate, max_load_kw=self.ml_max_load_kw, weight_decay=self.ml_weight_decay)
+        self.predictor = LoadPredictor(log_func=self.log, learning_rate=self.ml_learning_rate, max_load_kw=self.ml_max_load_kw, weight_decay=self.ml_weight_decay, dropout_rate=self.ml_dropout_rate)
 
         # Determine model save path
         if self.config_root:
@@ -152,7 +157,7 @@ class LoadMLComponent(ComponentBase):
                 # Model load failed (version mismatch, architecture change, etc.)
                 # Reinitialize predictor to ensure clean state
                 self.log("ML Component: Failed to load model, reinitializing predictor")
-                self.predictor = LoadPredictor(log_func=self.log, learning_rate=self.ml_learning_rate, max_load_kw=self.ml_max_load_kw, weight_decay=self.ml_weight_decay)
+                self.predictor = LoadPredictor(log_func=self.log, learning_rate=self.ml_learning_rate, max_load_kw=self.ml_max_load_kw, weight_decay=self.ml_weight_decay, dropout_rate=self.ml_dropout_rate)
 
     def get_from_incrementing(self, data, index, step, backwards=True):
         """
@@ -561,7 +566,6 @@ class LoadMLComponent(ComponentBase):
         self.load_minutes_now = load_minutes_now
         self.last_data_fetch = self.now_utc
         self.data_ready = True
-        self.ml_validation_holdout_hours = 48 if self.load_data_age_days > 3 else 24
 
     def get_current_prediction(self):
         """
@@ -633,21 +637,17 @@ class LoadMLComponent(ComponentBase):
         # Determine if training is needed
         is_initial = not self.initial_training_done
 
-        # Fetch fresh load data periodically (every 15 minutes)
-        should_fetch = first or ((seconds % PREDICTION_INTERVAL_SECONDS) == 0)
-        should_train = first or ((seconds % RETRAIN_INTERVAL_SECONDS) == 0)
+        # Retrain if the model is older than the retrain interval (rather than on a fixed tick)
+        retrain_age_seconds = (self.now_utc - self.last_train_time).total_seconds() if self.last_train_time else RETRAIN_INTERVAL_SECONDS
+        should_train = not first and (retrain_age_seconds >= RETRAIN_INTERVAL_SECONDS)
 
+        # Fetch fresh load data periodically (every N minutes)
+        should_fetch = first or should_train or ((seconds % PREDICTION_INTERVAL_SECONDS) == 0)
+
+        # Load database
         if not self.database_history_loaded and self.load_ml_database_days:
             async with self.data_lock:
                 await self.load_database_history()
-            should_fetch = True
-            should_train = True
-        elif is_initial:
-            # Initial run, need to fetch data and train model before we can provide predictions
-            should_train = True
-            should_fetch = True
-        elif should_train:
-            # Training requires fetching
             should_fetch = True
 
         if should_fetch:
@@ -674,9 +674,16 @@ class LoadMLComponent(ComponentBase):
             return True
 
         if is_initial:
-            self.log("ML Component: Starting initial training")
+            if should_train:
+                self.log("ML Component: Starting initial training")
+            else:
+                self.log("ML Component: Initial training is required, delaying until component has started")
+                return True
         elif should_train:
-            self.log("ML Component: Starting fine-tune training (2h interval)")
+            self.log("ML Component: Starting fine-tune training (2h interval), model age is {} hours".format(retrain_age_seconds / 3600.0))
+        elif should_fetch:
+            # If not training either then no need to print anything
+            self.log("ML Component: No training needed, model age is {} hours".format(dp2(retrain_age_seconds / 3600.0)))
 
         if should_train or should_fetch:
             # Hold prediction_started across all NumPy-heavy work (training + predict + save)
@@ -866,23 +873,45 @@ class LoadMLComponent(ComponentBase):
             time_decay = min(self.ml_time_decay_days, self.load_data_age_days)
             holdout_hours = self.ml_validation_holdout_hours
             patience = self.ml_patience_initial if is_initial else self.ml_patience_update
+            max_intermediate_passes = self.ml_curriculum_max_passes
+            window_days = self.ml_curriculum_window_days
+            step_days = self.ml_curriculum_step_days
         # Lock released - event loop is free during training
 
         try:
-            # Run synchronous NumPy training in a thread-pool executor so the
-            # asyncio event loop stays responsive throughout.
-            val_mae = self.predictor.train(
+            if is_initial:
+                # Curriculum: progressively expand the training window from oldest week
+                # forward so the model learns gradually from historical structure.
+                val_mae = self.predictor.train_curriculum(
+                    load_data_snap,
+                    now_utc_snap,
+                    pv_minutes=pv_data_snap,
+                    temp_minutes=temp_data_snap,
+                    import_rates=import_rates_snap,
+                    export_rates=export_rates_snap,
+                    epochs=epochs,
+                    time_decay_days=time_decay,
+                    validation_holdout_hours=holdout_hours,
+                    patience=patience,
+                    curriculum_window_days=window_days,
+                    curriculum_step_days=5,
+                    max_intermediate_passes=8,
+                )
+            # Even if initial was done we need to do one fine tuned curriculum pass too.
+            val_mae = self.predictor.train_curriculum(
                 load_data_snap,
                 now_utc_snap,
                 pv_minutes=pv_data_snap,
                 temp_minutes=temp_data_snap,
                 import_rates=import_rates_snap,
                 export_rates=export_rates_snap,
-                is_initial=is_initial,
                 epochs=epochs,
                 time_decay_days=time_decay,
                 validation_holdout_hours=holdout_hours,
                 patience=patience,
+                curriculum_window_days=window_days,
+                curriculum_step_days=step_days,
+                max_intermediate_passes=max_intermediate_passes,
             )
 
             if val_mae is not None:
@@ -986,6 +1015,7 @@ class LoadMLComponent(ComponentBase):
                 "power_today_h1": dp2(power_today_h1),
                 "power_today_h8": dp2(power_today_h8),
                 "mae_kwh": round(self.predictor.validation_mae, 4) if self.predictor and self.predictor.validation_mae else None,
+                "bias_kwh": round(self.predictor.validation_bias, 4) if self.predictor and self.predictor.validation_bias is not None else None,
                 "last_trained": self.last_train_time.isoformat() if self.last_train_time else None,
                 "model_age_hours": round(model_age_hours, 1) if model_age_hours else None,
                 "training_days": self.load_data_age_days,

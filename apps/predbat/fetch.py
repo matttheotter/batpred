@@ -997,6 +997,7 @@ class Fetch:
             self.rate_import = self.rate_add_io_slots(self.rate_import, self.octopus_slots)
             self.load_saving_slot(self.octopus_saving_slots, export=False, rate_replicate=self.rate_import_replicated)
             self.load_free_slot(self.octopus_free_slots, export=False, rate_replicate=self.rate_import_replicated)
+            load_axle_slot(self, self.axle_sessions, export=False, rate_replicate=self.rate_import_replicated)
             self.rate_import = self.basic_rates(self.get_arg("rates_import_override", [], indirect=False), "rates_import_override", self.rate_import, self.rate_import_replicated)
             self.rate_import = self.apply_manual_rates(self.rate_import, self.manual_import_rates, is_import=True, rate_replicate=self.rate_import_replicated)
             self.rate_scan(self.rate_import, print=True)
@@ -1417,10 +1418,12 @@ class Fetch:
             rate_low_average = dp2(rate_low_average / rate_low_count)
         return rate_low_start, rate_low_end, rate_low_average
 
-    def apply_manual_rates(self, rates, manual_items, is_import=True, rate_replicate={}):
+    def apply_manual_rates(self, rates, manual_items, is_import=True, rate_replicate=None):
         """
         Apply manual rates to the rates dictionary
         """
+        if rate_replicate is None:
+            rate_replicate = {}
         if not manual_items:
             return rates
 
@@ -1437,12 +1440,14 @@ class Fetch:
 
         return rates
 
-    def basic_rates(self, info, rtype, prev=None, rate_replicate={}):
+    def basic_rates(self, info, rtype, prev=None, rate_replicate=None):
         """
         Work out the energy rates based on user supplied time periods
         works on a 24-hour period only and then gets replicated later for future days
         """
         rates = {}
+        if rate_replicate is None:
+            rate_replicate = {}
         curr = self.currency_symbols[1]
 
         if prev:

@@ -7065,6 +7065,17 @@ def get_header_html(title, calculating, default_page, arg_errors, THIS_VERSION, 
     text += '<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/springfall2008/batpred/refs/heads/main/docs/images/bat_logo_light.png">'
 
     text += """
+<script>
+// Apply dark mode immediately before CSS is parsed to prevent flash of white
+if (localStorage.getItem('darkMode') === 'true') {
+    document.documentElement.classList.add('dark-mode');
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.body) {
+            document.body.classList.add('dark-mode');
+        }
+    });
+}
+</script>
 <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <style>
@@ -7074,12 +7085,19 @@ def get_header_html(title, calculating, default_page, arg_errors, THIS_VERSION, 
         height: 100%;
         border: 2px solid #ffffff;
     }
+    html.dark-mode, html.dark-mode body {
+        border-color: #121212;
+    }
     body {
         font-family: Arial, sans-serif;
         text-align: left;
         margin: 5px;
         background-color: #ffffff;
         color: #333;
+    }
+    html.dark-mode body {
+        background-color: #121212;
+        color: #e0e0e0;
     }
     h1 {
         color: #4CAF50;

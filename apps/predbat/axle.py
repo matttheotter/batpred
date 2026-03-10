@@ -29,10 +29,14 @@ class AxleAPI(ComponentBase):
 
     def initialize(self, api_key, pence_per_kwh, automatic):
         """Initialize the AxleAPI component"""
+        if not isinstance(api_key, str) or not api_key:
+            self.log("Error: AxleAPI: axle_api_key is missing or invalid, you must set it to a string (not a list or number). Axle Energy integration will not function correctly.")
+            api_key = None
         self.api_key = api_key
         self.pence_per_kwh = pence_per_kwh
         self.automatic = automatic
         self.failures_total = 0
+        self.history_loaded = False
         self.event_history = []  # List of past events
         self.current_event = {  # Current event
             "start_time": None,
@@ -40,7 +44,7 @@ class AxleAPI(ComponentBase):
             "import_export": None,
             "pence_per_kwh": None,
         }
-        self.updated_at: None  # Last updated moved out to separate attribute to not pollute triggering on change of current_event
+        self.updated_at = None  # Last updated moved out to separate attribute to not pollute triggering on change of current_event
 
     def load_event_history(self):
         """
@@ -185,6 +189,11 @@ class AxleAPI(ComponentBase):
         """
         Fetch the latest VPP event from Axle Energy API
         """
+        if not self.api_key:
+            self.log("Error: AxleAPI: Cannot fetch event - axle_api_key is not set or invalid. Please check your apps.yaml configuration.")
+            self.failures_total += 1
+            return
+
         self.log("AxleAPI: Fetching latest VPP event data")
 
         url = "https://api.axle.energy/vpp/home-assistant/event"

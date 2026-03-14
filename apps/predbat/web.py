@@ -73,7 +73,7 @@ from const import TIME_FORMAT, TIME_FORMAT_DAILY, TIME_FORMAT_HA
 from predbat import THIS_VERSION
 from component_base import ComponentBase
 from config import APPS_SCHEMA
-from web_metrics_dashboard import get_metrics_dashboard_css, get_metrics_dashboard_body, FALLBACK_HTML
+from web_metrics_dashboard import get_metrics_dashboard_css, get_metrics_dashboard_body
 from predbat_metrics import metrics_handler, metrics_json_handler, metrics, PROMETHEUS_AVAILABLE
 
 ROOT_YAML_KEY = "pred_bat"
@@ -4448,7 +4448,17 @@ document.addEventListener('DOMContentLoaded', function() {
         self.default_page = "./metrics_dashboard"
 
         if not PROMETHEUS_AVAILABLE:
-            return web.Response(text=FALLBACK_HTML, content_type="text/html")
+            text = self.get_header("Predbat Metrics", refresh=0)
+            text += "<body>\n"
+            text += """<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:2rem;">
+<h1>Metrics Dashboard Unavailable</h1>
+<p><code>prometheus_client</code> is not installed.</p>
+<p>Install it with: <code>pip install prometheus_client</code></p>
+<p style="margin-top:1.5rem;"><a href="./dash" style="padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:4px;font-size:16px;">&larr; Back to Dashboard</a></p>
+</div>
+"""
+            text += "</body></html>\n"
+            return web.Response(text=text, content_type="text/html")
 
         import json as _json
 

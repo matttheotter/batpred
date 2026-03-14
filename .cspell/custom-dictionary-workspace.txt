@@ -183,6 +183,7 @@ kwargs
 kwhb
 labelcolor
 labelnames
+larr
 linebreak
 linestyle
 loadml

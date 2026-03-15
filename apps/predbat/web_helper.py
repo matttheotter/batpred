@@ -7526,7 +7526,7 @@ def get_menu_html(calculating, default_page, arg_errors, THIS_VERSION, battery_s
     # Define status icon based on calculating state
     status_icon = ""
     if calculating:
-        status_icon = '<span class="mdi mdi-sync mdi-spin calculating-icon" style="color: #4CAF50; font-size: 24px; margin-left: 10px; margin-right: 10px;" title="Calculation in progress..."></span>'
+        status_icon = '<span class="mdi mdi-autorenew mdi-spin calculating-icon" style="color: #4CAF50; font-size: 24px; margin-left: 10px; margin-right: 10px;" title="Calculation in progress..."></span>'
     else:
         status_icon = '<span class="mdi mdi-check-circle idle-icon" style="color: #4CAF50; font-size: 24px; margin-left: 10px; margin-right: 10px;" title="System idle"></span>'
 
@@ -7769,7 +7769,7 @@ function updateLiveStatus() {
             const statusIcon = document.getElementById('status-icon');
             if (statusIcon) {
                 if (data.calculating) {
-                    statusIcon.innerHTML = '<span class="mdi mdi-sync mdi-spin calculating-icon" style="color: #4CAF50; font-size: 24px; margin-left: 10px; margin-right: 10px;" title="Calculation in progress..."></span>';
+                    statusIcon.innerHTML = '<span class="mdi mdi-autorenew mdi-spin calculating-icon" style="color: #4CAF50; font-size: 24px; margin-left: 10px; margin-right: 10px;" title="Calculation in progress..."></span>';
                 } else {
                     statusIcon.innerHTML = '<span class="mdi mdi-check-circle idle-icon" style="color: #4CAF50; font-size: 24px; margin-left: 10px; margin-right: 10px;" title="System idle"></span>';
                 }

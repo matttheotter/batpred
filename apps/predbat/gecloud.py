@@ -1666,6 +1666,26 @@ class GECloudData(ComponentBase):
         self.ge_url_cache = {}
         return True
 
+    def filter_data(self, mdata, measurement):
+        """
+        Filter the GECloudData data for a specific measurement (consumption, import, export, pv)
+        Remove duplicate data points where the measurement value is the same or less than the previous data point to save space, but always keep the most recent data point
+
+        This allows for smooth interpolation of the data for each measurement while keeping the dataset size manageable, especially for long time periods where values may not change frequently.
+        """
+        if not mdata:
+            return []
+        result = []
+        prev_value = -1
+        for item in mdata:
+            if measurement in item:
+                current_value = item[measurement]
+                # Only keep this data point if the value has changed from the previous data point, or if this is the most recent data point
+                if current_value > prev_value or item is mdata[-1]:
+                    result.append({"last_updated": item["last_updated"], measurement: current_value})
+                    prev_value = current_value
+        return result
+
     def get_data(self):
         """
         Get the GECloudData data

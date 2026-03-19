@@ -253,7 +253,7 @@ Create the following helpers in Home Assistant (Settings → Devices & Services 
 **Input booleans** (toggle type):
 
 | Entity ID | Name |
-|---|---|
+| --- | --- |
 | `input_boolean.predbat_charge_start` | Predbat Charge Start |
 | `input_boolean.predbat_charge_freeze` | Predbat Charge Freeze |
 | `input_boolean.predbat_discharge_start` | Predbat Discharge Start |
@@ -262,14 +262,14 @@ Create the following helpers in Home Assistant (Settings → Devices & Services 
 **Input numbers** (number type, unit: W):
 
 | Entity ID | Name | Min | Max | Step |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `input_number.predbat_charge_rate` | Predbat Charge Rate | 0 | 10000 | 100 |
 | `input_number.predbat_discharge_rate` | Predbat Discharge Rate | 0 | 10000 | 100 |
 
 **Input numbers** (number type, unit: %):
 
 | Entity ID | Name | Min | Max | Step |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `input_number.predbat_reserve` | Predbat Reserve | 4 | 100 | 1 |
 | `input_number.predbat_charge_limit` | Predbat Charge Limit | 4 | 100 | 1 |
 
@@ -1148,18 +1148,17 @@ mode: single
 
 - Create the **Freeze Charge Exit** automation to cleanly restore inverter state when Freeze Charging ends.
 
-  ```yaml
-  alias: LuxPower Freeze Charge Exit
-  description: |
-  Cleanup when Predbat leaves Freeze charging.
-  triggers:
-    - entity_id: predbat.status
+```yaml
+alias: LuxPower Freeze Charge Exit
+description: Cleanup when Predbat leaves Freeze charging.
+triggers:
+  - entity_id: predbat.status
     trigger: state
-  conditions:
-    - condition: state
+conditions:
+  - condition: state
     entity_id: input_boolean.freeze_charge_guard
     state: "on"
-    - condition: template
+  - condition: template
     value_template: |
       {% set new = trigger.to_state.state | default('') %} {{
         new not in ['unknown','unavailable'] and
@@ -1167,58 +1166,58 @@ mode: single
         not new.startswith('Error:') and
         'Freeze charging' not in new
       }}
-  actions:
-    - target:
-      entity_id:
-        - automation.luxpower_freeze_charge
-        - automation.luxpower_freeze_charge_predbat_override
-        - automation.luxpower_freeze_charge_watchdog
+actions:
+  - target:
+    entity_id:
+      - automation.luxpower_freeze_charge
+      - automation.luxpower_freeze_charge_predbat_override
+      - automation.luxpower_freeze_charge_watchdog
     action: automation.turn_off
-    - target:
-      entity_id: input_boolean.freeze_charge_guard
+  - target:
+    entity_id: input_boolean.freeze_charge_guard
     action: input_boolean.turn_off
+  - choose:
+    - conditions:
+        - condition: template
+          value_template: |
+            {{ trigger.to_state.state.startswith('Charging')
+               or trigger.to_state.state == 'Hold charging' }}
+      sequence:
+        - target:
+            entity_id: switch.lux_ac_charge_enable
+          action: switch.turn_on
+      default:
+        - target:
+            entity_id: switch.lux_ac_charge_enable
+          action: switch.turn_off
     - choose:
       - conditions:
-          - condition: template
-            value_template: |
-              {{ trigger.to_state.state.startswith('Charging')
-                 or trigger.to_state.state == 'Hold charging' }}
-        sequence:
-          - target:
-              entity_id: switch.lux_ac_charge_enable
-            action: switch.turn_on
-    default:
-      - target:
-          entity_id: switch.lux_ac_charge_enable
-        action: switch.turn_off
-    - choose:
-      - conditions:
-          - condition: template
-            value_template: |
-              {{ trigger.to_state.state.startswith('Charging') }}
-        sequence:
-          - target:
-              entity_id: number.lux_ac_battery_charge_level
-            data:
-              value: "{{ states('number.lux_system_charge_soc_limit') | int(0) }}"
-            action: number.set_value
-      - conditions:
+        - condition: template
+          value_template: |
+            {{ trigger.to_state.state.startswith('Charging') }}
+          sequence:
+            - target:
+                entity_id: number.lux_ac_battery_charge_level
+              data:
+                value: "{{ states('number.lux_system_charge_soc_limit') | int(0) }}"
+              action: number.set_value
+        - conditions:
           - condition: template
             value_template: |
               {{ trigger.to_state.state == 'Hold charging' }}
-        sequence:
-          - target:
-              entity_id: number.lux_ac_battery_charge_level
-            data:
-              value: >-
-                {{ states('number.lux_on_grid_discharge_cut_off_soc') | int(0)
-                }}
-            action: number.set_value
-    - target:
-      entity_id: automation.luxpower_freeze_charge_exit
-    action: automation.turn_off
-  mode: single
-  ```
+            sequence:
+              - target:
+                  entity_id: number.lux_ac_battery_charge_level
+                data:
+                  value: >-
+                    {{ states('number.lux_on_grid_discharge_cut_off_soc') | int(0)
+                    }}
+                action: number.set_value
+              - target:
+                  entity_id: automation.luxpower_freeze_charge_exit
+                action: automation.turn_off
+mode: single
+```
 
 Occasionally, when a Manual Freeze Charge is requested, Predbat may immediately decide that **Hold Charging** is the more appropriate state based on current conditions.
 In this case, Freeze Charging automations may remain enabled even though Predbat reports Hold Charging.
@@ -1227,7 +1226,6 @@ The watchdog safely exits Freeze Charging after a short grace period.
 - Create the **Freeze Charge Watchdog** automation to handle cases where Manual Freeze Charging immediately transitions to **Hold Charging**.
 
 ```yaml
-
 alias: LuxPower Freeze Charge Watchdog
 description: >
   Cancels freeze charge if Predbat does not commit to Freeze charging. Triggered

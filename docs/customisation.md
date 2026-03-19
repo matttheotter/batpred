@@ -196,6 +196,8 @@ Do not use if you are using the [Solcast integration and have turned on the inte
 Predbat relies upon your solar generation being accurate so if your export generation can be curtailed by your solar inverter or your electricity supplier in periods when there is excess electricity in the grid,
 then you must turn PV calibration Off as otherwise Predbat will model the chopped solar generation as a PV calibration factor and will significantly reduce your forecast PV generation, leading to a very inaccurate plan.
 
+Note: If you change the PV calibration enable switch (to On or Off), you will need to restart Predbat for the change to take effect.
+
 ## Historical load data
 
 The historical load data is taken from the load sensor as configured in `apps.yaml` with the days are selected using **days_previous**, and weighted using **days_previous_weight** in `apps.yaml`.
@@ -485,7 +487,7 @@ Higher values will generate plans with more solar diversion while lower values w
 A value of 0 means all diverted energy should be ignored in planning (assumed to be zero value).
 
 - **switch.predbat_iboost_energy_subtract** When turned On (the default) energy reported by the **iboost_energy_today** sensor configured in `apps.yaml` will be subtracted from your historical load data to improve the accuracy of predictions.
-If you are using PredAI you will also need to subtract this data inside PredAI configuration.
+If you are using PredAI you will also need to subtract this data inside the PredAI configuration.
 
 Different boost modes can be selected:
 

@@ -150,7 +150,7 @@ Training directly on months of mixed data can make it hard for the network to sp
 - Applies same time-weighted sampling to prioritize recent data
 - Preserves learned patterns while adapting to new ones
 - Same regularization techniques applied as initial training
-- Each fine-tune cycle blends the current data's feature statistics (mean/std) with the stored normalization parameters via an exponential moving average (alpha=0.1).
+- Each fine-tune cycle blends the current data's feature statistics (mean/std) with the stored normalisation parameters via an exponential moving average (alpha=0.1).
 This lets the model slowly track long-term shifts in feature distributions (e.g. seasonal load changes, new tariff rates) without sudden jumps that could destabilise existing weights.
 
 **Why Full Dataset for Fine-tuning?**
@@ -189,9 +189,9 @@ predbat:
   class: PredBat
 
   # Enable ML load prediction
-  load_ml_enable: True
-  # Use the output data in Predbat (can be False to explore the use without using the data)
-  load_ml_source: True
+  load_ml_enable: true
+  # Use the output data in Predbat (can be false to explore the use without using the data)
+  load_ml_source: true
 
   # Optional: Maximum days of historical data to fetch from HA on each poll (default: 28)
   # load_ml_max_days_history: 28
@@ -204,7 +204,7 @@ predbat:
 
 - `load_ml_enable`: Enables the ML component (required)
 - `load_ml_source`: When `true`, Predbat uses ML predictions for battery planning. Set to `false` to test predictions without affecting battery control
-- `load_ml_max_days_history`: Maximum days of historical data to fetch from Home Assistant on each poll (every 30 minutes)
+- `load_ml_max_days_history`: Optional maximum days of historical data to fetch from Home Assistant on each poll (every 30 minutes)
     - **Default**: 28 days
     - **Minimum**: 7 days
     - **Recommended**: 28 days
@@ -212,7 +212,7 @@ predbat:
     - **When to increase**: If you have very regular weekly patterns or want seasonal awareness
     - **When to decrease**: If your consumption patterns change frequently, or you have limited historical data storage
     - **Note**: Training time increases slightly with more data, but fine-tuning remains fast due to importance-weighted sampling
-- `load_ml_database_days`: Number of days of history to accumulate and persist in the on-disk database file (`predbat_ml_history.npz`)
+- `load_ml_database_days`: Optional number of days of history to accumulate and persist in the on-disk database file (`predbat_ml_history.npz`)
     - **Default**: 90 days
     - **How it works**: See [History Accumulation and the Database](#history-accumulation-and-the-database) below
     - **When to increase**: If you want the model to learn long-term seasonal patterns (e.g. summer vs winter)
@@ -227,7 +227,7 @@ The ML component maintains two distinct layers of historical data:
 Every 30 minutes the component fetches the most recent N days of sensor history from Home Assistant. This is limited by your HA recorder retention — if HA only stores 14 days then that is all you will get regardless of what `load_ml_max_days_history` is set to.
 
 **Accumulated database layer** (`load_ml_database_days`):
-After each successful fetch, the newly fetched data is *merged* with the existing in-memory dataset and saved to `predbat_ml_history.npz`. This means history accumulates over time, well beyond what a single HA fetch can provide. For example with a 14-day HA retention and `load_ml_database_days: 90` set, after 90 days of running the model will have 90 days of load history to train on — far more than HA alone could supply.
+After each successful fetch, the newly fetched data is *merged* with the existing in-memory dataset and saved to `predbat_ml_history.npz`. This means history accumulates over time, well beyond what a single HA fetch can provide. For example with a 14-day HA retention and the default `load_ml_database_days: 90` set, after 90 days of running the model will have 90 days of load history to train on — far more than HA alone could supply.
 
 **How the merge works:**
 Before each fetch the existing in-memory data is time-shifted forward so that all keys remain anchored to "minutes ago from now". Fresh data from HA is then merged on top, with the fresh values taking priority for the most recent period. Older keys that have shifted beyond `load_ml_database_days` are dropped.
@@ -236,14 +236,14 @@ This means:
 
 - `load_ml_max_days_history` controls how much fresh data is pulled from HA each cycle (bounded by HA retention)
 - `load_ml_database_days` controls the total depth of the training dataset that accumulates on disk
-- Setting `load_ml_database_days` to 0 or leaving `load_ml_database_days` unset disables the database entirely — training only ever uses what HA currently has
+- Setting `load_ml_database_days` to 0 disables the database entirely — training only ever uses what entity history HA currently has
 - The age reported in logs and the `training_days` attribute reflects the actual depth of the accumulated dataset, computed from the furthest key present in memory
 
-For best results:
+Before enabling load_ml_source:
 
-- Ensure you have a least a weeks worth of data before enabling load_ml_source.
-- Make sure you do not have PredAI enabled at the same time
-- Disable in day adjustment (switch.predbat_calculate_inday_adjustment) as the AI model will do that for you.
+- Ensure Load ML has been training itself and running with a least a weeks worth of data
+- Make sure you do not have [PredAI](https://github.com/springfall2008/predai) enabled at the same time
+- Disable in day adjustment (**switch.predbat_calculate_inday_adjustment**) as the Load ML model will do that for you and otherwise Predbat will double-count in-day load.
 
 ### Recommended: Enable Temperature Predictions
 
@@ -278,7 +278,7 @@ predbat:
 ### Optional: Subtract Car Charging
 
 If you have an EV charger set in Predbat then this will be subtracted from predictions.
-If this is not set then the default EV charging threshold is used if car_charging_hold is True.
+If this is not set then the default EV charging threshold is used if **switch.predbat_car_charging_hold** is On.
 
 ```yaml
 predbat:
@@ -338,7 +338,7 @@ Once trained, the component publishes predictions to:
 
 - `sensor.predbat_load_ml_forecast` - Contains 48-hour prediction in `results` attribute
 
-You can visualize these predictions in the Predbat web interface or by creating charts in Home Assistant.
+You can visualize these predictions in the [Chart view](web-interface.md#charts-view) of the Predbat web interface, or by creating [Apex charts](creating-charts.md) in Home Assistant.
 
 ## Understanding the Model
 
@@ -413,13 +413,13 @@ If validation MAE exceeds the threshold (default 2.0 kWh), predictions are disab
 
 ### Charts
 
-The Predbat WebUI has two charts associated with LoadML:
+The Predbat Web Console has two [Load ML charts](web-interface.md#charts-view):
 
-The LoadML chart shows the correlation between your actual load and the predictions by charting this against the prediction 1 hour in the future and 8 hours in the future.
+The LoadML chart shows the correlation between your actual house load (in blue) and the Load ML predictions, charting current Load ML prediction (in red), the 1 hour in the future prediction (orange), and the 8 hours future prediction (purple).  You can thus see how accurately Load ML is predicting your house load. Over time as Load ML learns your energy patterns and improves its prediction accuracy the red, blue, orange and purple lines should converge.
 
 <img width="1602" height="971" alt="Predbat LoadML chart showing actual household load and ML predictions 1 hour and 8 hours ahead" src="https://github.com/user-attachments/assets/731ef153-01e4-4ed1-bc5b-df1305d84f41" />
 
-The LoadMLPower chart shows a similar view as power, but also plots PV production, predicted PV production and temperature predictions.
+The LoadMLPower chart is similar to the Load ML chart, but also plots actual PV production, predicted PV production and temperature predictions.
 
 ### Check Model Status
 
@@ -430,10 +430,10 @@ ML Component: Model status: active, last trained: 2024-02-07 10:30:00
 ML Component: Validation MAE: 0.3245 kWh
 ```
 
-### Tracking Normalization Drift
+### Tracking Normalisation Drift
 
-Each time the model trains (initial fit) or fine-tunes (EMA update), it logs a normalization stats line that summarises the mean and standard deviation for each input feature group.
-You can search for Normalization stats in the logfile for this information.
+Each time the model trains (initial fit) or fine-tunes (EMA update), it logs a normalisation stats line that summarises the mean and standard deviation for each input feature group.
+You can search for Normalisation stats in the logfile for this information.
 
 Large shifts in `mean` or `std` for a group (e.g. `import_rate` after a tariff change, or `load` after a new appliance) will be visible here and confirm the EMA is tracking the drift correctly.
 
@@ -488,7 +488,7 @@ This file contains:
 - **Normalization parameters**: Feature and target mean/standard deviation (updated via EMA each fine-tune cycle to track distribution drift)
 - **Training metadata**: Epochs trained, timestamp, model version, architecture details
 
-The model is automatically loaded on Predbat restart, allowing predictions to continue immediately without retraining. The EMA-updated normalization parameters are saved and restored with the model, so drift tracking is preserved across restarts.
+The model is automatically loaded on Predbat restart, allowing predictions to continue immediately without retraining. The EMA-updated normalisation parameters are saved and restored with the model, so drift tracking is preserved across restarts.
 
 **Note**: If you update Predbat and the model architecture or version changes, the old model will be rejected and a new model will be trained from scratch. If the model becomes unstable, you can manually delete `predbat_ml_model.npz` to force retraining.
 
@@ -512,7 +512,7 @@ Future PV forecast values (negative keys) are never persisted — they are alway
 The following internal parameters are set in `load_ml_component.py` and are not currently exposed as `apps.yaml` keys, but are documented here for reference. They can be changed by editing the component directly if needed.
 
 | Parameter | Default | Description |
-|---|---|---|
+| --- | --- | --- |
 | `ml_curriculum_window_days` | 7 | Size (days) of the initial training window in the first curriculum pass |
 | `ml_curriculum_step_days` | 1 | Days added to the training window for each subsequent curriculum pass |
 | `ml_curriculum_max_passes` | 4 | Maximum number of intermediate curriculum passes before the final full-data pass; `0` means unlimited |

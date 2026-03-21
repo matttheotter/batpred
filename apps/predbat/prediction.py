@@ -158,9 +158,8 @@ class Prediction:
             self.export_limit = base.export_limit
             self.battery_rate_min = base.battery_rate_min
             self.battery_rate_max_charge = base.battery_rate_max_charge
+            self.battery_rate_max_charge_dc = base.battery_rate_max_charge_dc
             self.battery_rate_max_discharge = base.battery_rate_max_discharge
-            self.battery_rate_max_charge_scaled = base.battery_rate_max_charge_scaled
-            self.battery_rate_max_discharge_scaled = base.battery_rate_max_discharge_scaled
             self.battery_charge_power_curve = base.battery_charge_power_curve
             self.battery_discharge_power_curve = base.battery_discharge_power_curve
             self.battery_temperature = base.battery_temperature
@@ -529,6 +528,7 @@ class Prediction:
         set_charge_window = self.set_charge_window
         set_export_window = self.set_export_window
         battery_rate_max_charge = self.battery_rate_max_charge
+        battery_rate_max_charge_dc = self.battery_rate_max_charge_dc
         battery_rate_max_discharge = self.battery_rate_max_discharge
         battery_rate_min = self.battery_rate_min
         carbon_intensity = self.carbon_intensity
@@ -800,7 +800,16 @@ class Prediction:
                     if reduce_by > battery_draw:
                         if self.inverter_can_charge_during_export:
                             reduce_by = reduce_by - battery_draw
-                            battery_draw = max(-reduce_by * inverter_loss, -battery_to_min, -charge_rate_now_curve_step)
+
+                            if inverter_hybrid:
+                                charge_rate_now_curve_dc = (
+                                    get_charge_rate_curve_cached(soc, battery_rate_max_charge_dc, soc_max, battery_rate_max_charge_dc, battery_charge_power_curve_tuple, battery_rate_min, battery_temperature, battery_temperature_charge_curve_tuple)
+                                    * battery_rate_max_scaling
+                                )
+                                charge_rate_now_curve_dc_step = charge_rate_now_curve_dc * step
+                                battery_draw = max(-reduce_by * inverter_loss, -battery_to_min, -charge_rate_now_curve_dc_step)
+                            else:
+                                battery_draw = max(-reduce_by * inverter_loss, -battery_to_min, -charge_rate_now_curve_step)
                         else:
                             battery_draw = 0
                     else:
@@ -820,7 +829,12 @@ class Prediction:
                             reduce_by = reduce_by - battery_draw
                             battery_draw = 0
                             if self.inverter_can_charge_during_export:
-                                battery_draw = max(-reduce_by * inverter_loss, -battery_to_min, -charge_rate_now_curve_step)
+                                charge_rate_now_curve_dc = (
+                                    get_charge_rate_curve_cached(soc, battery_rate_max_charge_dc, soc_max, battery_rate_max_charge_dc, battery_charge_power_curve_tuple, battery_rate_min, battery_temperature, battery_temperature_charge_curve_tuple)
+                                    * battery_rate_max_scaling
+                                )
+                                charge_rate_now_curve_dc_step = charge_rate_now_curve_dc * step
+                                battery_draw = max(-reduce_by * inverter_loss, -battery_to_min, -charge_rate_now_curve_dc_step)
                         else:
                             battery_draw = battery_draw - reduce_by
 
@@ -842,12 +856,18 @@ class Prediction:
             elif charge_window_active and soc < charge_limit_n:
                 # Charge enable
                 # Only tune charge rate on final plan not every simulation
+                if inverter_hybrid and (battery_rate_max_charge_dc > battery_rate_max_charge):
+                    # For a hybrid inverter if the DC rate is higher than the max charge rate then we can use some of the extra for PV charging.
+                    pv_above = max((pv_now / step) - battery_rate_max_charge, 0)
+                    battery_rate_max_charge_combined = battery_rate_max_charge + min(battery_rate_max_charge_dc - battery_rate_max_charge, pv_above)
+                else:
+                    battery_rate_max_charge_combined = battery_rate_max_charge
                 charge_rate_now, charge_rate_now_curve = find_charge_rate(
                     minute_absolute,
                     soc,
                     charge_window[charge_window_n],
                     charge_limit_n,
-                    battery_rate_max_charge,
+                    battery_rate_max_charge_combined,
                     soc_max,
                     self.battery_charge_power_curve,
                     set_charge_low_power,
@@ -899,7 +919,19 @@ class Prediction:
                     battery_draw = min(diff, discharge_rate_now_curve_step, inverter_limit, battery_to_min)
                     battery_state = "e-"
                 else:
-                    battery_draw = max(diff, -charge_rate_now_curve_step, -inverter_limit, -battery_to_max)
+                    # Battery draw is only subject to inverter limit for the AC part
+                    if inverter_hybrid:
+                        charge_rate_now_curve_dc = (
+                            get_charge_rate_curve_cached(soc, battery_rate_max_charge_dc, soc_max, battery_rate_max_charge_dc, battery_charge_power_curve_tuple, battery_rate_min, battery_temperature, battery_temperature_charge_curve_tuple)
+                            * battery_rate_max_scaling
+                        )
+                        charge_rate_now_curve_dc_step = charge_rate_now_curve_dc * step
+
+                        virtual_inverter_limit = inverter_limit + pv_now
+                        battery_draw = max(diff, -charge_rate_now_curve_dc_step, -virtual_inverter_limit, -battery_to_max)
+                    else:
+                        battery_draw = max(diff, -charge_rate_now_curve_step, -inverter_limit, -battery_to_max)
+
                     if battery_draw < 0:
                         battery_state = "e+"
                     else:

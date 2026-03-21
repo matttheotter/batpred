@@ -36,7 +36,7 @@ import pytz
 import requests
 import asyncio
 
-THIS_VERSION = "v8.34.7"
+THIS_VERSION = "v8.34.8"
 
 # fmt: off
 PREDBAT_FILES = ["predbat.py", "const.py", "hass.py", "config.py", "prediction.py", "gecloud.py", "utils.py", "inverter.py", "ha.py", "download.py", "web.py", "web_helper.py", "predheat.py", "futurerate.py", "octopus.py", "solcast.py", "execute.py", "plan.py", "fetch.py", "output.py", "userinterface.py", "energydataservice.py", "alertfeed.py", "compare.py", "db_manager.py", "db_engine.py", "plugin_system.py", "ohme.py", "components.py", "fox.py", "carbon.py", "temperature.py", "web_mcp.py", "component_base.py", "axle.py", "solax.py", "solis.py", "unit_test.py", "load_ml_component.py", "load_predictor.py", "oauth_mixin.py", "predbat_metrics.py", "web_metrics_dashboard.py"]
@@ -559,9 +559,8 @@ class PredBat(hass.Hass, Octopus, Energidataservice, Fetch, Plan, Execute, Outpu
         self.export_limits_best = []
         self.export_window_best = []
         self.battery_rate_max_charge = 0
+        self.battery_rate_max_charge_dc = 0
         self.battery_rate_max_discharge = 0
-        self.battery_rate_max_charge_scaled = 0
-        self.battery_rate_max_discharge_scaled = 0
         self.battery_rate_min = 0
         self.battery_rate_max_scaling = 1.0
         self.battery_rate_max_scaling_discharge = 1.0

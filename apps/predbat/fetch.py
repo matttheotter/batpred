@@ -970,36 +970,7 @@ class Fetch:
                 self.rate_import_cost_threshold = highest
 
         # Work out car plan?
-        for car_n in range(self.num_cars):
-            if self.octopus_intelligent_charging and car_n == 0:
-                if self.car_charging_planned[car_n]:
-                    self.log("Car 0 on Octopus Intelligent, active plan for charge")
-                else:
-                    self.log("Car 0 on Octopus Intelligent, no active plan")
-            elif self.car_charging_planned[car_n] or self.car_charging_now[car_n]:
-                self.log(
-                    "Car {} plan charging from {} to {}, with slots {} from SoC {}% to {}%, ready by {}".format(
-                        car_n,
-                        self.car_charging_soc[car_n],
-                        self.car_charging_limit[car_n],
-                        self.low_rates,
-                        self.car_charging_soc[car_n],
-                        self.car_charging_limit[car_n],
-                        self.car_charging_plan_time[car_n],
-                    )
-                )
-                self.car_charging_slots[car_n] = self.plan_car_charging(car_n, self.low_rates)
-            else:
-                self.log("Car {} charging is not planned as it is not plugged in".format(car_n))
-
-            # Log the charging plan
-            if self.car_charging_slots[car_n]:
-                self.log("Car {} charging plan is: {}".format(car_n, self.car_charging_slots[car_n]))
-
-            if self.car_charging_planned[car_n] and self.car_charging_exclusive[car_n]:
-                self.log("Car {} charging is exclusive, will not plan other cars".format(car_n))
-                break
-
+        self.fetch_sensor_data_car_planning()
         # Publish the car plan
         self.publish_car_plan()
 
@@ -1055,6 +1026,47 @@ class Fetch:
             self.log("Axle sessions changed from {} to {}".format(prev_axle_sessions, self.axle_sessions))
             force_replan = True
         return force_replan
+
+    def fetch_sensor_data_car_planning(self):
+        # Work out car plan?
+        # Determine which cars are configured with Octopus Intelligent to avoid calling plan_car_charging for them
+        iog_entity_id_config = self.get_arg("octopus_intelligent_slot", indirect=False)
+        if iog_entity_id_config and not isinstance(iog_entity_id_config, list):
+            iog_entity_ids = [iog_entity_id_config]
+        elif iog_entity_id_config:
+            iog_entity_ids = iog_entity_id_config
+        else:
+            iog_entity_ids = []
+
+        for car_n in range(self.num_cars):
+            if self.octopus_intelligent_charging and car_n < len(iog_entity_ids) and iog_entity_ids[car_n]:
+                if self.car_charging_planned[car_n]:
+                    self.log("Car {} on Octopus Intelligent, active plan for charge".format(car_n))
+                else:
+                    self.log("Car {} on Octopus Intelligent, no active plan".format(car_n))
+            elif self.car_charging_planned[car_n] or self.car_charging_now[car_n]:
+                self.log(
+                    "Car {} plan charging from {} to {}, with slots {} from SoC {}% to {}%, ready by {}".format(
+                        car_n,
+                        self.car_charging_soc[car_n],
+                        self.car_charging_limit[car_n],
+                        self.low_rates,
+                        self.car_charging_soc[car_n],
+                        self.car_charging_limit[car_n],
+                        self.car_charging_plan_time[car_n],
+                    )
+                )
+                self.car_charging_slots[car_n] = self.plan_car_charging(car_n, self.low_rates)
+            else:
+                self.log("Car {} charging is not planned as it is not plugged in".format(car_n))
+
+            # Log the charging plan
+            if self.car_charging_slots[car_n]:
+                self.log("Car {} charging plan is: {}".format(car_n, self.car_charging_slots[car_n]))
+
+            if self.car_charging_planned[car_n] and self.car_charging_exclusive[car_n]:
+                self.log("Car {} charging is exclusive, will not plan other cars".format(car_n))
+                break
 
     def fetch_sensor_data_cars(self):
         """

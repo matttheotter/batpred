@@ -1729,11 +1729,10 @@ or an edit being made to `apps.yaml`), then Predbat will automatically calculate
 
 You should look at the [Predbat logfile](output-data.md#predbat-logfile) to find the predicted battery charging curve and copy/paste it into your `apps.yaml` file.
 
-The logfile *may* also include a recommendation for how to set your **input_number.battery_rate_max_scaling**/**_scaling_discharge** setting in HA if predbat detects that your inverter is charging/discharging at a different maximum rate than is configured in `apps.yaml`.<BR>
+The logfile *may* also include an Info recommendation for how to set your **input_number.battery_rate_max_scaling**/**_scaling_discharge** setting in HA if predbat detects that your inverter is charging/discharging at a different maximum rate than is configured in `apps.yaml`.<BR>
 If you don't get such a message then Predbat didn't detect any charge/discharge rate discrepancy.
 
-The YouTube video [charging curve and low power charging](https://youtu.be/L2vY_Vj6pQg)
-explains how the curve works and shows how Predbat automatically creates it.
+The YouTube video [charging curve and low power charging](https://youtu.be/L2vY_Vj6pQg) explains how the curve works and shows how Predbat automatically creates it.
 
 Setting this option to **auto** will cause the computed curve to be stored and used automatically. This is not recommended if you use low power charging mode as your
 history will eventually not contain any full power charging data to compute the curve, so in this case it's best to manually configure the charge curve in `apps.yaml`.
@@ -1744,7 +1743,7 @@ These must be configured in `apps.yaml` to point to Home Assistant entities that
 Either **soc_percent** or **soc_kw** from `apps.yaml` can be used to generate the charge curve. If both are defined then **soc_percent** is used in preference.
 
 Predbat will search through the charge history of your inverter, looking for periods of where Predbat status is Charging, battery_charge_rate is at least 95% of the maximum inverter battery charge rate, and the battery charges to above 85% SoC.
-From the corresponding battery_power readings, Predbat determines the charge curve. If suitable charge history cannot be found then Predbat will report that it cannot create the charge curve.
+From the corresponding battery_power readings, Predbat determines the charge curve and reports it as 'Info' messages in the Predbat logfile. If suitable charge history cannot be found then Predbat will report that it cannot create the charge curve.
 
 If you have a GivEnergy inverter and are using the recommended default [REST mode to control your inverter](#inverter-control-configurations)
 then you will need to uncomment out the following entries in `apps.yaml`:
@@ -1794,7 +1793,7 @@ Either **soc_percent** or **soc_kw** from `apps.yaml` can be used to generate th
 
 Predbat will search through the discharge history of your inverter, looking for periods of where Predbat status is Exporting or Discharging, battery_discharge_rate is at least 95% of the maximum inverter battery discharge rate,
 and the battery discharges down below 20% SoC.
-From the corresponding battery_power readings, Predbat determines the discharge curve. If suitable discharge history cannot be found then Predbat will report that it cannot create the discharge curve.
+From the corresponding battery_power readings, Predbat determines the discharge curve and reports it as 'Info' messages in the Predbat logfile. If suitable discharge history cannot be found then Predbat will report that it cannot create the discharge curve.
 
 If you are using REST mode to control your GivEnergy inverter then the following entries in `apps.yaml` will need to be uncommented :
 

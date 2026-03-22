@@ -296,9 +296,9 @@ If you've run out of API calls you will have to wait until midnight GMT for the 
 It's recommended that you don't include the Solcast forecast within your GivEnergy portal to avoid running out of API calls.
 - Check the [Solcast server API status](https://status.solcast.com/) is OK
 
-## Note: Cannot find battery charge curve
+## Info: Cannot find battery charge curve
 
-If you get the message "Note: Cannot find battery charge curve, one of the required settings for soc_kw, battery_power and charge_rate are missing from apps.yaml" in the logfile
+If you get the message "Info: Cannot find battery charge curve, one of the required settings for soc_kw, battery_power and charge_rate are missing from apps.yaml" in the logfile
 then Predbat is trying to create a battery charge curve but does not have access to the required history information in Home Assistant.
 
 [Creating the battery charge curve](apps-yaml.md#battery-chargedischarge-curves) is described in the `apps.yaml` document.

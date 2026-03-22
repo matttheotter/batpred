@@ -1,13 +1,8 @@
 # Inverter setup
 
-PredBat was originally written for GivEnergy inverters using the GivTCP integration but has been extended to many other inverter models.
-
-The table below lists the inverters and required Home Assistant integrations that have had Predbat configurations developed.
+PredBat was originally written for GivEnergy inverters using the GivTCP integration but has now been extended to [many inverter models](#inverter-configurations).
 
 Follow the [Predbat installation guide](install.md) for full instructions to setup and configure Predbat. This document covers only the steps that are specific to different inverter types.
-
-Additionally, if your inverter type is not listed, you can create a [custom inverter definition for Predbat](#i-want-to-add-an-unsupported-inverter-to-predbat).
-Once you get everything working please share the configuration as a github issue so it can be incorporated into the Predbat documentation.
 
 To setup the inverter with Predbat you will need to:
 
@@ -31,11 +26,18 @@ To setup the inverter with Predbat you will need to:
 
 6. Follow the rest of the [Predbat install instructions](install.md), in particular review that `apps.yaml` is configured correctly for your inverter.
 
+## Inverter Configurations
+
+The table below lists the inverters and required Home Assistant integrations that have had Predbat configurations developed.
+
+Additionally, if your inverter type is not listed, you can create a [custom inverter definition for Predbat](#i-want-to-add-an-unsupported-inverter-to-predbat).
+Once you get everything working please share the configuration as a github issue so it can be incorporated into the Predbat documentation.
+
    | Name | Integration | Template |
    | :---------------------------- | :------------- | :------------ |
    | [GivEnergy with GivTCP](#givenergy-with-givtcp) | [GivTCP](https://github.com/britkat1980/ha-addons) | [givenergy_givtcp.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/givenergy_givtcp.yaml) |
    | [Givenergy with GE Cloud](#givenergy-with-ge-cloud) | [ge_cloud](https://github.com/springfall2008/ge_cloud) | [givenergy_cloud.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/givenergy_cloud.yaml) |
-   | [Givenergy with GE Cloud EMS](#givenergy-with-ge-cloud-ems | [ge_cloud EMS](https://github.com/springfall2008/ge_cloud) | [givenergy_ems.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/givenergy_ems.yaml) |
+   | [Givenergy with GE Cloud EMS](#givenergy-with-ge-cloud-ems) | [ge_cloud EMS](https://github.com/springfall2008/ge_cloud) | [givenergy_ems.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/givenergy_ems.yaml) |
    | [Givenergy/Octopus No Home Assistant](#givenergy-octopus-cloud-direct---no-home-assistant) | n/a | [ge_cloud_octopus_standalone.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/ge_cloud_octopus_standalone.yaml) |
    | [Fox](#fox) | [Foxess](https://github.com/nathanmarlor/foxess_modbus/) | [fox.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/fox.yaml) |
    | [Fox Cloud](#fox-cloud) | Predbat | [fox_cloud.yaml](https://raw.githubusercontent.com/springfall2008/batpred/refs/heads/main/templates/fox_cloud.yaml) |

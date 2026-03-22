@@ -331,10 +331,6 @@ pred_bat:
   #    end: '14:30:00'
   #    rate: 5
 
-  # For pv estimate, leave blank for central estimate, or add 10 for 10% curve (worst case) or 90 or 90% curve (best case)
-  # If you use 10 then disable pv_metric10_weight below
-  # pv_estimate: 10
-
   # Days previous is the number of days back to find historical load data
   # Recommended is 7 to capture day of the week but 1 can also be used
   # if you have more history you could use 7 and 14 (in a list) but the standard data in HA only lasts 10 days

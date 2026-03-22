@@ -1362,11 +1362,6 @@ Predbat models cloud coverage by using the difference between the PV and PV10 fo
 this modulates the PV output predictions up and down over the plan slot duration as if there were passing clouds.
 This can have an impact on planning, especially for things like freeze charging which could assume the PV will cover the house load but it might not due to clouds.
 
-- **pv_estimate** in `apps.yaml` can be used to configure Predbat to always use the 10% forecast by setting the configuration item to '10', or '90' to always use the 90% PV estimate (not recommended!).<BR>
-Set to blank or delete / comment out the line to use the default central (PV50) estimate.
-
-If **pv_estimate** is set to 10 then **input_number.predbat_pv_metric10_weight** in Home Assistant should be set to 1.0.
-
 See also [PV configuration options in Home Assistant](customisation.md#solar-pv-adjustment-options).
 
 ## Forecast.solar Solar Forecast

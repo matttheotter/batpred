@@ -98,7 +98,7 @@ COMPONENT_LIST = {
             "pv_scaling": {"required": False, "config": "pv_scaling", "default": 1.0},
         },
         "required_or": ["solcast_api_key", "forecast_solar", "pv_forecast_today"],
-        "phase": 1,
+        "phase": 2,  # Solar component moved to phase 2 so that any Predbat cloud components (such as GEcloud) have been started and initialised pv_today, etc
     },
     "gecloud": {
         "class": GECloudDirect,
@@ -423,6 +423,7 @@ class Components:
         self.log(f"Starting component(s) {only} again")
         self.initialize(only=only, phase=0)
         self.initialize(only=only, phase=1)
+        self.initialize(only=only, phase=2)
         self.start(only=only)
 
     """

@@ -1560,8 +1560,13 @@ class PredBat(hass.Hass, Octopus, Energidataservice, Fetch, Plan, Execute, Outpu
 
             self.components.initialize(phase=1)
             if not self.components.start(phase=1):
-                self.log("Error: Some components failed to start (phase1)")
-                self.record_status("Error: Some components failed to start (phase1)", had_errors=True)
+                self.log("Error: Some components failed to start (phase 1)")
+                self.record_status("Error: Some components failed to start (phase 1)", had_errors=True)
+
+            self.components.initialize(phase=2)
+            if not self.components.start(phase=2):
+                self.log("Error: Some components failed to start (phase 2)")
+                self.record_status("Error: Some components failed to start (phase 2)", had_errors=True)
 
             self.load_user_config(quiet=False, register=True)
             self.auto_config(final=True)

@@ -402,17 +402,17 @@ The template `apps.yaml` for each inverter type comes pre-configured with regula
 
 If you have more than one inverter or entity names are non-standard then you will need to edit `apps.yaml` for your inverter entities.
 
-### Givenergy Cloud Direct
+### GivEnergy Cloud Direct
 
 Predbat now supports direct communication with the GivEnergy cloud services instead of local control via GivTCP to your inverter.
 
-Log into the GivEnergy Portal web site and create an API key and copy it into the **ge_cloud_key** setting in `apps.yaml`.
+Log into the GivEnergy Portal web site and [create an API key](#givenergy-cloud-data) and copy it into the **ge_cloud_key** setting in `apps.yaml`.
 
-If you set **ge_cloud_automatic** to true, the number of inverters and their settings will be configured automatically.
+If you set **ge_cloud_automatic** to true, the number of inverters and their settings will be configured automatically and any inverter/battery configuration in `apps.yaml` will be ignored.
 Or, if you set **ge_cloud_automatic** to false then you need to manually configure **ge_cloud_serial** to your inverter serial number for Predbat to use on the GivEnergy Cloud.
 
 If you set **ge_cloud_data** to false then Predbat will use the local Home Assistant data for history rather than the cloud data;
-you will need to wait until you have a few days of history established (at least days_previous days) before this will work correctly.
+you will need to wait until you have a few days of history established (at least **days_previous** days) before this will work correctly.
 
 ```yaml
   ge_cloud_direct: true
@@ -420,9 +420,13 @@ you will need to wait until you have a few days of history established (at least
   ge_cloud_serial: '{geserial}'
   ge_cloud_key: 'xxxxx'
   ge_cloud_data: true
+  ge_cloud_load_today_ignore: false
 ```
 
 **Note:** It's recommended to store `ge_cloud_key` in `secrets.yaml` and reference it as `ge_cloud_key: !secret givenergy_api_key` - see [Storing secrets](#storing-secrets).
+
+- **ge_cloud_load_today_ignore** - Optional, defaults to false. When set to `true`, Predbat will override the **ge_cloud_automatic** setting and use the **load_today** sensor configured in `apps.yaml`.
+This can be useful if the **load_today** data in the GivEnergy Cloud does not accurately reflect your house load and you want to use a custom load_today sensor.  All other sensors will use either the `apps.yaml` entries or the GivEnergy Cloud entities depending upon **ge_cloud_automatic**.
 
 ### SolaX Cloud Direct
 
@@ -786,7 +790,7 @@ the main load data analysis and can significantly improve prediction accuracy, e
 
 See the [Workarounds](#workarounds) section below for configuration settings for scaling these if required.
 
-If you have multiple inverters then you may find that the load_today figures are incorrect as the inverters share the house load between them.
+If you have multiple inverters then you may find that the **load_today** figures are incorrect as the inverters share the house load between them.
 In this circumstance, one solution is to create a Home Assistant template helper to calculate house load from {pv generation}+{battery discharge}-{battery charge}+{import}-{export}.
 The example below is defined in `configuration.yaml` (not the HA user interface) so it only updates every 5 minutes rather than on every underlying sensor state change:
 
@@ -852,24 +856,28 @@ Connecting to the cloud is less efficient and means that Predbat will be depende
 - **ge_cloud_serial** - Set the inverter serial number to use for the cloud data
 - **ge_cloud_key** - Set to your API Key for the GE Cloud (long string)
 
-If you need to create a ge_cloud_key, in the GivEnergy cloud portal:
+If you need to create a **ge_cloud_key**, in the GivEnergy cloud portal:
 
-- Click 'account settings' in the menu bar (icon of a person overlaid with a cogwheel)
+- Click 'Account Settings' in the menu bar (icon of a person overlaid with a cogwheel)
 - Click 'Manage Account Security' then 'Manage API Tokens' then 'Create API Token'
 - Enter a name for the token e.g. 'Predbat'
 - Select 'No expiry' for the token expiry duration, or choose a fixed duration but remember to create a new token before it expires as Predbat's access will stop once the token expires
 - Ensure that 'api:inverter' is ticked
 - Create token
-- Finally, copy/paste the token created into ge_cloud_key within apps.yaml
+- Finally, copy/paste the token created into **ge_cloud_key** within `apps.yaml`, or [store the GE cloud key in secrets.yaml](#storing-secrets)
+
+i.e.
+
+```yaml
+  ge_cloud_key: API_key_consisting_of_long_string_of_numbers_and_letters
+```
 
 ### GivEnergy Cloud controls
 
-*Experimental*
-
-Predbat now supports GE Cloud controls directly from inside Predbat. When enabled Predbat will connect directly with the GE Cloud and expose
+Predbat supports GE Cloud controls directly from inside Predbat. When enabled Predbat will connect directly with the GE Cloud and expose
 the controls of your inverter inside home assistant.
 
-*Note* You will still have to configure `apps.yaml` to point to these controls.
+*Note:* You will still have to configure `apps.yaml` to point to these controls.
 
 - **ge_cloud_direct** - Set to true to enable GE Cloud direct access
 - **ge_cloud_key** - Set to your API Key for the GE Cloud (long string)

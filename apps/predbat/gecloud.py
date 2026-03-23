@@ -741,12 +741,14 @@ class GECloudDirect(ComponentBase):
                 if "pause_battery" in ha_name:
                     has_pause_battery = True
 
-        self.log("GECloud: Auto-config detected features - charge power percent: {}, pause battery: {}, pause start time: {}, discharge target soc: {}".format(has_charge_power_percent, has_pause_battery, has_pause_start_time, has_discharge_target_soc))
+        self.log("GECloud: Auto-configuring Predbat and not using apps.yaml entries for control")
+        self.log("GECloud: detected features - charge power percent: {}, pause battery: {}, pause start time: {}, discharge target soc: {}".format(has_charge_power_percent, has_pause_battery, has_pause_start_time, has_discharge_target_soc))
 
         self.set_arg("inverter_type", ["GEC" for _ in range(num_inverters)])
         self.set_arg("num_inverters", num_inverters)
         self.set_arg("inverter_mode", [f"switch.{self.prefix}_gecloud_{device}_enable_eco_mode" for device in batteries])
-        self.set_arg("load_today", [f"sensor.{self.prefix}_gecloud_{device}_consumption_today" for device in batteries])
+        if not self.get_arg("ge_cloud_load_today_ignore", default=False):
+            self.set_arg("load_today", [f"sensor.{self.prefix}_gecloud_{device}_consumption_today" for device in batteries])
         self.set_arg("import_today", [f"sensor.{self.prefix}_gecloud_{device}_grid_import_today" for device in batteries])
         self.set_arg("export_today", [f"sensor.{self.prefix}_gecloud_{device}_grid_export_today" for device in batteries])
         self.set_arg("pv_today", [f"sensor.{self.prefix}_gecloud_{device}_solar_today" for device in batteries])
@@ -803,12 +805,13 @@ class GECloudDirect(ComponentBase):
 
         # reconfigure for EMS
         if devices["ems"]:
-            self.log("GECloud: EMS detected, using this for control")
+            self.log("GECloud: EMS detected, using EMS for control")
             ems = devices["ems"]
             self.set_arg("inverter_type", ["GEE" for _ in range(num_inverters)])
             self.set_arg("ge_cloud_serial", ems)
             self.set_arg("ge_cloud_data", False)
-            self.set_arg("load_today", [f"sensor.{self.prefix}_gecloud_{ems}_consumption_today"])
+            if not self.get_arg("ge_cloud_load_today_ignore", default=False):
+                self.set_arg("load_today", [f"sensor.{self.prefix}_gecloud_{ems}_consumption_today"])
             self.set_arg("import_today", [f"sensor.{self.prefix}_gecloud_{ems}_grid_import_today"])
             self.set_arg("export_today", [f"sensor.{self.prefix}_gecloud_{ems}_grid_export_today"])
             self.set_arg("pv_today", [f"sensor.{self.prefix}_gecloud_{ems}_solar_today"])
@@ -1762,7 +1765,7 @@ async def test_gecloud_direct(api_key):  # pragma: no cover
     # Create a mock base object
     mock_base = MockBase()
 
-    # Create GECloudDirect instanceFoxAPI(mock_base, **arg_dict)
+    # Create GECloudDirect(mock_base, **arg_dict)
     arg_dict = {
         "ge_cloud_direct": True,
         "api_key": api_key,

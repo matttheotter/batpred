@@ -2028,6 +2028,7 @@ APPS_SCHEMA = {
     "ge_cloud_key": {"type": "string", "empty": False},
     "ge_cloud_direct": {"type": "boolean"},
     "ge_cloud_automatic": {"type": "boolean"},
+    "ge_cloud_load_today_ignore": {"type": "boolean"},
     "num_inverters": {"type": "integer", "zero": False},
     "balance_inverters_seconds": {"type": "integer", "zero": True},
     "givtcp_rest": {"type": "string_list", "entries": "num_inverters"},

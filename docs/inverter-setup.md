@@ -160,20 +160,22 @@ This is being worked on by the author of GivTCP, e.g. see [GivTCP issue: unable 
 
 ## GivEnergy with GE Cloud
 
-This is an experimental system, please discuss it on the ticket: <https://github.com/springfall2008/batpred/issues/905>
-
-- First set up ge_cloud integration using your API key <https://github.com/springfall2008/ge_cloud>
+- Firstly [create a GivEnergy API key](apps-yaml.md#givenergy-cloud-data) so that Predbat can control your inverters
 - Now copy the template `givenergy_cloud.yaml` from templates over the top of your `apps.yaml` and edit
     - Set geserial to your inverter serial number
-- Make sure that the 'discharge down to' registers are set to 4% and slots 2, 3 and 4 for charge and discharge are disabled in the portal (if you have them)
+- If you set **ge_cloud_automatic** to `true` in `apps.yaml` then Predbat will auto-configure itself to use the appropriate GE Cloud controls and will ignore any inverter and battery controls set in `apps.yaml`
+- Make sure that the 'discharge down to' registers are set to 4% and charge and discharge slots 2, 3 and 4 are disabled in the portal by setting the start and end times to 00:00 (if you have them).
+- If you have set **ge_cloud_automatic** to `true` and the GE Cloud does not return accurate **load_today** energy information, you can [override the GE Cloud load data](apps-yaml.md) by creating a custom template sensor and setting **ge_cloud_load_today_ignore** to true in `apps.yaml`.
 
 ## GivEnergy with GE Cloud EMS
 
-- First set up ge_cloud integration using your API key <https://github.com/springfall2008/ge_cloud>
+- First, [create a GivEnergy API key](apps-yaml.md#givenergy-cloud-data) so that Predbat can control your inverters
 - Now copy the template `givenergy_ems.yaml` from templates over the top of your `apps.yaml` and edit
     - Set geserial to your first inverter serial and geserial2 to the second (look in HA for entity names)
     - Set geseriale to the EMS inverter serial number (look in HA for the entity names)
-- Turn off charge, export and discharge slots 2, 3 and 4 as Predbat will only use slot 1 - set the start and end times for these to 00:00
+- Predbat will auto-configure itself to use the appropriate GE Cloud controls for the EMS and if you add extra inverter and battery controls to `apps.yaml`, these will be ignored
+- As Predbat will only use slot 1, turn off charge, export and discharge slots 2, 3 and 4  - set the start and end times for these to 00:00
+- If your EMS does not return accurate **load_today** energy information, you can [override the GE Cloud load data](apps-yaml.md) by creating a custom template sensor and setting **ge_cloud_load_today_ignore** to `true` in `apps.yaml`.
 
 ## GivEnergy Octopus Cloud Direct - No Home Assistant
 

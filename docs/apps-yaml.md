@@ -287,9 +287,9 @@ Valid values are:
 
 ### enable_coarse_fine_levels
 
-Controls the two-pass coarse/fine optimization algorithm for improved planning performance. The default is `true` (enabled).
+Controls the two-pass coarse/fine optimisation algorithm for improved planning performance. The default is `true` (enabled).
 
-When enabled, Predbat uses a two-pass optimization strategy:
+When enabled, Predbat uses a two-pass optimisation strategy:
 
 - **Coarse pass**: Quickly evaluates a reduced set of slot length combinations to identify approximately optimal charge/export window sizes
 - **Fine pass**: Refines the search by focusing only on slot lengths near those identified as optimal

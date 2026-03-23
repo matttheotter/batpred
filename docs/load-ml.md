@@ -27,7 +27,7 @@ The ML Load Prediction component uses a lightweight multi-layer perceptron (MLP)
 - Supports temperature forecast data for improved accuracy
 - Uses historical and future energy import/export rates as input features
 - Deep neural network with 3 hidden layers [512, 256, 64 neurons]
-- Optimized with He initialization and AdamW weight decay for robust training
+- Optimised with He initialisation and AdamW weight decay for robust training
 - Automatically trains on historical data (requires at least 1 day, recommended 7+ days; fetches up to `load_ml_max_days_history` days from HA and accumulates up to `load_ml_database_days` days in the on-disk database)
 - Fine-tunes periodically (every 2 hours) using full dataset to adapt to changing patterns
 - Time-weighted training prioritizes recent data while learning from historical patterns
@@ -45,10 +45,10 @@ The ML Load Predictor uses a deep multi-layer perceptron (MLP) with the followin
 - **Output Layer**: 1 neuron (predicts next 5-minute step)
 - **Total Parameters**: ~889,000 trainable weights
 
-**Optimization Techniques:**
+**Optimisation Techniques:**
 
-- **He Initialization**: Weights initialized using He/Kaiming method (`std = sqrt(2/fan_in)`), optimized for ReLU activations
-- **AdamW Optimizer**: Adam optimization with weight decay (L2 regularization, default 0.01) to prevent overfitting
+- **He Initialisation**: Weights initialised using He/Kaiming method (`std = sqrt(2/fan_in)`), optimised for ReLU activations
+- **AdamW Optimiser**: Adam optimisation with weight decay (L2 regularization, default 0.01) to prevent overfitting
 - **Cosine LR Decay**: Learning rate decays from `lr_max` (0.001) to `lr_min` (0.0001) following a cosine curve over all epochs, reducing oscillation in late training
 - **Huber Loss**: Training uses Huber loss (δ=1.35 in normalised space) instead of MSE, which reduces the influence of individual spike events (e.g. EV charging) on the gradient
 - **Inverted Dropout**: Random neurons are dropped during training (default rate 0.1) to reduce overfitting; no scaling is needed at inference time
@@ -107,7 +107,7 @@ To prevent drift in long-range predictions, the model blends autoregressive pred
 - Fetches up to `load_ml_max_days_history` days (default: 28) from HA, then merges with accumulated database history (up to `load_ml_database_days`, default: 90 days)
 - Uses 100 epochs with early stopping (patience=5)
 - Batch size: 128 samples
-- AdamW optimizer with learning rate 0.001 and weight decay 0.01
+- AdamW optimiser with learning rate 0.001 and weight decay 0.01
 - Sample weighting: exponential time decay (recent data weighted more)
 - Validates on the last 24 hours of data
 - Saves model to disk: `predbat_ml_model.npz`
@@ -484,7 +484,7 @@ Two files are saved to your Predbat config directory:
 This file contains:
 
 - **Network weights and biases**: All 3 hidden layers plus output layer
-- **Optimizer state**: Adam momentum terms for continuing fine-tuning
+- **Optimiser state**: Adam momentum terms for continuing fine-tuning
 - **Normalization parameters**: Feature and target mean/standard deviation (updated via EMA each fine-tune cycle to track distribution drift)
 - **Training metadata**: Epochs trained, timestamp, model version, architecture details
 
@@ -518,7 +518,7 @@ The following internal parameters are set in `load_ml_component.py` and are not 
 | `ml_curriculum_max_passes` | 4 | Maximum number of intermediate curriculum passes before the final full-data pass; `0` means unlimited |
 | `ml_dropout_rate` | 0.1 | Fraction of hidden neurons randomly dropped during training to reduce over-fitting |
 | `ml_weight_decay` | 0.01 | L2 regularization coefficient for AdamW (larger = more regularization) |
-| `ml_learning_rate` | 0.001 | Adam optimizer learning rate |
+| `ml_learning_rate` | 0.001 | Adam optimiser learning rate |
 | `ml_epochs_initial` | 100 | Max epochs for initial (full) training; early stopping usually fires first |
 | `ml_epochs_update` | 30 | Max epochs for each fine-tune cycle |
 | `ml_patience_initial` | 10 | Early-stopping patience (epochs) for initial training |

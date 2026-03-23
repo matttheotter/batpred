@@ -120,7 +120,7 @@ def run_test_web_if(my_predbat):
             else:
                 res = requests.get(address)
 
-            # /api/ping returns 500 when Predbat isn't fully initialized (expected in test)
+            # /api/ping returns 500 when Predbat isn't fully initialised (expected in test)
             # /metrics and /metrics/json return 503 when prometheus_client is not installed
             # Other endpoints may return 400 for missing optional params, which is fine
             acceptable_statuses = [200]

@@ -33,7 +33,7 @@ class MockGECloudDirect(GECloudDirect):
         self.config_args = {}
         self.prefix = "predbat"  # Add prefix attribute for entity naming
 
-        # Initialize instance variables that GECloudDirect expects
+        # Initialise instance variables that GECloudDirect expects
         self.requests_total = 0
         self.failures_total = 0
         self.register_list = {}
@@ -1815,7 +1815,7 @@ def _test_async_write_inverter_setting_success(my_predbat):
 
     async def test():
         ge_cloud = MockGECloudDirect()
-        ge_cloud.pending_writes["test123"] = []  # Initialize pending writes for serial
+        ge_cloud.pending_writes["test123"] = []  # Initialise pending writes for serial
 
         with patch("gecloud.asyncio.sleep", new_callable=AsyncMock):
 
@@ -3030,7 +3030,7 @@ def _test_load_ge_cache_corrupt_file(my_predbat):
         ge_data.load_ge_cache()
 
         if ge_data.ge_url_cache != {}:
-            print("ERROR: Should initialize empty cache for corrupt file")
+            print("ERROR: Should initialise empty cache for corrupt file")
             return 1
 
         return 0

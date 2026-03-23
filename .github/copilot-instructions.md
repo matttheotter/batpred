@@ -83,8 +83,8 @@ class PredBat(hass.Hass, Octopus, Energidataservice, Fetch, Plan, Execute, Outpu
 
 The core prediction/planning happens in `Plan` mixin (`apps/predbat/plan.py`) which orchestrates:
 
-- `optimise_all_windows()` - Main optimization entry point
-- `optimise_levels_pass()` - Initial rate-based optimization
+- `optimise_all_windows()` - Main optimisation entry point
+- `optimise_levels_pass()` - Initial rate-based optimisation
 - `optimise_detailed_pass()` - Fine-tune charge/export windows
 - `run_prediction()` - Execute battery simulation via `Prediction` class
 
@@ -280,7 +280,7 @@ Core prediction happens in `apps/predbat/prediction.py`:
 - `Prediction` class runs battery simulation in 5-min steps
 - Multiprocessing via `wrapped_run_prediction_*` functions
 - Global state in `PRED_GLOBAL` dict for process sharing
-- Optimization in `apps/predbat/plan.py` via `optimise_all_windows()`
+- Optimisation in `apps/predbat/plan.py` via `optimise_all_windows()`
 
 ### State Management
 
@@ -314,7 +314,7 @@ Web interface in `apps/predbat/web.py` runs on port 5052 (configurable via `web_
 
 - `config.py` - All configuration constants and schema
 - `prediction.py` - Battery simulation engine
-- `plan.py` - Optimization algorithms
+- `plan.py` - Optimisation algorithms
 - `execute.py` - Inverter control execution
 - `inverter.py` - Multi-inverter abstraction layer
 - `ha.py` - Home Assistant interface (`HAInterface`, `HAHistory`)

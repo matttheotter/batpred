@@ -363,7 +363,7 @@ It publishes comprehensive sensors for battery status, energy totals, and provid
 - You have a SolaX inverter (X1, X3, X3-Hybrid, or other cloud-connected models)
 - You want cloud-based control without local integrations
 - You have SolaX Cloud API credentials (client ID and secret)
-- You want automatic battery charge/discharge optimization
+- You want automatic battery charge/discharge optimisation
 - You want Predbat to read historical energy data directly from SolaX Cloud
 
 #### Important notes (solax)
@@ -375,7 +375,7 @@ It publishes comprehensive sensors for battery status, energy totals, and provid
 - Supports both residential and commercial installations
 - Control commands use time-window based scheduling (similar to GivEnergy)
 - Read-only mode available with `solax_enable_controls: false`
-- Compatible with Predbat's standard optimization algorithms
+- Compatible with Predbat's standard optimisation algorithms
 
 #### Configuration Options (solax)
 
@@ -468,7 +468,7 @@ This will authenticate, fetch all plants, devices, and real-time data, helping d
 
 #### What it does (ohme)
 
-Integrates with Ohme EV chargers to monitor charging sessions and coordinate charging with your energy tariff. Works particularly well with Intelligent Octopus to optimize charging times and costs.
+Integrates with Ohme EV chargers to monitor charging sessions and coordinate charging with your energy tariff. Works particularly well with Intelligent Octopus to optimise charging times and costs.
 
 #### When to enable (ohme)
 
@@ -600,7 +600,7 @@ Retrieves current and forecast carbon intensity data for the UK electricity grid
 - You want to minimize your carbon footprint
 - You're interested in carbon-aware energy management
 - You're in the UK (uses UK National Grid data)
-- You want to see carbon intensity alongside cost optimization
+- You want to see carbon intensity alongside cost optimisation
 
 #### How it works (carbon)
 

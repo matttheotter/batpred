@@ -48,7 +48,7 @@ class PredbatMCPServer(ComponentBase):
     """
 
     def initialize(self, mcp_enable, mcp_secret, mcp_port):
-        """Initialize the MCP server component"""
+        """Initialise the MCP server component"""
         self.mcp_enable = mcp_enable
         self.mcp_secret = mcp_secret
         self.mcp_port = mcp_port
@@ -912,7 +912,7 @@ class MCPServerWrapper:
     """
 
     def __init__(self, base, log_func=None):
-        """Initialize the MCP server wrapper"""
+        """Initialise the MCP server wrapper"""
         self.base = base
         self.prefix = base.prefix
         self.log = log_func or print
@@ -1192,7 +1192,7 @@ class MCPServerWrapper:
             return {"jsonrpc": "2.0", "id": request_id if "request_id" in locals() else None, "error": {"code": -32603, "message": f"Internal error: {str(e)}"}}
 
     async def _handle_initialize(self, params):
-        """Handle MCP initialize request"""
+        """Handle MCP initialise request"""
         return {"protocolVersion": "2024-11-05", "capabilities": {"tools": {}}, "serverInfo": {"name": "Predbat MCP Server", "version": "1.0.1"}}
 
     async def _handle_tools_list(self, params):

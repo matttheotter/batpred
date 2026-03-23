@@ -1202,7 +1202,7 @@ class Fetch:
             # Disable octopus charging if we don't have the slot sensor
             self.octopus_intelligent_charging = False
 
-        # Log final car SoC (initialized before the IOG loop, updated per-car after Octopus battery_size is read)
+        # Log final car SoC (initialised before the IOG loop, updated per-car after Octopus battery_size is read)
         if self.num_cars:
             self.log("Cars: SoC: {}kWh, Charge limit {}%, plan time {}, battery size {}kWh".format(self.car_charging_soc, self.car_charging_limit, self.car_charging_plan_time, self.car_charging_battery_size))
 

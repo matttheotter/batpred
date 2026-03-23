@@ -25,7 +25,7 @@ class CarbonAPI(ComponentBase):
     """Carbon intensity client."""
 
     def initialize(self, postcode, automatic):
-        """Initialize the CarbonAPI component"""
+        """Initialise the CarbonAPI component"""
         self.postcode = postcode
         self.automatic = automatic
         self.failures_total = 0

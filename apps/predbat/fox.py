@@ -210,7 +210,7 @@ class FoxAPI(ComponentBase, OAuthMixin):
     """Fox API client."""
 
     def initialize(self, key, automatic, inverter_sn=None, auth_method=None, token_expires_at=None, token_hash=None):
-        """Initialize the Fox API component"""
+        """Initialise the Fox API component"""
         self.key = key
         self.automatic = automatic
         self.failures_total = 0
@@ -234,7 +234,7 @@ class FoxAPI(ComponentBase, OAuthMixin):
         self.start_time_today = None
         self.last_midnight_utc = None
 
-        # Initialize OAuth support
+        # Initialise OAuth support
         self._init_oauth(auth_method, key, token_expires_at, "fox_ess")
         self.token_hash = token_hash or ""
 
@@ -269,7 +269,7 @@ class FoxAPI(ComponentBase, OAuthMixin):
         """
         Main run loop
         """
-        # Initialize start time on first run
+        # Initialise start time on first run
         if first:
             self.start_time_today = datetime.now(timezone.utc)
             self.last_midnight_utc = self.midnight_utc

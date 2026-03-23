@@ -13,7 +13,7 @@ Temperature API Component Tests
 
 Comprehensive test suite for the External Temperature API component.
 Tests all major functionality including:
-- Initialization and configuration with zone.home fallback
+- Initialisation and configuration with zone.home fallback
 - URL placeholder replacement for latitude/longitude
 - API data fetching with retry logic and error handling
 - Timezone offset conversion (positive and negative)
@@ -74,8 +74,8 @@ class MockTemperatureAPI(TemperatureAPI):
 
 
 def _test_temperature_initialization(my_predbat):
-    """Test TemperatureAPI initialization with various configurations"""
-    print("  Testing TemperatureAPI initialization...")
+    """Test TemperatureAPI initialisation with various configurations"""
+    print("  Testing TemperatureAPI initialisation...")
 
     # Test with explicit coordinates
     temp_component = MockTemperatureAPI(
@@ -92,7 +92,7 @@ def _test_temperature_initialization(my_predbat):
         print("    ERROR: Incorrect longitude: {}".format(temp_component.temperature_longitude))
         return 1
 
-    print("    PASS: Initialization with explicit coordinates")
+    print("    PASS: Initialisation with explicit coordinates")
     return 0
 
 
@@ -100,7 +100,7 @@ def _test_temperature_zone_home_fallback(my_predbat):
     """Test zone.home coordinate fallback"""
     print("  Testing zone.home coordinate fallback...")
 
-    # Initialize without explicit coordinates
+    # Initialise without explicit coordinates
     temp_component = MockTemperatureAPI(
         temperature_latitude=None,
         temperature_longitude=None,
@@ -647,7 +647,7 @@ def _test_fetch_temperature_data_missing_coordinates(my_predbat):
     """Test fetch_temperature_data returns None when coordinates missing"""
     print("  Testing fetch_temperature_data with missing coordinates...")
 
-    # Initialize without coordinates
+    # Initialise without coordinates
     temp_component = MockTemperatureAPI(
         temperature_latitude=None,
         temperature_longitude=None,
@@ -1011,7 +1011,7 @@ def test_temperature(my_predbat=None):
     Comprehensive test suite for External Temperature API.
 
     Tests all major functionality including:
-    - Initialization and configuration
+    - Initialisation and configuration
     - zone.home coordinate fallback
     - URL placeholder replacement
     - Timezone offset conversion (positive and negative)
@@ -1022,7 +1022,7 @@ def test_temperature(my_predbat=None):
 
     # Registry of all sub-tests
     sub_tests = [
-        ("initialization", _test_temperature_initialization, "Temperature API initialization"),
+        ("initialization", _test_temperature_initialization, "Temperature API initialisation"),
         ("zone_home_fallback", _test_temperature_zone_home_fallback, "zone.home coordinate fallback"),
         ("url_placeholder", _test_temperature_url_placeholder_replacement, "URL placeholder replacement"),
         ("timezone_offset", _test_temperature_timezone_offset_conversion, "Timezone offset conversion"),

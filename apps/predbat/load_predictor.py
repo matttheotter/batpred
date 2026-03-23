@@ -86,11 +86,11 @@ class LoadPredictor:
 
     def __init__(self, log_func=None, learning_rate=0.001, max_load_kw=23.0, weight_decay=0.01, dropout_rate=0.1):
         """
-        Initialize the load predictor.
+        Initialise the load predictor.
 
         Args:
             log_func: Logging function (defaults to print)
-            learning_rate: Learning rate for Adam optimizer
+            learning_rate: Learning rate for Adam optimiser
             max_load_kw: Maximum load in kW for clipping predictions
             weight_decay: L2 regularization coefficient for AdamW (0.0 disables)
             dropout_rate: Fraction of hidden-layer neurons to drop during training (0.0 disables);
@@ -106,7 +106,7 @@ class LoadPredictor:
         self.weights = None
         self.biases = None
 
-        # Adam optimizer state
+        # Adam optimiser state
         self.m_weights = None
         self.v_weights = None
         self.m_biases = None
@@ -129,7 +129,7 @@ class LoadPredictor:
         self.model_initialized = False
 
     def _initialize_weights(self):
-        """Initialize network weights using He initialization (optimal for ReLU)"""
+        """Initialise network weights using He initialisation (optimal for ReLU)"""
         np.random.seed(42)  # For reproducibility
 
         layer_sizes = [TOTAL_FEATURES] + HIDDEN_SIZES + [OUTPUT_STEPS]
@@ -145,7 +145,7 @@ class LoadPredictor:
             fan_in = layer_sizes[i]
             fan_out = layer_sizes[i + 1]
 
-            # He initialization (optimal for ReLU activations)
+            # He initialisation (optimal for ReLU activations)
             std = np.sqrt(2.0 / fan_in)
             w = np.random.randn(fan_in, fan_out).astype(np.float32) * std
             b = np.zeros(fan_out, dtype=np.float32)
@@ -153,7 +153,7 @@ class LoadPredictor:
             self.weights.append(w)
             self.biases.append(b)
 
-            # Adam optimizer momentum terms
+            # Adam optimiser momentum terms
             self.m_weights.append(np.zeros_like(w))
             self.v_weights.append(np.zeros_like(w))
             self.m_biases.append(np.zeros_like(b))
@@ -164,7 +164,7 @@ class LoadPredictor:
 
     def _reset_adam_optimizer(self):
         """
-        Reset Adam optimizer momentum to zero.
+        Reset Adam optimiser momentum to zero.
 
         Used when starting fine-tuning to prevent accumulated momentum
         from previous training sessions causing overfitting on small
@@ -180,7 +180,7 @@ class LoadPredictor:
             self.v_biases[i] = np.zeros_like(self.biases[i])
 
         self.adam_t = 0
-        self.log("ML Predictor: Reset Adam optimizer state for fine-tuning")
+        self.log("ML Predictor: Reset Adam optimiser state for fine-tuning")
 
     def _forward(self, X, training=False):
         """
@@ -268,7 +268,7 @@ class LoadPredictor:
 
     def _adam_update(self, weight_grads, bias_grads, beta1=0.9, beta2=0.999, epsilon=1e-8, lr=None):
         """
-        Update weights using Adam optimizer with optional weight decay (AdamW).
+        Update weights using Adam optimiser with optional weight decay (AdamW).
 
         Args:
             weight_grads: Gradients for weights
@@ -1048,11 +1048,11 @@ class LoadPredictor:
         X_val_norm = self._normalize_features(X_val, fit=False)
         y_val_norm = self._normalize_targets(y_val, fit=False)
 
-        # Initialize weights if needed
+        # Initialise weights if needed
         if not self.model_initialized or (is_initial and self.weights is None):
             self._initialize_weights()
 
-        # Reset Adam optimizer state for fine-tuning to prevent accumulated
+        # Reset Adam optimiser state for fine-tuning to prevent accumulated
         # momentum from causing overfitting on small fine-tuning datasets
         if not is_initial and self.model_initialized:
             self._reset_adam_optimizer()

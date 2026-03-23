@@ -18,7 +18,7 @@ class TestFetch(Fetch):
     """Test class that inherits from Fetch to access its methods"""
 
     def __init__(self):
-        # Initialize minimal required attributes
+        # Initialise minimal required attributes
         self.log_messages = []
         self.forecast_minutes = 24 * 60  # 24 hours
         self.plan_interval_minutes = 30

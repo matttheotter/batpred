@@ -222,7 +222,7 @@ class GECloudDirect(ComponentBase):
     """
 
     def initialize(self, ge_cloud_direct, api_key, automatic):
-        """Initialize the GE Cloud Direct component"""
+        """Initialise the GE Cloud Direct component"""
         self.api_key = api_key
         self.automatic = automatic
         self.register_list = {}
@@ -396,7 +396,7 @@ class GECloudDirect(ComponentBase):
                     except (ValueError, TypeError):
                         pass
 
-                self.log("GECloud: Update data for device {} battery capacity {} max charge rate {}".format(device, capacity, max_charge_rate))
+                self.log("GECloud: Updated data for device {}: battery capacity {}kWh, max charge rate {}kW".format(device, capacity, max_charge_rate))
 
                 self.dashboard_item(entity_name + "_battery_size", capacity, attributes=attribute_table.get("battery_size", {}), app="gecloud")
                 self.dashboard_item(entity_name + "_max_charge_rate", max_charge_rate, attributes=attribute_table.get("max_charge_rate", {}), app="gecloud")
@@ -1442,7 +1442,7 @@ class GECloudData(ComponentBase):
     """
 
     def initialize(self, ge_cloud_data, ge_cloud_key, ge_cloud_serial, days_previous):
-        """Initialize the GE Cloud Data component"""
+        """Initialise the GE Cloud Data component"""
         self.ge_cloud_key = ge_cloud_key
         self.ge_cloud_serial_config_item = ge_cloud_serial
         self.days_previous = days_previous

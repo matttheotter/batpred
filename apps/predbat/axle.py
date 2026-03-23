@@ -32,7 +32,7 @@ class AxleAPI(ComponentBase):
     """Axle Energy VPP client with managed mode support."""
 
     def initialize(self, api_key, pence_per_kwh, automatic, managed_mode=False, site_id=None, partner_username=None, partner_password=None, api_base_url="https://api.axle.energy"):
-        """Initialize the AxleAPI component.
+        """Initialise the AxleAPI component.
 
         Args:
             api_key: BYOK API key (used in BYOK mode only)

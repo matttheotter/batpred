@@ -263,6 +263,93 @@ def run_multi_car_iog_load_slots_test(testname, my_predbat):
     return failed
 
 
+def run_multi_car_iog_unplugged_car_test(testname, my_predbat):
+    """
+    Regression test for issue #3592: When car 1 has an IOG entity configured but the old code
+    only guarded car_n == 0, plan_car_charging() was incorrectly called for car 1 whenever
+    car_charging_planned[1] was True (e.g. from stale dispatch slots). This caused car 1's
+    charging plan to expand from the small set of IOG dispatch windows to ALL low-rate windows
+    - 'charging slots all the time'.
+
+    The fix changes `car_n == 0` to check whether the car is configured with an IOG entity,
+    which prevents plan_car_charging() from being called for any IOG-configured car.
+
+    This test exercises fetch_sensor_data_car_planning() directly - the extracted function
+    that contains the fixed conditional.
+    """
+    failed = False
+    print("**** Running Test: multi_car_iog {} ****".format(testname))
+
+    # Set up 2 cars, both on IOG
+    my_predbat.num_cars = 2
+    my_predbat.car_charging_now = [False, False]
+    my_predbat.car_charging_plan_smart = [False, False]
+    my_predbat.car_charging_plan_max_price = [0, 0]
+    my_predbat.car_charging_plan_time = ["23:59:00", "23:59:00"]  # ready at end of day - catches all low_rates windows
+    my_predbat.car_charging_battery_size = [100.0, 80.0]
+    my_predbat.car_charging_limit = [100.0, 80.0]
+    my_predbat.car_charging_rate = [7.4, 7.4]
+    my_predbat.car_charging_soc = [50.0, 40.0]
+    my_predbat.car_charging_soc_next = [None, None]
+    my_predbat.car_charging_exclusive = [False, False]
+    my_predbat.car_charging_loss = 1.0
+    my_predbat.octopus_intelligent_charging = True
+    my_predbat.octopus_intelligent_ignore_unplugged = False
+
+    # Both cars have IOG entities - the scenario from issue #3592
+    my_predbat.args["octopus_intelligent_slot"] = [
+        "binary_sensor.octopus_energy_intelligent_dispatching_car1",
+        "binary_sensor.octopus_energy_intelligent_dispatching_car2",
+    ]
+
+    # Simulate state after fetch_sensor_data_cars() ran:
+    # - Both cars have car_charging_planned = True (IOG path sets this when slots are present)
+    # - car_charging_slots contains just the IOG-sourced slots (1 per car)
+    iog_slot_car0 = [{"start": 60, "end": 120, "kwh": 7.4, "average": 7.0, "cost": 51.8, "soc": 57.4}]
+    iog_slot_car1 = [{"start": 120, "end": 180, "kwh": 5.92, "average": 7.0, "cost": 41.44, "soc": 47.4}]
+    my_predbat.car_charging_planned = [True, True]
+    my_predbat.car_charging_slots = [list(iog_slot_car0), list(iog_slot_car1)]
+
+    # Set up multiple low_rates windows so plan_car_charging would produce many slots if called
+    my_predbat.low_rates = [
+        {"start": 0, "end": 30, "average": 5.0},
+        {"start": 60, "end": 90, "average": 5.0},
+        {"start": 120, "end": 150, "average": 5.0},
+        {"start": 180, "end": 210, "average": 5.0},
+        {"start": 240, "end": 270, "average": 5.0},
+        {"start": 1440, "end": 1470, "average": 5.0},
+        {"start": 1500, "end": 1530, "average": 5.0},
+    ]
+
+    # Call the real function under test
+    my_predbat.fetch_sensor_data_car_planning()
+
+    # car 0: IOG car, slots must be unchanged (plan_car_charging must NOT have been called)
+    if my_predbat.car_charging_slots[0] != iog_slot_car0:
+        print("ERROR: car_charging_slots[0] was mutated - plan_car_charging should not have been called for an IOG car")
+        print("  Expected: {}".format(iog_slot_car0))
+        print("  Got:      {}".format(my_predbat.car_charging_slots[0]))
+        failed = True
+    else:
+        print("OK: car_charging_slots[0] unchanged - plan_car_charging correctly skipped for IOG car 0")
+
+    # car 1: IOG car, slots must be unchanged (this is the regression from issue #3592)
+    if my_predbat.car_charging_slots[1] != iog_slot_car1:
+        print("ERROR: car_charging_slots[1] was mutated - plan_car_charging should not have been called for an IOG car (issue #3592)")
+        print("  Expected: {}".format(iog_slot_car1))
+        print("  Got {} slots: {}".format(len(my_predbat.car_charging_slots[1]), my_predbat.car_charging_slots[1]))
+        failed = True
+    else:
+        print("OK: car_charging_slots[1] unchanged - plan_car_charging correctly skipped for IOG car 1 (fix for issue #3592)")
+
+    if failed:
+        print("Test: {} FAILED".format(testname))
+    else:
+        print("Test: {} PASSED".format(testname))
+
+    return failed
+
+
 def run_multi_car_iog_tests(my_predbat):
     """
     Run all multi-car IOG tests
@@ -270,4 +357,5 @@ def run_multi_car_iog_tests(my_predbat):
     failed = False
     failed |= run_multi_car_iog_test("multi_car_iog_basic", my_predbat)
     failed |= run_multi_car_iog_load_slots_test("multi_car_iog_load_slots_regression", my_predbat)
+    failed |= run_multi_car_iog_unplugged_car_test("multi_car_iog_unplugged_car_3592", my_predbat)
     return failed

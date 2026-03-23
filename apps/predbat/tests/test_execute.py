@@ -43,6 +43,8 @@ class ActiveTestInverter:
         self.inv_has_charge_enable_time = True
         self.inv_has_timed_pause = True
         self.inv_has_discharge_enable_time = True
+        self.inv_has_ge_eco_toggle = False
+        self.inv_has_ge_inverter_mode = False
         self.soc_kw = soc_kw
         self.soc_max = soc_max
         self.soc_percent = calc_percent_limit(soc_kw, soc_max)
@@ -195,6 +197,7 @@ def run_execute_test(
     has_timed_pause=True,
     has_target_soc=True,
     has_charge_enable_time=True,
+    has_ge_eco_toggle=False,
     inverter_hybrid=False,
     battery_max_rate=1000,
     minutes_now=12 * 60,
@@ -253,6 +256,7 @@ def run_execute_test(
         inverter.inv_has_timed_pause = has_timed_pause
         inverter.inv_has_target_soc = has_target_soc
         inverter.inv_has_charge_enable_time = has_charge_enable_time
+        inverter.inv_has_ge_eco_toggle = has_ge_eco_toggle
         reserve_kwh = reserve / total_inverters
         reserve_percent = calc_percent_limit(reserve_kwh, inverter.soc_max)
         inverter.reserve_percent = reserve_percent
@@ -365,6 +369,20 @@ def run_execute_test(
         if assert_status in ["Freeze exporting"] and inverter.immediate_discharge_soc_freeze != True:
             print("ERROR: Inverter {} Immediate export SOC freeze should be True got {}".format(inverter.id, inverter.immediate_discharge_soc_freeze))
             failed = True
+
+    # Validate isCharging binary sensor state: must be True for any charging status (Freeze charging, Hold charging, Charging variants)
+    charging_statuses = ["Charging", "Freeze charging", "Hold charging"]
+    expected_is_charging = any(s in assert_status for s in charging_statuses)
+    if my_predbat.isCharging != expected_is_charging:
+        print("ERROR: isCharging should be {} for status '{}' got {}".format(expected_is_charging, assert_status, my_predbat.isCharging))
+        failed = True
+
+    # Validate isExporting binary sensor state: must be True for any exporting status (Exporting, Freeze exporting variants)
+    exporting_statuses = ["Exporting", "Freeze exporting"]
+    expected_is_exporting = any(s in assert_status for s in exporting_statuses)
+    if my_predbat.isExporting != expected_is_exporting:
+        print("ERROR: isExporting should be {} for status '{}' got {}".format(expected_is_exporting, assert_status, my_predbat.isExporting))
+        failed = True
 
     my_predbat.minutes_now = 12 * 60
     return failed
@@ -1780,6 +1798,37 @@ def run_execute_tests(my_predbat):
         set_export_window=True,
         soc_kw=0,
         assert_force_export=False,
+        assert_discharge_start_time_minutes=my_predbat.minutes_now + 30,
+        assert_discharge_end_time_minutes=my_predbat.minutes_now + 90 + 1,
+    )
+    # GEC (GivEnergy Cloud) inverters use an immediate ECO toggle switch - ECO mode must NOT be turned off
+    # before the export window actually starts, otherwise the battery stops supplying demand load early.
+    # With inv_has_ge_eco_toggle=True the pre-window adjust_force_export call should pass force_export=False.
+    failed |= run_execute_test(
+        my_predbat,
+        "discharge_upcoming_ge_eco_prewindow",
+        export_window_best=export_window_best3,
+        export_limits_best=export_limits_best,
+        set_charge_window=True,
+        set_export_window=True,
+        soc_kw=5,
+        has_ge_eco_toggle=True,
+        assert_force_export=False,
+        assert_status="Demand",
+        assert_discharge_start_time_minutes=my_predbat.minutes_now + 30,
+        assert_discharge_end_time_minutes=my_predbat.minutes_now + 90 + 1,
+    )
+    # Confirm the existing behaviour for standard inverters (inv_has_ge_eco_toggle=False) is unchanged:
+    # force_export=True is still passed to pre-program the discharge window.
+    failed |= run_execute_test(
+        my_predbat,
+        "discharge_upcoming_std_prewindow",
+        export_window_best=export_window_best3,
+        export_limits_best=export_limits_best,
+        set_charge_window=True,
+        set_export_window=True,
+        soc_kw=5,
+        assert_force_export=True,
         assert_discharge_start_time_minutes=my_predbat.minutes_now + 30,
         assert_discharge_end_time_minutes=my_predbat.minutes_now + 90 + 1,
     )

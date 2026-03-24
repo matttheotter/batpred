@@ -244,7 +244,7 @@ intelligent_settings_query = """query {{
 
 octoplus_saving_session_query = """query {{
 	savingSessions {{
-    events(getDevEvents: false) {{
+    events(includeDev: false) {{
 			id
       code
 			rewardPerKwhInOctoPoints
@@ -275,6 +275,28 @@ octoplus_saving_session_join_mutation = """mutation {{
 	}}
 }}
 """
+
+flexibility_campaign_query = """query {{
+  customerFlexibilityCampaignEvents(
+    accountNumber: "{account_id}"
+    supplyPointIdentifier: "{mpan}"
+    campaignSlug: "{campaign_slug}"
+    last: 50
+  ) {{
+    edges {{
+      node {{
+        code
+        startAt
+        endAt
+      }}
+    }}
+    totalCount
+    pageInfo {{
+      hasNextPage
+      endCursor
+    }}
+  }}
+}}"""
 
 intelligent_settings_mutation = """mutation {{
   setDevicePreferences(input: {{
@@ -308,6 +330,7 @@ class OctopusEnergyApiClient:
         self.api_key = api_key
         self.log = log
         self.base_url = "https://api.octopus.energy"
+        self.backend_url = "https://api.backend.octopus.energy"
 
         self.default_headers = {"user-agent": f"{user_agent_value}/1.0"}
         self.timeout = aiohttp.ClientTimeout(total=None, sock_connect=timeout_in_seconds, sock_read=timeout_in_seconds)
@@ -350,6 +373,8 @@ class OctopusAPI(ComponentBase):
         self.intelligent_devices = {}
         self.automatic = automatic
         self.commands = []
+        self.mpan = None
+        self.free_electricity_events = []
 
         # API request metrics for monitoring
         self.requests_total = 0
@@ -431,7 +456,7 @@ class OctopusAPI(ComponentBase):
             # 10-minute update for intelligent device
             await self.async_update_intelligent_devices(self.account_id)
             await self.fetch_tariffs(self.tariffs)
-            self.saving_sessions = await self.async_get_saving_sessions(self.account_id)
+            self.saving_sessions = await self.async_get_flexibility_events(self.account_id)
             self.get_saving_session_data()
 
         if first or refresh or (count_minutes % 2) == 0:
@@ -637,6 +662,10 @@ class OctopusAPI(ComponentBase):
                         isImport = True
                         deviceID_import = meter.get("smartImportElectricityMeter", {}).get("deviceId", None)
                         self.log("OctopusAPI: Found active import meter with device ID {}".format(deviceID_import))
+                        if not self.mpan:
+                            self.mpan = meterpoint.get("mpan")
+                            if self.mpan:
+                                self.log("OctopusAPI: Found MPAN {}".format(self.mpan[:4] + "..." + self.mpan[-4:] if len(self.mpan) > 8 else self.mpan))
                     if meter.get("smartExportElectricityMeter", None):
                         isExport = True
                         deviceID_export = meter.get("smartExportElectricityMeter", {}).get("deviceId", None)
@@ -904,9 +933,9 @@ class OctopusAPI(ComponentBase):
         Get the entity name
         """
         if index:
-            entity_name = root + ".predbat_octopus_" + self.account_id.replace("-", "_") + "_" + suffix + "_" + index
+            entity_name = root + "." + self.prefix + "_octopus_" + self.account_id.replace("-", "_") + "_" + suffix + "_" + index
         else:
-            entity_name = root + ".predbat_octopus_" + self.account_id.replace("-", "_") + "_" + suffix
+            entity_name = root + "." + self.prefix + "_octopus_" + self.account_id.replace("-", "_") + "_" + suffix
         entity_name = entity_name.lower()
         return entity_name
 
@@ -924,6 +953,12 @@ class OctopusAPI(ComponentBase):
         event_reward = {}
         event_code = {}
 
+        # Default saving session rate in octopoints/kWh
+        # octopus_saving_session_rate is in p/kWh, convert to octopoints
+        octopoints_per_penny = self.get_arg("octopus_saving_session_octopoints_per_penny", 8)
+        default_rate_pence = self.get_arg("octopus_saving_session_rate", 100)  # 100p/kWh default
+        default_octopoints = default_rate_pence * octopoints_per_penny
+
         if not has_joined:
             self.log("OctopusAPI: User has not joined Octopus saving sessions campaign")
             available_events = []
@@ -938,29 +973,44 @@ class OctopusAPI(ComponentBase):
             end = event.get("endAt", None)
             event_id = event.get("id", None)
             code = event.get("code", None)
+            reward = event.get("rewardPerKwhInOctoPoints", None)
+            if reward is None:
+                reward = default_octopoints
             if event_id:
-                event_reward[event_id] = event.get("rewardPerKwhInOctoPoints", None)
+                event_reward[event_id] = reward
                 event_code[event_id] = code
             if start and end and event_id not in joined_ids:
                 endDataTime = parse_date_time(end)
                 if endDataTime > self.now_utc_exact:
-                    return_available_events.append({"start": start, "end": end, "octopoints_per_kwh": event.get("rewardPerKwhInOctoPoints", None), "code": code, "id": event_id})
+                    return_available_events.append({"start": start, "end": end, "octopoints_per_kwh": reward, "code": code, "id": event_id})
 
         for event in joined_events:
             start = event.get("startAt", None)
             end = event.get("endAt", None)
             event_id = event.get("eventId", None)
+            reward = event_reward.get(event_id, None)
+            if reward is None:
+                reward = default_octopoints  # Inject default when API doesn't provide reward
             if start and end:
-                return_joined_events.append({"start": start, "end": end, "octopoints_per_kwh": event_reward.get(event_id, None), "rewarded_octopoints": event.get("rewardGivenInOctoPoints", None), "id": event_id, "code": event_code.get(event_id, None)})
+                return_joined_events.append({"start": start, "end": end, "octopoints_per_kwh": reward, "rewarded_octopoints": event.get("rewardGivenInOctoPoints", None), "id": event_id, "code": event_code.get(event_id, None)})
+
         saving_attributes = {"friendly_name": "Octopus Intelligent Saving Sessions", "icon": "mdi:currency-usd", "joined_events": return_joined_events, "available_events": return_available_events}
+
+        # Check if currently in an active saving session
+        # Handle both old API keys (start/end) and new API keys (startAt/endAt)
         active_event = False
         for event in joined_events:
-            start = event.get("start", None)
-            end = event.get("end", None)
+            start = event.get("startAt", event.get("start", None))
+            end = event.get("endAt", event.get("end", None))
             if start and end:
-                if start <= self.now_utc_exact and end > self.now_utc_exact:
-                    active_event = True
-                    break
+                try:
+                    start_dt = parse_date_time(start)
+                    end_dt = parse_date_time(end)
+                    if start_dt <= self.now_utc_exact and end_dt > self.now_utc_exact:
+                        active_event = True
+                        break
+                except (ValueError, TypeError):
+                    pass
         self.dashboard_item(self.get_entity_name("binary_sensor", "saving_session"), "on" if active_event else "off", attributes=saving_attributes, app="octopus")
 
         # Create joiner dropdown for available events
@@ -971,6 +1021,30 @@ class OctopusAPI(ComponentBase):
                 possible_codes.append(code)
         self.dashboard_item(self.get_entity_name("select", "saving_session_join"), "", attributes={"options": possible_codes, "friendly_name": "Join Octopus Saving Session Event", "icon": "mdi:currency-usd"}, app="octopus")
 
+        # Publish free electricity events from flexibility API
+        free_electric_events = []
+        for event in self.free_electricity_events:
+            start = event.get("startAt")
+            end = event.get("endAt")
+            code = event.get("code")
+            if start and end:
+                free_electric_events.append({"start": start, "end": end, "code": code, "rate": 0})
+        free_attributes = {"friendly_name": "Octopus Free Electricity Sessions", "icon": "mdi:flash", "events": free_electric_events}
+        active_free_event = False
+        for event in free_electric_events:
+            start = event.get("start")
+            end = event.get("end")
+            if start and end:
+                try:
+                    start_dt = parse_date_time(start)
+                    end_dt = parse_date_time(end)
+                    if start_dt <= self.now_utc_exact and end_dt > self.now_utc_exact:
+                        active_free_event = True
+                        break
+                except (ValueError, TypeError):
+                    pass
+        self.dashboard_item(self.get_entity_name("sensor", "free_electricity"), "on" if active_free_event else "off", attributes=free_attributes, app="octopus")
+
         return return_available_events, return_joined_events
 
     def automatic_config(self, tariffs):
@@ -980,6 +1054,7 @@ class OctopusAPI(ComponentBase):
         self.log("OctopusAPI: Automatic configuration of entities")
         self.set_arg("octopus_saving_session", self.get_entity_name("binary_sensor", "saving_session"))
         self.set_arg("octopus_saving_session_join", self.get_entity_name("select", "saving_session_join"))
+        self.set_arg("octopus_free_electricity", self.get_entity_name("sensor", "free_electricity"))
         for tariff in tariffs:
             self.set_arg("metric_octopus_{}".format(tariff), self.get_entity_name("sensor", tariff + "_rates"))
             if tariff == "import":
@@ -1006,7 +1081,7 @@ class OctopusAPI(ComponentBase):
         """
         Get the saving sessions
         """
-        response_data = await self.async_graphql_query(octoplus_saving_session_query.format(account_id=self.account_id), "get-saving-sessions", ignore_errors=True)
+        response_data = await self.async_graphql_query(octoplus_saving_session_query.format(account_id=self.account_id), "get-saving-sessions", ignore_errors=True, use_backend=True)
         if response_data is None:
             return self.saving_sessions
         else:
@@ -1017,6 +1092,79 @@ class OctopusAPI(ComponentBase):
                 if savingSessions["account"] is None:
                     savingSessions["account"] = {}
             return savingSessions
+
+    async def async_get_flexibility_events(self, account_id):
+        """
+        Get flexibility campaign events (saving sessions + free electricity)
+        using the new customerFlexibilityCampaignEvents API.
+        Falls back to legacy savingSessions query if MPAN is not available.
+        """
+        if not self.mpan:
+            self.log("OctopusAPI: No MPAN available, falling back to legacy saving sessions query")
+            return await self.async_get_saving_sessions(account_id)
+
+        # Query saving sessions
+        saving_events = []
+        response_data = await self.async_graphql_query(flexibility_campaign_query.format(account_id=account_id, mpan=self.mpan, campaign_slug="octoplus-saving-sessions"), "get-flexibility-saving-sessions", ignore_errors=True)
+        if response_data is not None:
+            campaign_data = response_data.get("customerFlexibilityCampaignEvents", {})
+            if campaign_data:
+                edges = campaign_data.get("edges", [])
+                for edge in edges:
+                    node = edge.get("node", {})
+                    if node:
+                        saving_events.append(
+                            {
+                                "code": node.get("code"),
+                                "startAt": node.get("startAt"),
+                                "endAt": node.get("endAt"),
+                            }
+                        )
+                self.log("OctopusAPI: Found {} saving session events via flexibility API".format(len(saving_events)))
+
+        # Query free electricity sessions
+        free_events = []
+        response_data = await self.async_graphql_query(flexibility_campaign_query.format(account_id=account_id, mpan=self.mpan, campaign_slug="free_electricity"), "get-flexibility-free-electricity", ignore_errors=True)
+        if response_data is not None:
+            campaign_data = response_data.get("customerFlexibilityCampaignEvents", {})
+            if campaign_data:
+                edges = campaign_data.get("edges", [])
+                for edge in edges:
+                    node = edge.get("node", {})
+                    if node:
+                        free_events.append(
+                            {
+                                "code": node.get("code"),
+                                "startAt": node.get("startAt"),
+                                "endAt": node.get("endAt"),
+                            }
+                        )
+                self.log("OctopusAPI: Found {} free electricity events via flexibility API".format(len(free_events)))
+
+        # Store free electricity events for use by fetch_octopus_sessions
+        self.free_electricity_events = free_events
+
+        # If no saving session events from new API, fall back to legacy query
+        # The new flexibility API may not have events populated yet for all accounts
+        if not saving_events:
+            self.log("OctopusAPI: No saving session events from flexibility API, falling back to legacy query")
+            legacy_result = await self.async_get_saving_sessions(account_id)
+            return legacy_result
+
+        # Map to existing internal format
+        # New API doesn't distinguish available vs joined — treat all as joined
+        result = {"events": [], "account": {"hasJoinedCampaign": len(saving_events) > 0, "joinedEvents": []}}  # No "available" events (no separate list in new API)
+        for event in saving_events:
+            result["account"]["joinedEvents"].append(
+                {
+                    "eventId": event.get("code"),
+                    "startAt": event.get("startAt"),
+                    "endAt": event.get("endAt"),
+                    "rewardGivenInOctoPoints": None,
+                }
+            )
+
+        return result
 
     async def async_get_day_night_rates(self, url):
         """
@@ -1380,9 +1528,11 @@ class OctopusAPI(ComponentBase):
             self.log(f"Warn: OctopusAPI: Failed to connect. Timeout of {self.api.timeout} exceeded.")
             return None
 
-    async def async_graphql_query(self, query, request_context, returns_data=True, ignore_errors=False, _retry_count=0):
+    async def async_graphql_query(self, query, request_context, returns_data=True, ignore_errors=False, _retry_count=0, use_backend=False):
         """
-        Execute a graphql query with automatic token refresh on auth errors
+        Execute a graphql query with automatic token refresh on auth errors.
+        If use_backend=True, uses api.backend.octopus.energy with no JWT prefix
+        (required for saving sessions since Feb 2026 API migration).
         """
         token = await self.async_refresh_token()
         if token is None:
@@ -1393,9 +1543,11 @@ class OctopusAPI(ComponentBase):
         try:
             self.requests_total += 1
             client = await self.api.async_create_client_session()
-            url = f"{self.api.base_url}/v1/graphql/"
+            base = self.api.backend_url if use_backend else self.api.base_url
+            url = f"{base}/v1/graphql/"
             payload = {"query": query}
-            headers = {"Authorization": f"JWT {self.graphql_token}", integration_context_header: request_context}
+            auth_prefix = "" if use_backend else "JWT "
+            headers = {"Authorization": f"{auth_prefix}{self.graphql_token}", integration_context_header: request_context}
             async with client.post(url, json=payload, headers=headers) as response:
                 # Process response (which reads the text)
                 response_body = await self.async_read_response_retry(response, url, ignore_errors=ignore_errors)
@@ -1415,7 +1567,7 @@ class OctopusAPI(ComponentBase):
                                 return None
                             # Token is now refreshed and cached in self.graphql_token
                             # Retry the query with new token (_retry_count=1 prevents infinite loop)
-                            return await self.async_graphql_query(query, request_context, returns_data=returns_data, ignore_errors=ignore_errors, _retry_count=1)
+                            return await self.async_graphql_query(query, request_context, returns_data=returns_data, ignore_errors=ignore_errors, _retry_count=1, use_backend=use_backend)
 
                 # Check for other errors (non-auth)
                 if response_body and "errors" in response_body and not ignore_errors:
@@ -1438,7 +1590,7 @@ class OctopusAPI(ComponentBase):
                     return None
         except TimeoutError:
             self.failures_total += 1
-            self.log(f"Warn: OctopusAPI: Failed to connect. Timeout of {self.timeout} exceeded.")
+            self.log(f"Warn: OctopusAPI: Failed to connect, timeout exceeded.")
             record_api_call("octopus", False, "connection_error")
 
         return None
@@ -2449,6 +2601,22 @@ class Octopus:
             free_online = self.download_octopus_free(self.get_arg("octopus_free_url", indirect=False))
             octopus_free_slots.extend(free_online)
 
+        # Load free electricity events from Octopus flexibility API
+        if "octopus_free_electricity" in self.args:
+            entity_id = self.get_arg("octopus_free_electricity", indirect=False)
+            if entity_id:
+                events = self.get_state_wrapper(entity_id=entity_id, attribute="events")
+                if events:
+                    for event in events:
+                        start = event.get("start", None)
+                        end = event.get("end", None)
+                        if start and end:
+                            octopus_free_slot = {}
+                            octopus_free_slot["start"] = start
+                            octopus_free_slot["end"] = end
+                            octopus_free_slot["rate"] = 0
+                            octopus_free_slots.append(octopus_free_slot)
+
         # Octopus saving session
         octopus_saving_slots = []
         if "octopus_saving_session" in self.args:
@@ -2496,6 +2664,10 @@ class Octopus:
                                 self.call_notify("Predbat: Joined Octopus saving event {}-{}, {} p/kWh".format(start_time.strftime("%a %d/%m %H:%M"), end_time.strftime("%H:%M"), saving_rate))
                             self.octopus_last_joined_try = self.now_utc
 
+            # Default saving session rate for when octopoints_per_kwh is not available
+            # (e.g. new flexibility API events that don't report reward rates)
+            default_rate_pence = self.get_arg("octopus_saving_session_rate", 0)
+
             if joined_events:
                 for event in joined_events:
                     start = event.get("start", None)
@@ -2503,8 +2675,10 @@ class Octopus:
                     octopoints_kwh = event.get("octopoints_per_kwh", None)
                     if octopoints_kwh is not None:
                         saving_rate = octopoints_kwh / octopoints_per_penny  # Octopoints per pence
-                    # If octopoints_per_kwh is None, skip this event as it's a past event only
-                    if start and end and octopoints_kwh is not None and saving_rate > 0:
+                    elif default_rate_pence > 0:
+                        saving_rate = default_rate_pence  # Use configured default rate
+                    # Skip events with no rate info unless default is configured
+                    if start and end and (octopoints_kwh is not None or default_rate_pence > 0) and saving_rate > 0:
                         # Save the saving slot?
                         try:
                             start_time = str2time(start)

@@ -40,7 +40,7 @@ from tests.test_iboost import run_iboost_smart_tests
 from tests.test_alert_feed import test_alert_feed
 from tests.test_solax import run_solax_tests
 from tests.test_single_debug import run_single_debug
-from tests.test_saving_session import test_saving_session, test_saving_session_null_octopoints, test_saving_session_notify_config
+from tests.test_saving_session import test_saving_session, test_saving_session_null_octopoints, test_saving_session_notify_config, test_saving_session_default_rate
 from tests.test_secrets import run_secrets_tests
 from tests.test_ge_cloud import test_ge_cloud
 from tests.test_axle import test_axle
@@ -103,6 +103,8 @@ from tests.test_temperature import test_temperature
 from tests.test_oauth_mixin import run_oauth_mixin_tests
 from tests.test_fox_oauth import run_fox_oauth_tests
 from tests.test_band_rate_text import test_band_rate_text
+from tests.test_kraken import run_kraken_tests
+from tests.test_kraken_auth_mixin import run_kraken_auth_mixin_tests
 
 
 # Mock the components and plugin system
@@ -214,6 +216,7 @@ def main():
         ("saving_session", test_saving_session, "Saving session tests", False),
         ("saving_session_null", test_saving_session_null_octopoints, "Saving session null octopoints test (issue #3079)", False),
         ("saving_session_notify", test_saving_session_notify_config, "Saving session notification config tests", False),
+        ("saving_session_default_rate", test_saving_session_default_rate, "Saving session default rate injection test", False),
         ("alert_feed", test_alert_feed, "Alert feed tests", False),
         ("fox_api", run_fox_api_tests, "Fox API tests", False),
         ("solcast", run_solcast_tests, "Solcast API tests", False),
@@ -263,6 +266,9 @@ def main():
         # OAuth infrastructure tests
         ("oauth_mixin", run_oauth_mixin_tests, "OAuth mixin tests (token refresh, expiry, 401 handling, env var fallback)", False),
         ("fox_oauth", run_fox_oauth_tests, "Fox API OAuth tests (dual auth headers, 401 retry, initialize params)", False),
+        # Kraken Energy (EDF/E.ON) tests
+        ("kraken", run_kraken_tests, "Kraken API tests (init, GraphQL, tariff discovery, rate fetching, run lifecycle)", False),
+        ("kraken_auth", run_kraken_auth_mixin_tests, "Kraken auth mixin tests (API key, email, refresh, 401 handling)", False),
         ("optimise_levels", run_optimise_levels_tests, "Optimise levels tests", False),
         ("optimise_windows", run_optimise_all_windows_tests, "Optimise all windows tests", True),
         ("debug_cases", run_debug_cases, "Debug case file tests", True),

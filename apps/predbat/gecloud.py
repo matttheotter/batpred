@@ -417,9 +417,9 @@ class GECloudDirect(ComponentBase):
             if measurand:
                 state = evc_data[key]  # added conversion of state values to match the unit of measure, dividing energy sensors by 1000, multiplying power by 1000
                 if measurand == "Current.Export":
-                    self.dashboard_item(entity_name + "_evc_current_export", state=dp1(state / 1000), attributes={"friendly_name": "EV Charger Current Export", "icon": "mdi:ev-station", "unit_of_measurement": "A", "device_class": "current"}, app="gecloud")
+                    self.dashboard_item(entity_name + "_evc_current_export", state=state, attributes={"friendly_name": "EV Charger Current Export", "icon": "mdi:ev-station", "unit_of_measurement": "A", "device_class": "current"}, app="gecloud")
                 elif measurand == "Current.Import":
-                    self.dashboard_item(entity_name + "_evc_current_import", state=dp1(state / 1000), attributes={"friendly_name": "EV Charger Current Import", "icon": "mdi:ev-station", "unit_of_measurement": "A", "device_class": "current"}, app="gecloud")
+                    self.dashboard_item(entity_name + "_evc_current_import", state=state, attributes={"friendly_name": "EV Charger Current Import", "icon": "mdi:ev-station", "unit_of_measurement": "A", "device_class": "current"}, app="gecloud")
                 elif measurand == "Current.Offered":
                     self.dashboard_item(entity_name + "_evc_current_offered", state=state, attributes={"friendly_name": "EV Charger Current Offered", "icon": "mdi:ev-station", "unit_of_measurement": "A", "device_class": "current"}, app="gecloud")
                 elif measurand == "Energy.Active.Export.Register":

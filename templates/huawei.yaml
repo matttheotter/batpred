@@ -95,7 +95,7 @@ pred_bat:
   charge_start_service:
     - service: huawei_solar.forcible_charge_soc
       target_soc: "{target_soc}"
-      power: "{inverter_limit_charge}"
+      power: "{power}"
       device_id: "{device_id}"
   charge_stop_service:
     - service: huawei_solar.stop_forcible_charge
@@ -103,7 +103,7 @@ pred_bat:
   discharge_start_service:
     - service: huawei_solar.forcible_discharge_soc
       target_soc: "{target_soc}"
-      power: "{inverter_limit_discharge}"
+      power: "{power}"
       device_id: "{device_id}"
   discharge_stop_service:
     - service: huawei_solar.stop_forcible_charge

@@ -1754,7 +1754,7 @@ INVERTER_DEF = {
         "support_discharge_freeze": False,
         "has_idle_time": False,
         "can_span_midnight": True,
-        "charge_discharge_with_rate": False,
+        "charge_discharge_with_rate": True,
         "target_soc_used_for_discharge": True,
     },
     "SK": {

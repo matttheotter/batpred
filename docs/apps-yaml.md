@@ -470,7 +470,7 @@ Set **solax_region** based on where your SolaX Cloud account is registered:
 - `'us'` - United States region - openapi-us.solaxcloud.com
 - `'cn'` - China region - openapi.solaxcloud.com
 
-**solax_plant_id**: If you have multiple plants registered in your SolaX Cloud account but only want Predbat to control specific plants, you can restict Predbat to only control specific plant IDs:
+**solax_plant_id**: If you have multiple plants registered in your SolaX Cloud account but only want Predbat to control specific plants, you can restrict Predbat to only control specific plant IDs:
 
 ```yaml
   solax_plant_id: '1618699116555534337'
@@ -600,7 +600,7 @@ Add the following to your `apps.yaml` to configure the Solis Cloud integration:
 - `solis_base_url` - Solis Cloud API base URL (optional, auto-detects region)
 - `solis_control_enable` - Enable/disable control commands (default: `true`, set to `false` for monitoring only)
 - `solis_cloud_pv_load_ignore` - Optional, defaults to false. When set to `true`, Predbat will override the **solis_automatic** setting and use the **load_today**, **load_power**, **pv_today** and **pv_load** sensors configured in `apps.yaml`.<BR>
-This can be useful if the Solis cloud data in the does not accurately reflect your house PV and load (e.g. multiple inverters that share load or PV inverter and microinverters) and you want to use a custom sensors.  All other sensors will use either the `apps.yaml` entries or the Solis Cloud entities depending upon **solis_automatic**.
+This can be useful if the Solis cloud data in the does not accurately reflect your house PV and load (e.g. multiple inverters that share load or PV inverter and micro-inverters) and you want to use a custom sensors.  All other sensors will use either the `apps.yaml` entries or the Solis Cloud entities depending upon **solis_automatic**.
 
 #### Important notes (Solis)
 

@@ -538,11 +538,11 @@ class SolisAPI(ComponentBase):
                 self.log(f"Warn: Solis API: No time windows cached for {inverter_sn}")
                 return True
 
-            # Make a copy as we will locally modify the data before writing it
+            #  Make a copy as we will locally modify the data before writing it
             time_windows = copy.deepcopy(self.charge_discharge_time_windows[inverter_sn])
 
             if self.is_tou_v2_mode(inverter_sn):
-                # V2 mode: check and write individual registers for changed values only
+                #  V2 mode: check and write individual registers for changed values only
                 slots_to_check = range(1, 7)
                 success = True
                 max_charge_current_amps = self.cached_values.get(inverter_sn, {}).get(SOLIS_CID_BATTERY_MAX_CHARGE_CURRENT, None)

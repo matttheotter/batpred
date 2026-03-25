@@ -43,7 +43,7 @@ class MockSolisAPI(SolisAPI):
         self.base_url = "https://api.soliscloud.com"
         self.automatic = False
         self.session = None
-        self.nominal_voltage = 48.4
+        self.nominal_voltage = 48.0
         self.control_enable = True
         self.inverter_sn = []
 
@@ -58,6 +58,7 @@ class MockSolisAPI(SolisAPI):
         self.max_charge_current = {}
         self.max_discharge_current = {}
         self.charge_discharge_time_windows = {}
+        self.cached_infos = {}
         self.slots_reset = set()
 
         # Logging
@@ -129,7 +130,7 @@ async def test_fetch_entity_data():
     api = MockSolisAPI()
     inverter_sn = "010262229130043"
     api.inverter_sn = [inverter_sn]
-    api.nominal_voltage = 48.4
+    api.nominal_voltage = 48.0
     api.max_charge_current[inverter_sn] = 62
     api.max_discharge_current[inverter_sn] = 62
 
@@ -162,14 +163,14 @@ async def test_fetch_entity_data():
     api.dashboard_items[f"select.predbat_solis_{inverter_sn}_charge_slot1_start_time"] = {"state": "02:30:00", "attributes": {}}
     api.dashboard_items[f"select.predbat_solis_{inverter_sn}_charge_slot1_end_time"] = {"state": "05:30:00", "attributes": {}}
     api.dashboard_items[f"number.predbat_solis_{inverter_sn}_charge_slot1_soc"] = {"state": "95", "attributes": {}}
-    api.dashboard_items[f"number.predbat_solis_{inverter_sn}_charge_slot1_power"] = {"state": "3000", "attributes": {}}  # 3000W = ~62A at 48.4V
+    api.dashboard_items[f"number.predbat_solis_{inverter_sn}_charge_slot1_power"] = {"state": "3000", "attributes": {}}  # 3000W = ~62A at 48.0V
 
     # Discharge slot 1
     api.dashboard_items[f"switch.predbat_solis_{inverter_sn}_discharge_slot1_enable"] = {"state": "off", "attributes": {}}
     api.dashboard_items[f"select.predbat_solis_{inverter_sn}_discharge_slot1_start_time"] = {"state": "16:00:00", "attributes": {}}
     api.dashboard_items[f"select.predbat_solis_{inverter_sn}_discharge_slot1_end_time"] = {"state": "19:00:00", "attributes": {}}
     api.dashboard_items[f"number.predbat_solis_{inverter_sn}_discharge_slot1_soc"] = {"state": "20", "attributes": {}}
-    api.dashboard_items[f"number.predbat_solis_{inverter_sn}_discharge_slot1_power"] = {"state": "2400", "attributes": {}}  # 2400W = ~49A at 48.4V
+    api.dashboard_items[f"number.predbat_solis_{inverter_sn}_discharge_slot1_power"] = {"state": "2400", "attributes": {}}  # 2400W = ~49A at 48.0V
 
     # Charge slot 2 - partial data
     api.dashboard_items[f"switch.predbat_solis_{inverter_sn}_charge_slot2_enable"] = {"state": "off", "attributes": {}}
@@ -185,8 +186,8 @@ async def test_fetch_entity_data():
     assert slot1["charge_start_time"] == "02:30", f"Expected charge_start_time='02:30', got {slot1['charge_start_time']}"
     assert slot1["charge_end_time"] == "05:30", f"Expected charge_end_time='05:30', got {slot1['charge_end_time']}"
     assert slot1["charge_soc"] == 95, f"Expected charge_soc=95, got {slot1['charge_soc']}"
-    # Power converted to amps: 3000W / 48.4V = 61.98A, clamped to max 62A
-    expected_charge_current = int(3000 / 48.4)  # ~61A
+    # Power converted to amps: 3000W / 48.0V = 62.5A, clamped to max 62A
+    expected_charge_current = int(3000 / 48.0)  # ~62A
     assert slot1["charge_current"] == expected_charge_current, f"Expected charge_current={expected_charge_current}, got {slot1['charge_current']}"
 
     # Verify discharge slot 1 values were fetched
@@ -194,8 +195,8 @@ async def test_fetch_entity_data():
     assert slot1["discharge_start_time"] == "16:00", f"Expected discharge_start_time='16:00', got {slot1['discharge_start_time']}"
     assert slot1["discharge_end_time"] == "19:00", f"Expected discharge_end_time='19:00', got {slot1['discharge_end_time']}"
     assert slot1["discharge_soc"] == 20, f"Expected discharge_soc=20, got {slot1['discharge_soc']}"
-    # Power converted to amps: 2400W / 48.4V = 49.58A
-    expected_discharge_current = int(2400 / 48.4)  # ~49A
+    # Power converted to amps: 2400W / 48.0V = 49.58A
+    expected_discharge_current = int(2400 / 48.0)  # ~49A
     assert slot1["discharge_current"] == expected_discharge_current, f"Expected discharge_current={expected_discharge_current}, got {slot1['discharge_current']}"
 
     # Verify slot 2 values (only enable and start_time were available)
@@ -262,7 +263,7 @@ async def test_fetch_entity_data_invalid_values():
     api = MockSolisAPI()
     inverter_sn = "BAD_DATA"
     api.inverter_sn = [inverter_sn]
-    api.nominal_voltage = 48.4
+    api.nominal_voltage = 48.0
     api.max_charge_current[inverter_sn] = 62
     api.max_discharge_current[inverter_sn] = 62
 
@@ -398,12 +399,12 @@ async def test_read_cid():
     api._execute_request = mock_execute_request
 
     # Test reading battery SOC
-    result = await api.read_cid(inverter_sn, 103)
+    result, info = await api.read_cid(inverter_sn, 103)
     assert result == "50", f"Expected '50', got '{result}'"
     print("PASSED: read_cid returns correct value for battery SOC")
 
     # Test reading storage mode
-    result = await api.read_cid(inverter_sn, 633)
+    result, info = await api.read_cid(inverter_sn, 633)
     assert result == "33", f"Expected '33', got '{result}'"
     print("PASSED: read_cid returns correct value for storage mode")
 
@@ -482,7 +483,7 @@ async def test_read_cid():
 
     api._execute_request = mock_execute_request_with_retries
 
-    result = await api.read_cid(inverter_sn, 103)
+    result, info = await api.read_cid(inverter_sn, 103)
     assert result == "50", f"Expected '50' after retries, got '{result}'"
     assert call_count[0] == 3, f"Expected 3 API calls (2 failures + 1 success), got {call_count[0]}"
     print("PASSED: read_cid retries after API failures and eventually succeeds")
@@ -515,7 +516,7 @@ async def test_read_batch():
     api._execute_request = mock_execute_request
 
     # Test reading multiple CIDs
-    result = await api.read_batch(inverter_sn, [103, 633, 104])
+    result, result_info = await api.read_batch(inverter_sn, [103, 633, 104])
     assert isinstance(result, dict), f"Expected dict result, got {type(result)}"
     assert result[103] == "50", f"Expected '50' for CID 103, got '{result.get(103)}'"
     assert result[633] == "33", f"Expected '33' for CID 633, got '{result.get(633)}'"
@@ -562,7 +563,7 @@ async def test_read_batch():
 
     api._execute_request = mock_execute_request_empty
 
-    result = await api.read_batch(inverter_sn, [103, 633])
+    result, result_info = await api.read_batch(inverter_sn, [103, 633])
     assert result == {}, f"Expected empty dict for empty response, got {result}"
     print("PASSED: read_batch handles empty response correctly")
 
@@ -590,7 +591,7 @@ async def test_read_batch():
 
     api._execute_request = mock_execute_request_with_retries
 
-    result = await api.read_batch(inverter_sn, [103, 633])
+    result, result_info = await api.read_batch(inverter_sn, [103, 633])
     assert result[103] == "50", f"Expected '50' after retries, got '{result.get(103)}'"
     assert result[633] == "33", f"Expected '33' after retries, got '{result.get(633)}'"
     assert call_count[0] == 3, f"Expected 3 API calls (2 failures + 1 success), got {call_count[0]}"
@@ -617,7 +618,7 @@ async def test_read_and_write_cid():
 
     async def mock_read_cid(inv_sn, cid):
         read_calls.append({"inverter_sn": inv_sn, "cid": cid})
-        return cid_state.get(cid, "0")
+        return cid_state.get(cid, "0"), {"msg": cid_state.get(cid, "0")}
 
     async def mock_write_cid(inv_sn, cid, value, old_value=None, field_description=None):
         write_calls.append({"inverter_sn": inv_sn, "cid": cid, "value": value, "old_value": old_value, "field_description": field_description})
@@ -1088,11 +1089,13 @@ async def test_write_time_windows_v2_mode():
     # Verify results
     assert result == True, "write_time_windows_if_changed should return True"
 
-    # Check that read_and_write_cid was called for all V2 fields
+    # Check that read_and_write_cid was called for all V2 fields (no enable gating)
     calls = api.read_and_write_cid_calls
-    # Should write: charge_enable, charge_time, charge_soc, charge_current, discharge_enable, discharge_time, discharge_soc, discharge_current
-    # = 8 calls (not 10, since we only have discharge enable/time/soc/current, not a separate enable write)
-    assert len(calls) == 8, f"Expected 8 calls for V2 mode (4 charge + 4 discharge fields), got {len(calls)}"
+    # All fields written regardless of enable state:
+    # charge: enable, time, soc, current (4 calls)
+    # discharge: enable, time, soc, current (4 calls)
+    # = 8 calls total
+    assert len(calls) == 8, f"Expected 8 calls for V2 mode (4 charge + 4 discharge), got {len(calls)}"
 
     # Verify charge enable was written
     charge_enable_call = next((c for c in calls if c["cid"] == SOLIS_CID_CHARGE_ENABLE_BASE), None)
@@ -1109,17 +1112,35 @@ async def test_write_time_windows_v2_mode():
     assert charge_soc_call is not None, "Charge SOC should be written"
     assert charge_soc_call["value"] == "100", "Charge SOC should be 100"
 
-    # Verify charge current was written
+    # Verify charge current was written (as float string)
     charge_current_call = next((c for c in calls if c["cid"] == SOLIS_CID_CHARGE_CURRENT[0]), None)
     assert charge_current_call is not None, "Charge current should be written"
-    assert charge_current_call["value"] == "50", "Charge current should be 50"
+    assert charge_current_call["value"] == "50.0", "Charge current should be 50.0"
+
+    # Verify discharge enable was written
+    discharge_enable_call = next((c for c in calls if c["cid"] == SOLIS_CID_DISCHARGE_ENABLE_BASE), None)
+    assert discharge_enable_call is not None, "Discharge enable should be written"
+    assert discharge_enable_call["value"] == "0", "Discharge enable should be 0"
+
+    # Verify discharge time/SOC/current were also written (no enable gating)
+    from solis import SOLIS_CID_DISCHARGE_TIME, SOLIS_CID_DISCHARGE_SOC, SOLIS_CID_DISCHARGE_CURRENT
+
+    discharge_time_call = next((c for c in calls if c["cid"] == SOLIS_CID_DISCHARGE_TIME[0]), None)
+    assert discharge_time_call is not None, "Discharge time should be written"
+    assert discharge_time_call["value"] == "16:00-19:00", "Discharge time should be 16:00-19:00"
+    discharge_soc_call = next((c for c in calls if c["cid"] == SOLIS_CID_DISCHARGE_SOC[0]), None)
+    assert discharge_soc_call is not None, "Discharge SOC should be written"
+    assert discharge_soc_call["value"] == "10", "Discharge SOC should be 10"
+    discharge_current_call = next((c for c in calls if c["cid"] == SOLIS_CID_DISCHARGE_CURRENT[0]), None)
+    assert discharge_current_call is not None, "Discharge current should be written"
+    assert discharge_current_call["value"] == "30.0", "Discharge current should be 30.0"
 
     # Verify storage mode was set to Self-Use (non-zero charge current)
     storage_mode_calls = api.set_storage_mode_calls
     assert len(storage_mode_calls) == 1, f"Expected 1 storage mode call, got {len(storage_mode_calls)}"
     assert storage_mode_calls[0]["mode"] == "Self-Use", "Storage mode should be Self-Use for non-zero charge current"
 
-    print("PASSED: V2 mode writes all fields correctly and sets storage mode")
+    print("PASSED: V2 mode writes all fields and sets storage mode")
     return False
 
 
@@ -1775,7 +1796,7 @@ async def test_publish_entities():
     # Check power conversion (amps to watts)
     assert f"number.{prefix}_solis_{inverter_sn_lower}_charge_slot1_power" in api.dashboard_items, "Charge slot 1 power should be published"
     charge_power = api.dashboard_items[f"number.{prefix}_solis_{inverter_sn_lower}_charge_slot1_power"]
-    expected_power = int(50 * api.nominal_voltage)  # 50A * 48.4V = 2420W
+    expected_power = int(50 * api.nominal_voltage)  # 50A * 48.0V = 2420W
     assert charge_power["state"] == expected_power, f"Charge power should be {expected_power}W, got {charge_power['state']}"
     assert charge_power["attributes"]["unit_of_measurement"] == "W", "Charge power should have W unit"
 
@@ -1801,13 +1822,13 @@ async def test_publish_entities():
     # Check max power numbers (converted from amps)
     assert f"number.{prefix}_solis_{inverter_sn_lower}_max_charge_power" in api.dashboard_items, "Max charge power should be published"
     max_charge = api.dashboard_items[f"number.{prefix}_solis_{inverter_sn_lower}_max_charge_power"]
-    expected_max_power = int(50 * api.nominal_voltage)  # 50A * 48.4V
+    expected_max_power = int(50 * api.nominal_voltage)  # 50A * 48.0V
     assert max_charge["state"] == expected_max_power, f"Max charge power should be {expected_max_power}W, got {max_charge['state']}"
 
     # Check battery capacity calculation (Ah to kWh)
     assert f"sensor.{prefix}_solis_{inverter_sn_lower}_battery_capacity" in api.dashboard_items, "Battery capacity should be published"
     battery_cap = api.dashboard_items[f"sensor.{prefix}_solis_{inverter_sn_lower}_battery_capacity"]
-    expected_kwh = round(100 * api.nominal_voltage / 1000.0, 2)  # 100Ah * 48.4V / 1000 = 4.84 kWh
+    expected_kwh = round(100 * api.nominal_voltage / 1000.0, 2)  # 100Ah * 48.0V / 1000 = 4.84 kWh
     assert battery_cap["state"] == expected_kwh, f"Battery capacity should be {expected_kwh}kWh, got {battery_cap['state']}"
     assert battery_cap["attributes"]["unit_of_measurement"] == "kWh", "Battery capacity should have kWh unit"
 
@@ -2289,12 +2310,12 @@ async def test_number_event_charge_power():
     api.charge_discharge_time_windows[inverter_sn] = {2: {"charge_current": 0}}
 
     # Test updating charge power (watts -> amps conversion)
-    # nominal_voltage = 48.4V, so 2420W = 50A
+    # nominal_voltage = 48.0V, so 2420W = 50A
     entity_id = f"number.predbat_solis_{inverter_sn}_charge_slot2_power"
     await api.number_event(entity_id, 2420)
 
-    # Verify current was updated (2420W / 48.4V = 50A)
-    expected_amps = int(2420 / 48.4)  # = 50A
+    # Verify current was updated (2420W / 48.0V = 50A)
+    expected_amps = int(2420 / 48.0)  # = 50A
     assert api.charge_discharge_time_windows[inverter_sn][2]["charge_current"] == float(expected_amps), f"Expected {expected_amps}, got {api.charge_discharge_time_windows[inverter_sn][2]['charge_current']}"
 
     print("PASSED: Charge power number event handled correctly")
@@ -2335,12 +2356,12 @@ async def test_number_event_discharge_power():
     api.charge_discharge_time_windows[inverter_sn] = {4: {"discharge_current": 0}}
 
     # Test updating discharge power (watts -> amps conversion)
-    # nominal_voltage = 48.4V, so 1452W = 30A
+    # nominal_voltage = 48.0V, so 1452W = 30A
     entity_id = f"number.predbat_solis_{inverter_sn}_discharge_slot4_power"
     await api.number_event(entity_id, 1452)
 
-    # Verify current was updated (1452W / 48.4V = 30A)
-    expected_amps = int(1452 / 48.4)  # = 30A
+    # Verify current was updated (1452W / 48.0V = 30A)
+    expected_amps = float(round(1452 / 48.0, 1))  # = 30.2A
     assert api.charge_discharge_time_windows[inverter_sn][4]["discharge_current"] == float(expected_amps), f"Expected {expected_amps}, got {api.charge_discharge_time_windows[inverter_sn][4]['discharge_current']}"
 
     print("PASSED: Discharge power number event handled correctly")
@@ -2412,14 +2433,14 @@ async def test_number_event_max_power():
     api.read_and_write_cid = mock_read_and_write_cid
 
     # Test max_charge_power (watts -> amps conversion)
-    # nominal_voltage = 48.4V, so 4840W = 100A
+    # nominal_voltage = 48.0V, so 4840W = 100A
     entity_id = f"number.predbat_solis_{inverter_sn}_max_charge_power"
     await api.number_event(entity_id, 4840)
 
     assert len(api.read_and_write_cid_calls) == 1, "Should call read_and_write_cid once"
     call = api.read_and_write_cid_calls[0]
     assert call["cid"] == SOLIS_CID_BATTERY_MAX_CHARGE_CURRENT, f"Expected CID {SOLIS_CID_BATTERY_MAX_CHARGE_CURRENT}, got {call['cid']}"
-    expected_amps = str(int(4840 / 48.4))  # = "100"
+    expected_amps = round(float(4840) / api.nominal_voltage, 1)  # = "100.0"
     assert call["value"] == expected_amps, f"Expected '{expected_amps}', got {call['value']}"
 
     print("PASSED: Max power number event handled correctly")

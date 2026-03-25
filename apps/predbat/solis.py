@@ -1035,15 +1035,18 @@ class SolisAPI(ComponentBase):
         self.set_arg("battery_power", [f"sensor.{self.prefix}_solis_{device}_battery_power" for device in devices])
         self.set_arg("battery_power_invert", [f"True" for device in devices])
         self.set_arg("grid_power", [f"sensor.{self.prefix}_solis_{device}_grid_power" for device in devices])
-        self.set_arg("load_power", [f"sensor.{self.prefix}_solis_{device}_load_power" for device in devices])
-        self.set_arg("pv_power", [f"sensor.{self.prefix}_solis_{device}_pv_power" for device in devices])
         self.set_arg("battery_voltage", [f"sensor.{self.prefix}_solis_{device}_battery_voltage" for device in devices])
         # self.set_arg("battery_temperature", [f"sensor.{self.prefix}_solis_{device}_battery_temperature" for device in devices])
-        self.set_arg("load_today", [f"sensor.{self.prefix}_solis_{device}_total_load_energy" for device in devices])
+        
+        # if solis_cloud_pv_load_ignore is set to true, override Solis cloud sensors and use load/pv_today/power entries defined in apps.yaml
+        if not self.get_arg("solis_cloud_pv_load_ignore", default=False):
+            self.set_arg("load_today", [f"sensor.{self.prefix}_solis_{device}_total_load_energy" for device in devices])
+            self.set_arg("pv_today", [f"sensor.{self.prefix}_solis_{device}_pv_energy_total" for device in devices])
+            self.set_arg("load_power", [f"sensor.{self.prefix}_solis_{device}_load_power" for device in devices])
+            self.set_arg("pv_power", [f"sensor.{self.prefix}_solis_{device}_pv_power" for device in devices])
         self.set_arg("import_today", [f"sensor.{self.prefix}_solis_{device}_today_import_energy" for device in devices])
         self.set_arg("export_today", [f"sensor.{self.prefix}_solis_{device}_today_export_energy" for device in devices])
-        self.set_arg("pv_today", [f"sensor.{self.prefix}_solis_{device}_pv_energy_total" for device in devices])
-
+        
         # Battery capacity and limits from cached details
         # XXX: This is currently broken, user must set manually in apps.yaml
         # self.set_arg("soc_max", [f"sensor.{self.prefix}_solis_{device}_battery_capacity" for device in devices])

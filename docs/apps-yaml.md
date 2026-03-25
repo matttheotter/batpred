@@ -432,9 +432,9 @@ This can be useful if the **load_today** data in the GivEnergy Cloud does not ac
 
 Predbat supports direct communication with the SolaX Cloud API to control SolaX inverters and batteries without requiring local integrations.
 
-To use SolaX Cloud Direct, you need to obtain API credentials (client ID and client secret) from your SolaX Cloud account.
+#### Solax Cloud Setup
 
-#### Getting your SolaX Cloud API credentials
+To use SolaX Cloud Direct, you need to obtain API credentials (client ID and client secret) from your SolaX Cloud account:
 
 1. Log in to your SolaX Cloud account at:
    - EU: <https://www.solaxcloud.com>
@@ -444,8 +444,6 @@ To use SolaX Cloud Direct, you need to obtain API credentials (client ID and cli
 3. Create a new API application or access existing credentials
 4. Copy your **Client ID** and **Client Secret**
 5. Add these to your `apps.yaml` configuration
-
-#### Basic SolaX Cloud configuration
 
 If you set **solax_automatic** to `true`, Predbat will automatically discover your plants, inverters, and batteries, and configure all necessary entities without manual intervention.
 
@@ -466,17 +464,13 @@ If you set **solax_automatic** to `true`, Predbat will automatically discover yo
 
 See [Storing secrets](#storing-secrets) for more information.
 
-#### Region selection
-
 Set **solax_region** based on where your SolaX Cloud account is registered:
 
 - `'eu'` - European region (default) - openapi-eu.solaxcloud.com
 - `'us'` - United States region - openapi-us.solaxcloud.com
 - `'cn'` - China region - openapi.solaxcloud.com
 
-#### Optional configuration options
-
-**solax_plant_id**: If you have multiple plants registered in your SolaX Cloud account but only want Predbat to control specific plants, you can filter by plant ID:
+**solax_plant_id**: If you have multiple plants registered in your SolaX Cloud account but only want Predbat to control specific plants, you can restict Predbat to only control specific plant IDs:
 
 ```yaml
   solax_plant_id: '1618699116555534337'
@@ -490,9 +484,7 @@ If not specified, Predbat will control all plants found in your account.
   solax_enable_controls: false
 ```
 
-#### Automatic configuration (solax_automatic: true)
-
-When **solax_automatic** is enabled, Predbat will:
+When **solax_automatic** is set to `true`, Predbat will:
 
 1. Discover all plants with inverters and batteries in your SolaX Cloud account
 2. Automatically configure `num_inverters` based on the number of plants found
@@ -507,9 +499,7 @@ When **solax_automatic** is enabled, Predbat will:
 
 No manual entity configuration is required when using automatic mode.
 
-#### Published entities
-
-When SolaX Cloud is configured, Predbat creates the following entities for each plant (replace `{plant_id}` with your actual plant ID):
+When SolaX Cloud is configured, Predbat creates the following entities for each plant ID:
 
 **Sensors:**
 
@@ -540,8 +530,6 @@ When SolaX Cloud is configured, Predbat creates the following entities for each 
 - `number.predbat_solax_{plant_id}_battery_schedule_export_target_soc` - Export target SOC (%)
 - `number.predbat_solax_{plant_id}_battery_schedule_export_rate` - Export rate (W)
 - `switch.predbat_solax_{plant_id}_battery_schedule_export_enable` - Enable/disable exporting
-
-#### Manual configuration (solax_automatic: false)
 
 If you disable automatic configuration, you must manually configure inverter entities in `apps.yaml` similar to other inverter types. In this case, set:
 
@@ -589,7 +577,7 @@ python3 solax.py --client-id YOUR_CLIENT_ID --client-secret YOUR_CLIENT_SECRET -
 
 Predbat includes support for Solis inverters via the Solis Cloud API, allowing direct cloud-based monitoring and control of Solis hybrid inverters with battery storage.
 
-#### Configuration (solis)
+#### Solis Cloud Configuration
 
 Add the following to your `apps.yaml` to configure the Solis Cloud integration:
 
@@ -598,7 +586,10 @@ Add the following to your `apps.yaml` to configure the Solis Cloud integration:
   solis_api_secret: !secret solis_api_secret
   solis_automatic: true
   solis_control_enable: true
+  solis_cloud_pv_load_ignore: false
 ```
+
+**Note:** It's strongly recommended to store `api_key` and `api_secret` in `secrets.yaml` and reference them as `!secret solis_api_key` - see [Storing secrets](#storing-secrets).
 
 **Configuration options:**
 
@@ -608,14 +599,14 @@ Add the following to your `apps.yaml` to configure the Solis Cloud integration:
 - `solis_automatic` - Set to `true` to automatically configure Predbat entities (recommended, default: `false`)
 - `solis_base_url` - Solis Cloud API base URL (optional, auto-detects region)
 - `solis_control_enable` - Enable/disable control commands (default: `true`, set to `false` for monitoring only)
-
-**Note:** It's strongly recommended to store `api_key` and `api_secret` in `secrets.yaml` and reference them as `!secret solis_api_key` - see [Storing secrets](#storing-secrets).
+- **solis_cloud_pv_load_ignore** - Optional, defaults to false. When set to `true`, Predbat will override the **solis_automatic** setting and use the **load_today**, **load_power**, **pv_today** and **pv_load** sensors configured in `apps.yaml`.<BR>
+This can be useful if the Solis cloud data in the does not accurately reflect your house PV and load (e.g. multiple inverters that share load or PV inverter and microinverters) and you want to use a custom sensors.  All other sensors will use either the `apps.yaml` entries or the Solis Cloud entities depending upon **solis_automatic**.
 
 #### Important notes (Solis)
 
 **IMPORTANT:** The Solis Cloud integration cannot automatically determine your battery size from the inverter. You have two options:
 
-1. **Manual configuration (recommended):** Set `soc_max` in `apps.yaml` manually with your battery capacity in kWh:
+1. **Manual configuration (recommended):** Set `soc_max` in `apps.yaml` manually to your battery capacity in kWh:
 
 ```yaml
   soc_max:

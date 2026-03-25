@@ -2099,6 +2099,7 @@ APPS_SCHEMA = {
     "solis_automatic": {"type": "boolean"},
     "solis_base_url": {"type": "string", "empty": False},
     "solis_control_enable": {"type": "boolean"},
+    "solis_cloud_pv_load_ignore": {"type": "boolean"},
     "octopus_intelligent_slot": {"type": "sensor|sensor_list", "sensor_type": "boolean|action", "entries": "num_cars", "optional_entries": True},
     "octopus_ready_time": {"type": "sensor|sensor_list", "sensor_type": "string", "entries": "num_cars", "optional_entries": True},
     "octopus_charge_limit": {"type": "sensor|sensor_list", "sensor_type": "float", "entries": "num_cars", "optional_entries": True},

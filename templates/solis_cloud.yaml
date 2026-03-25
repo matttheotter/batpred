@@ -49,7 +49,7 @@ pred_bat:
   #   - sensor.pv_today
   # pv_power:
   #   - sensor.pv_power
-  
+
   # Right now Solis Cloud can't determine the battery capacity so set it here in kwh
   soc_max: 7.5
 

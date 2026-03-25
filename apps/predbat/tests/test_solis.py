@@ -93,7 +93,7 @@ class MockSolisAPI(SolisAPI):
 
     def get_arg(self, name, default=None):
         """Mock get_arg"""
-        return self.config_args.get(name, default)
+        return default
 
     def is_tou_v2_mode(self, sn):
         """Mock is_tou_v2_mode - can be overridden in tests"""

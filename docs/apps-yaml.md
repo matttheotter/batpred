@@ -599,7 +599,7 @@ Add the following to your `apps.yaml` to configure the Solis Cloud integration:
 - `solis_automatic` - Set to `true` to automatically configure Predbat entities (recommended, default: `false`)
 - `solis_base_url` - Solis Cloud API base URL (optional, auto-detects region)
 - `solis_control_enable` - Enable/disable control commands (default: `true`, set to `false` for monitoring only)
-- **solis_cloud_pv_load_ignore** - Optional, defaults to false. When set to `true`, Predbat will override the **solis_automatic** setting and use the **load_today**, **load_power**, **pv_today** and **pv_load** sensors configured in `apps.yaml`.<BR>
+- `solis_cloud_pv_load_ignore` - Optional, defaults to false. When set to `true`, Predbat will override the **solis_automatic** setting and use the **load_today**, **load_power**, **pv_today** and **pv_load** sensors configured in `apps.yaml`.<BR>
 This can be useful if the Solis cloud data in the does not accurately reflect your house PV and load (e.g. multiple inverters that share load or PV inverter and microinverters) and you want to use a custom sensors.  All other sensors will use either the `apps.yaml` entries or the Solis Cloud entities depending upon **solis_automatic**.
 
 #### Important notes (Solis)

@@ -32,9 +32,24 @@ pred_bat:
   # https://www.soliscloud.com/station?glyun_vue2=%2F%23%2FapiManage
   solis_api_key: 'xxxx'
   solis_api_secret: xxxx'
-  solis_automatic: True
-  solis_control_enable: True
+  solis_automatic: true
+  solis_control_enable: true
 
+  #
+  # Inverter and battery sensors will be auto-configured from the Solis Cloud if solis_automatic is set to true and any entries in apps.yaml will be ignored
+  #
+  # If the Solis cloud does not provide accurate house load and PV data then you can override the Solis Cloud sensors and use custom sensors defined in apps.yaml
+  #
+  # solis_cloud_pv_load_ignore: true
+  # load_today:
+  #   - sensor.house_load_today
+  # load_power:
+  #   - sensor.house_load_power
+  # pv_today:
+  #   - sensor.pv_today
+  # pv_power:
+  #   - sensor.pv_power
+  
   # Right now Solis Cloud can't determine the battery capacity so set it here in kwh
   soc_max: 7.5
 

@@ -2,71 +2,60 @@
 
 This section of the documentation describes the configuration required for different 3rd party devices/integrations, typically EV chargers.  If you have a device not listed then please raise a GitHub ticket with your configuration.
 
-## Wallbox Pulsar
+## Hypervolt
 
-<https://www.home-assistant.io/integrations/wallbox/>
+<https://github.com/gndean/home-assistant-hypervolt-charger>
 
-Can be used both for the Car Charging Hold feature (to filter out previous car charging) and to determine if the car is plugged in
+Can be used both for the Car Charging Hold feature (to filter out previous car charging) and to determine if the car is plugged in (only V3 models).
+
+For plugged-in detection on V2 models, see guidance <https://springfall2008.github.io/batpred/car-charging/#example-ev-and-charger-setup>.
 
 ```yaml
-  car_charging_energy: 're:sensor.wallbox_portal_added_energy'
+  car_charging_energy: 're:(sensor.hypervolt_session_energy_total_increasing)'
   car_charging_planned:
-    - 're:sensor.wallbox_portal_status_description'
+    - 're:(binary_sensor.hypervolt_car_plugged)'
+  car_charging_planned_response:
+    - 'on'
+  car_charging_now:
+    - 're:(sensor.hypervolt_charging_readiness)'
+  car_charging_now_response:
+    - 'charging'
 ```
 
-Wallbox works with Octopus Intelligent GO and can be triggered via Octopus themselves or an HA automation linked to the Predbat slot sensor
+Note: **sensor.hypervolt_session_energy_total_increasing** defaults to 'unknown' between charging sessions; [create a template sensor](car-charging.md#configure-appsyaml-for-your-car-charging) to wrap around the hypervolt sensor to resolve predbat complaining about this.
 
-## Zappi
+**Agile Tariff**
 
-<https://github.com/CJNE/ha-myenergi>
+To automate the schedule charging with Predbat, set up the automation to detect when there is a change to `binary_sensor.predbat_car_charging_slot`.
 
-Can be used both for the Car Charging Hold feature (to filter out previous car charging) and to determine if the car is plugged in
+Ensure that `select.hypervolt_charge_mode` is in 'Boost', when Predbat charging slot is 'on', set `select.hypervolt_activation_mode` to 'Plug and Charge', when it is 'off' set the 'Schedule', this is the recommended method for start/stop charging.
+
+## Octopus Energy
+
+<https://github.com/BottlecapDave/HomeAssistant-OctopusEnergy>
+
+Can be used for energy rates, car charging and saving sessions
+
+**For Energy Rates**
 
 ```yaml
-  car_charging_energy: 're:sensor.myenergi_zappi_[0-9a-z]+_charge_added_session'
-  car_charging_planned:
-    - 're:sensor.myenergi_zappi_[0-9a-z]+_plug_status)'
+  metric_octopus_import: 're:(sensor.(octopus_energy_|)electricity_[0-9a-z]+_[0-9a-z]+_current_rate)'
+  metric_octopus_export: 're:(sensor.(octopus_energy_|)electricity_[0-9a-z]+_[0-9a-z]+_export_current_rate)'
 ```
 
-_TIP:_ The Zappi must be set to Eco+ mode for IOG to control it.
-If Predbat starts exporting your battery (e.g. prior to the IOG cheap overnight period) then the Zappi can treat the exported energy as excess solar and start charging the EV battery with it!<BR>
-To prevent this happening, in the Zappi configuration set the Export Margin to 8000W so that the Zappi will only charge the EV from excess solar when more than 8000W is being exported (which should never happen).
-
-## Tesla
-
-<https://github.com/alandtse/tesla>
-
-Can be used to extract the car's current SoC and Charge limit. Also can be used to control the cars charging with an automation linked to the Predbat slot sensor
+**For Octopus Intelligent Go**
 
 ```yaml
-  car_charging_limit:
-    - 're:number.xxx_charge_limit'
-  car_charging_soc:
-    - 're:sensor.xxx_battery'
+  octopus_intelligent_slot: 're:(binary_sensor.octopus_energy([0-9a-z_]+|)_intelligent_dispatching)'
+  octopus_ready_time: 're:((select|time).octopus_energy_([0-9a-z_]+|)_intelligent_target_time)'
+  octopus_charge_limit: 're:(number.octopus_energy([0-9a-z_]+|)_intelligent_charge_target)'
 ```
 
-## Toyota
-
-<https://github.com/DurgNomis-drol/ha_toyota> - For Toyota EU cars only
-
-Can be used to extract the car's current SoC.
+**For Octopus Saving Sessions**
 
 ```yaml
-  car_charging_soc:
-    - 'sensor.toyota_XXX_battery_level'
-```
-
-Example sensor name for BZ4X - `sensor.toyota_bz4x_battery_level`
-
-## Renault
-
-<https://www.home-assistant.io/integrations/renault>
-
-Can be used to extract the car's current SoC.
-
-```yaml
-  car_charging_soc:
-    - 'sensor.battery'
+  octopus_saving_session: 're:(binary_sensor.octopus_energy([0-9a-z_]+|)_saving_session(s|))'
+  octopus_saving_session_octopoints_per_penny: 8
 ```
 
 ## Ohme Direct
@@ -75,7 +64,7 @@ Predbat can talk direct to the Ohme cloud service to control your Ohme EV charge
 
 See [Ohme Direct](car-charging.md#ohme-car-charger-direct-integration)
 
-## HA In-Built Ohme Integration
+## Ohme HA In-Built Integration
 
 <https://www.home-assistant.io/integrations/ohme>
 
@@ -186,6 +175,22 @@ Normally not recommended if you are on Intelligent GO, but can be useful for ad-
     - 'binary_sensor.ohme_car_charging'
 ```
 
+## Nordpool
+
+**For adjustment to Octopus Intelligent**
+
+This is built into Predbat, see the [apps.yaml configuration guide](car-charging.md#octopus-led-charging)
+
+**As your energy rates (e.g. for those in Norway)**
+
+<https://github.com/custom-components/nordpool/>
+
+Can be linked to Predbat to provide energy rates in your region e.g:
+
+```yaml
+  metric_octopus_import: 'sensor.nordpool_kwh_oslo_eur_3_10_025'
+```
+
 ## PodPoint
 
 <https://github.com/mattrayner/pod-point-home-assistant-component>
@@ -211,76 +216,15 @@ Can be used both for the Car Charging Hold feature (to filter out previous car c
 Also can be used to control the cars charging with an automation linked to the Predbat slot sensor.
 The device needs to be set to 'Smart' mode in the PodPoint app. Your automation trigger should then set the `switch.psl_XXXXXX_charging_allowed` to on. And off to stop charging. This uses the PodPoint schedule override setting to start/stop the charge.
 
-## Hypervolt
+## Renault
 
-<https://github.com/gndean/home-assistant-hypervolt-charger>
+<https://www.home-assistant.io/integrations/renault>
 
-Can be used both for the Car Charging Hold feature (to filter out previous car charging) and to determine if the car is plugged in (only V3 models).
-
-For plugged-in detection on V2 models, see guidance <https://springfall2008.github.io/batpred/car-charging/#example-ev-and-charger-setup>.
+Can be used to extract the car's current SoC.
 
 ```yaml
-  car_charging_energy: 're:(sensor.hypervolt_session_energy_total_increasing)'
-  car_charging_planned:
-    - 're:(binary_sensor.hypervolt_car_plugged)'
-  car_charging_planned_response:
-    - 'on'
-  car_charging_now:
-    - 're:(sensor.hypervolt_charging_readiness)'
-  car_charging_now_response:
-    - 'charging'
-```
-
-Note: **sensor.hypervolt_session_energy_total_increasing** defaults to 'unknown' between charging sessions.
-
-**Agile Tariff**
-
-To automate the schedule charging with Predbat, set up the automation to detect when there is a change to `binary_sensor.predbat_car_charging_slot`.
-
-Ensure that `select.hypervolt_charge_mode` is in 'Boost', when Predbat charging slot is 'on', set `select.hypervolt_activation_mode` to 'Plug and Charge', when it is 'off' set the 'Schedule', this is the recommended method for start/stop charging.
-
-## Octopus Energy
-
-<https://github.com/BottlecapDave/HomeAssistant-OctopusEnergy>
-
-Can be used for energy rates, car charging and saving sessions
-
-**For Energy Rates**
-
-```yaml
-  metric_octopus_import: 're:(sensor.(octopus_energy_|)electricity_[0-9a-z]+_[0-9a-z]+_current_rate)'
-  metric_octopus_export: 're:(sensor.(octopus_energy_|)electricity_[0-9a-z]+_[0-9a-z]+_export_current_rate)'
-```
-
-**For Octopus Intelligent Go**
-
-```yaml
-  octopus_intelligent_slot: 're:(binary_sensor.octopus_energy([0-9a-z_]+|)_intelligent_dispatching)'
-  octopus_ready_time: 're:((select|time).octopus_energy_([0-9a-z_]+|)_intelligent_target_time)'
-  octopus_charge_limit: 're:(number.octopus_energy([0-9a-z_]+|)_intelligent_charge_target)'
-```
-
-**For Octopus Saving Sessions**
-
-```yaml
-  octopus_saving_session: 're:(binary_sensor.octopus_energy([0-9a-z_]+|)_saving_session(s|))'
-  octopus_saving_session_octopoints_per_penny: 8
-```
-
-## Nordpool
-
-### For adjustment to Octopus Intelligent
-
-This is built into Predbat, see the [apps.yaml configuration guide](car-charging.md#octopus-led-charging)
-
-### As your energy rates (e.g. for those in Norway)
-
-<https://github.com/custom-components/nordpool/>
-
-Can be linked to Predbat to provide energy rates in your region e.g:
-
-```yaml
-  metric_octopus_import: 'sensor.nordpool_kwh_oslo_eur_3_10_025'
+  car_charging_soc:
+    - 'sensor.battery'
 ```
 
 ## Solcast
@@ -295,3 +239,59 @@ For solar forecast data
   pv_forecast_d3: re:(sensor.(solcast_|)(pv_forecast_|)forecast_(day_3|d3))
   pv_forecast_d4: re:(sensor.(solcast_|)(pv_forecast_|)forecast_(day_4|d4))
 ```
+
+## Tesla
+
+<https://github.com/alandtse/tesla>
+
+Can be used to extract the car's current SoC and Charge limit. Also can be used to control the cars charging with an automation linked to the Predbat slot sensor
+
+```yaml
+  car_charging_limit:
+    - 're:number.xxx_charge_limit'
+  car_charging_soc:
+    - 're:sensor.xxx_battery'
+```
+
+## Toyota
+
+<https://github.com/DurgNomis-drol/ha_toyota> - For Toyota EU cars only
+
+Can be used to extract the car's current SoC.
+
+```yaml
+  car_charging_soc:
+    - 'sensor.toyota_XXX_battery_level'
+```
+
+Example sensor name for BZ4X - `sensor.toyota_bz4x_battery_level`
+
+## Wallbox Pulsar
+
+<https://www.home-assistant.io/integrations/wallbox/>
+
+Can be used both for the Car Charging Hold feature (to filter out previous car charging) and to determine if the car is plugged in
+
+```yaml
+  car_charging_energy: 're:sensor.wallbox_portal_added_energy'
+  car_charging_planned:
+    - 're:sensor.wallbox_portal_status_description'
+```
+
+Wallbox works with Octopus Intelligent GO and can be triggered via Octopus themselves or an HA automation linked to the Predbat slot sensor
+
+## Zappi
+
+<https://github.com/CJNE/ha-myenergi>
+
+Can be used both for the Car Charging Hold feature (to filter out previous car charging) and to determine if the car is plugged in
+
+```yaml
+  car_charging_energy: 're:sensor.myenergi_zappi_[0-9a-z]+_charge_added_session'
+  car_charging_planned:
+    - 're:sensor.myenergi_zappi_[0-9a-z]+_plug_status)'
+```
+
+_TIP:_ The Zappi must be set to Eco+ mode for IOG to control it.
+If Predbat starts exporting your battery (e.g. prior to the IOG cheap overnight period) then the Zappi can treat the exported energy as excess solar and start charging the EV battery with it!<BR>
+To prevent this happening, in the Zappi configuration set the Export Margin to 8000W so that the Zappi will only charge the EV from excess solar when more than 8000W is being exported (which should never happen).

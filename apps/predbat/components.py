@@ -466,7 +466,8 @@ class Components:
         self.initialize(only=only, phase=0)
         self.initialize(only=only, phase=1)
         self.initialize(only=only, phase=2)
-        self.start(only=only)
+        for phase in (0, 1, 2):
+            self.start(only=only, phase=phase)
 
     """
     Pass through events to the appropriate component

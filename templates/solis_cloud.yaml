@@ -31,7 +31,7 @@ pred_bat:
   # Obtain the Solis Cloud KeyID and KeySecret from the Solis Cloud Web Site (under service/api management)
   # https://www.soliscloud.com/station?glyun_vue2=%2F%23%2FapiManage
   solis_api_key: 'xxxx'
-  solis_api_secret: xxxx'
+  solis_api_secret: 'xxxx'
   solis_automatic: true
   solis_control_enable: true
 

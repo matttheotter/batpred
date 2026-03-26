@@ -17,7 +17,9 @@ enum InverterType {
   INVERTER_TYPE_DEYE_SUNSYNK    = 5;
   INVERTER_TYPE_GIVENERGY       = 6;
   INVERTER_TYPE_GIVENERGY_EMS   = 7;
-  INVERTER_TYPE_CUSTOM          = 8;
+  INVERTER_TYPE_GIVENERGY_GATEWAY = 8;
+  INVERTER_TYPE_ALPHA_ESS       = 9;
+  INVERTER_TYPE_CUSTOM          = 10;
 }
 
 message BatteryStatus {
@@ -39,7 +41,7 @@ message PvStatus {
 }
 
 message GridStatus {
-  int32 power_w      = 1;  // positive = importing from grid
+  int32 power_w      = 1;  // positive = exporting to grid, negative = importing
   // Future: grid quality fields
   float voltage_v    = 2;  // 0 = not available
   float frequency_hz = 3;
@@ -104,7 +106,7 @@ message EnergyCounters {
 
 message InverterEntry {
   InverterType   type      = 1;
-  string         serial    = 2;
+  string         serial    = 2;  // inverter serial (user-facing, from Modbus probe)
   string         ip        = 3;
   bool           connected = 4;
   bool           active    = 5;
@@ -118,6 +120,8 @@ message InverterEntry {
   EmsStatus      ems       = 13;
   EnergyCounters energy    = 14;  // daily energy counters (populated from extended poll tier)
   bool           managed   = 15;  // true = accepts commands, false = poll-only
+  bool           primary   = 16;  // true = PredBat should use this inverter for control/config
+  string         dongle_serial = 17;  // WiFi dongle serial (internal, used for Modbus framing)
 }
 
 message GatewayStatus {

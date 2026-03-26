@@ -336,6 +336,7 @@ soliscloud
 solisx
 sourcery
 Southwell
+sparkline
 springfall
 starthour
 startminute

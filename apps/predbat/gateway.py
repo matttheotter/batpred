@@ -7,6 +7,7 @@ gateway — no Home Assistant in the loop.
 """
 
 import asyncio
+import datetime
 import json
 import os
 import ssl
@@ -139,6 +140,9 @@ class GatewayMQTT(ComponentBase):
         self._last_published_plan = None
         self._pending_plan = None
 
+        # Predbat data publish state (price/timeline for device display)
+        self._last_predbat_data = None
+
         # Register for plan execution hook so we receive plan updates generically
         if hasattr(self.base, "register_hook"):
             self.base.register_hook("on_plan_executed", self._on_plan_executed)
@@ -249,6 +253,10 @@ class GatewayMQTT(ComponentBase):
                 plan_entries, tz = self._pending_plan
                 self._pending_plan = None
                 await self.publish_plan(plan_entries, tz)
+
+            # Publish predbat data (price, timeline) to device display
+            if self._mqtt_connected and self._auto_configured:
+                await self._publish_predbat_data()
 
             # Token refresh check
             await self._check_token_refresh()
@@ -400,16 +408,21 @@ class GatewayMQTT(ComponentBase):
             attributes={"device_id": device_id, "firmware": firmware},
         )
 
-        # Inverter time from gateway timestamp
+        # Inverter time from gateway timestamp — use first primary inverter's serial
         if status.timestamp > 0 and len(status.inverters) > 0:
+            primary_inv = next((inv for inv in status.inverters if inv.primary), status.inverters[0])
+            ts_suffix = primary_inv.serial[-6:].lower() if len(primary_inv.serial) > 6 else primary_inv.serial.lower()
             dt = datetime.fromtimestamp(status.timestamp)
-            ts_suffix = status.inverters[0].serial[-6:].lower()
             self.set_state_wrapper(
                 f"sensor.{self.prefix}_gateway_{ts_suffix}_inverter_time",
                 dt.strftime("%Y-%m-%d %H:%M:%S"),
             )
 
         for inv in status.inverters:
+            # Skip non-primary inverters — EMS/gateway units report overlapping
+            # power readings that would cause doubled values on the dashboard.
+            if not inv.primary:
+                continue
             suffix = inv.serial[-6:].lower() if len(inv.serial) > 6 else inv.serial.lower()
             self._inject_inverter_entities(inv, suffix)
 
@@ -477,19 +490,21 @@ class GatewayMQTT(ComponentBase):
         self.set_state_wrapper(f"number.{pfx}_target_soc", control.target_soc)
 
         # Schedule times (convert HHMM uint32 → HH:MM:SS string)
-        if inv.schedule.ByteSize() > 0:
-            sched = inv.schedule
-            for field, name in [
-                ("charge_start", "charge_slot1_start"),
-                ("charge_end", "charge_slot1_end"),
-                ("discharge_start", "discharge_slot1_start"),
-                ("discharge_end", "discharge_slot1_end"),
-            ]:
-                hhmm = getattr(sched, field, 0)
-                hours = hhmm // 100
-                minutes = hhmm % 100
-                time_str = f"{hours:02d}:{minutes:02d}:00"
-                self.set_state_wrapper(f"select.{pfx}_{name}", time_str)
+        # Always set with defaults so PredBat doesn't crash on missing charge_start_time
+        sched = inv.schedule if inv.schedule.ByteSize() > 0 else None
+        for field, name in [
+            ("charge_start", "charge_slot1_start"),
+            ("charge_end", "charge_slot1_end"),
+            ("discharge_start", "discharge_slot1_start"),
+            ("discharge_end", "discharge_slot1_end"),
+        ]:
+            hhmm = getattr(sched, field, 0) if sched else 0
+            hours = hhmm // 100
+            minutes = hhmm % 100
+            if hours >= 24:
+                hours = 0  # firmware sends 2400 for midnight end-of-day
+            time_str = f"{hours:02d}:{minutes:02d}:00"
+            self.set_state_wrapper(f"select.{pfx}_{name}", time_str)
 
         # Inverter time (from GatewayStatus timestamp for clock drift detection)
         if self._last_status and self._last_status.timestamp:
@@ -507,12 +522,13 @@ class GatewayMQTT(ComponentBase):
         self.set_state_wrapper(f"sensor.{pfx}_battery_dod", round(dod_pct / 100.0, 3))
 
         # Energy counters (Wh → kWh)
-        if inv.energy.ByteSize() > 0:
-            energy = inv.energy
-            self.set_state_wrapper(f"sensor.{pfx}_pv_today", round(energy.pv_today_wh / 1000.0, 2))
-            self.set_state_wrapper(f"sensor.{pfx}_import_today", round(energy.grid_import_today_wh / 1000.0, 2))
-            self.set_state_wrapper(f"sensor.{pfx}_export_today", round(energy.grid_export_today_wh / 1000.0, 2))
-            self.set_state_wrapper(f"sensor.{pfx}_load_today", round(energy.consumption_today_wh / 1000.0, 2))
+        # Always set with defaults so PredBat doesn't crash on missing load_today
+        energy = inv.energy if inv.energy.ByteSize() > 0 else None
+        self.set_state_wrapper(f"sensor.{pfx}_pv_today", round(getattr(energy, "pv_today_wh", 0) / 1000.0, 2) if energy else 0)
+        self.set_state_wrapper(f"sensor.{pfx}_import_today", round(getattr(energy, "grid_import_today_wh", 0) / 1000.0, 2) if energy else 0)
+        self.set_state_wrapper(f"sensor.{pfx}_export_today", round(getattr(energy, "grid_export_today_wh", 0) / 1000.0, 2) if energy else 0)
+        self.set_state_wrapper(f"sensor.{pfx}_load_today", round(getattr(energy, "consumption_today_wh", 0) / 1000.0, 2) if energy else 0)
+        if energy:
             self.set_state_wrapper(f"sensor.{pfx}_battery_charge_today", round(energy.battery_charge_today_wh / 1000.0, 2))
             self.set_state_wrapper(f"sensor.{pfx}_battery_discharge_today", round(energy.battery_discharge_today_wh / 1000.0, 2))
 
@@ -527,14 +543,29 @@ class GatewayMQTT(ComponentBase):
             return
 
         status = self._last_status
-        inverters = status.inverters
+        all_inverters = list(status.inverters)
 
-        if not inverters:
+        if not all_inverters:
             self.log("Error: GatewayMQTT: no inverters in gateway status")
             return
 
+        # Filter to primary inverters with battery data for planning.
+        # EMS/gateway units may be primary but lack battery — they provide
+        # monitoring entities but shouldn't be registered as plan inverters.
+        any_primary = any(inv.primary for inv in all_inverters)
+        if any_primary:
+            inverters = [inv for inv in all_inverters if inv.primary and inv.battery.ByteSize() > 0]
+            if not inverters:
+                # All primary inverters lack battery — fall back to any with battery
+                inverters = [inv for inv in all_inverters if inv.battery.capacity_wh > 0]
+        else:
+            # Old firmware: no primary flags, use all with battery data
+            inverters = [inv for inv in all_inverters if inv.battery.ByteSize() > 0]
+        if not inverters:
+            inverters = all_inverters  # last resort
+
         num_inverters = len(inverters)
-        self.log(f"Info: GatewayMQTT: auto-config: {num_inverters} inverter(s)")
+        self.log(f"Info: GatewayMQTT: auto-config: {num_inverters} primary inverter(s) of {len(all_inverters)} total")
 
         # Set inverter type
         self.set_arg("inverter_type", ["GWMQTT"] * num_inverters)
@@ -659,8 +690,110 @@ class GatewayMQTT(ComponentBase):
         self.set_arg("pause_end_time", None)
         self.set_arg("discharge_target_soc", None)
 
+        # Gateway provides all inverter data directly — disable GE Cloud to
+        # prevent double-counting (cloud API + MQTT would sum the same energy).
+        self.set_arg("ge_cloud_data", False)
+        self.set_arg("ge_cloud_direct", False)
+
         self._auto_configured = True
         self.log(f"Info: GatewayMQTT: auto-config complete: {num_inverters} inverter(s) registered")
+
+    async def _publish_predbat_data(self):
+        """Publish price/timeline data to the gateway device for display.
+
+        Reads PredBat entities (rates, cost_today, ppkwh_today, plan_html raw)
+        and publishes JSON to predbat/devices/{device_id}/predbat_data.
+        """
+        try:
+            # Current price from rates entity (current half-hour import rate)
+            current_price = float(self.get_state_wrapper(self.prefix + ".rates") or 0)
+            cost_today = self.get_state_wrapper(self.prefix + ".cost_today")
+            avg_price = self.get_state_wrapper(self.prefix + ".ppkwh_today")
+
+            timeline = [0] * 12  # 12 x 30-min slots, default idle
+            block_soc = []  # SOC % values for current plan block only
+            block_state_name = ""  # Current block state for display label
+
+            # Build timeline and extract current block SOC from plan JSON rows
+            plan_raw = self.get_state_wrapper(self.prefix + ".plan_html", attribute="raw")
+            if plan_raw and isinstance(plan_raw, dict) and "rows" in plan_raw:
+                rows = plan_raw["rows"]
+                now = datetime.datetime.now(datetime.timezone.utc)
+
+                state_map = {
+                    "Charging": 1,
+                    "Freeze charging": 1,
+                    "Hold charging": 1,
+                    "Discharging": 2,
+                    "Freeze discharging": 2,
+                }
+
+                slot_idx = 0
+                current_block_state = None
+                block_done = False
+                for row in rows:
+                    try:
+                        row_time = datetime.datetime.strptime(row.get("time", ""), "%Y-%m-%dT%H:%M:%S%z")
+                    except (ValueError, TypeError):
+                        continue
+
+                    if row_time < now - datetime.timedelta(minutes=30):
+                        continue
+
+                    state = row.get("state", "")
+                    code = state_map.get(state, 0)
+                    if code == 0:
+                        pv = float(row.get("pv_forecast", 0) or 0)
+                        if pv > 0.1:
+                            code = 3  # Solar
+                        else:
+                            code = 4  # Grid import (consuming)
+
+                    if slot_idx < 12:
+                        timeline[slot_idx] = code
+
+                    # Track current block: consecutive rows with same state.
+                    # If first block is only 1 slot, extend into next block
+                    # so the sparkline always has >= 2 points to render.
+                    if not block_done:
+                        if current_block_state is None:
+                            current_block_state = state
+                            block_state_name = state
+                        if state == current_block_state:
+                            block_soc.append(int(float(row.get("soc_percent", 0) or 0)))
+                        elif len(block_soc) < 2:
+                            # Single-slot block — extend into next block
+                            current_block_state = state
+                            block_state_name = state
+                            block_soc.append(int(float(row.get("soc_percent", 0) or 0)))
+                        else:
+                            block_done = True
+
+                    slot_idx += 1
+
+            # Build payload
+            payload = {
+                "current_price": round(float(current_price), 1),
+                "avg_price": round(float(avg_price or 0), 1),
+                "total_saved": round(float(cost_today or 0) / 100.0, 2),  # pence → pounds
+                "timeline": timeline,
+                "block_soc": block_soc,
+                "block_state": block_state_name,
+            }
+
+            # Only publish if data changed
+            if payload == self._last_predbat_data:
+                return
+
+            payload_json = json.dumps(payload)
+            topic = f"{self._topic_base}/predbat_data"
+
+            await self._publish_raw(topic, payload_json.encode(), retain=True)
+            self._last_predbat_data = payload
+            self.log(f"Info: Published predbat_data: price={payload['current_price']}p avg={payload['avg_price']}p saved=£{payload['total_saved']}")
+
+        except Exception as e:
+            self.log(f"Warn: Failed to publish predbat_data: {e}")
 
     def _plan_changed(self, plan_entries):
         """Check if the plan differs from the last published plan."""

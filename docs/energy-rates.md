@@ -146,16 +146,13 @@ Note: **You must have signed up to both the Octopus Octoplus and then the Saving
 For Predbat to automatically manage Octopus saving sessions the following additional configuration item in `apps.yaml` is used.
 Like the electricity rates, this is set in the `apps.yaml` template to a regular expression that should auto-discover the Octopus Energy integration.
 
-- **octopus_saving_session** - Indicates if a saving session is active, should point to the sensor binary_sensor.octopus_energy_ACCOUNT_ID_octoplus_saving_sessions.
+- **octopus_saving_session** - Indicates if a saving session is active, should point to the sensor 'event.octopus_energy_ACCOUNT_ID_saving_session_event'.
 
 When a saving session is available it will be automatically joined by Predbat and should then appear as a joined session within the next 30 minutes.
 
-Note: Predbat automatically joining the saving session relies upon the event being enabled and Predbat being able to find the saving session event as 'event.octopus_energy_ACCOUNT_ID_octoplus_saving_session_events' - there have been occasions
-with some Octopus Integration installations where the event name is different.  If this is the case then the event must be renamed to the correct format that Predbat can function correctly.
-
 In the Predbat plan, for joined saving sessions the energy rates for import and export will be overridden by adding the assumed saving rate to your normal rate.
 The assumed rate will be taken from the Octopus Energy integration and converted into pence
-using the **octopus_saving_session_octopoints_per_penny** configuration item in apps.yaml (default is 8).
+using the **octopus_saving_session_octopoints_per_penny** configuration item in `apps.yaml` (default is 8).
 
 If you normally cut back your house usage during a saving session then you can change **input_number.predbat_load_scaling_saving** to allow Predbat to assume an energy
 reduction in this period. E.g. setting to a value of 0.8 would indicate you will use 80% of the normal consumption in that period (a 20% reduction).

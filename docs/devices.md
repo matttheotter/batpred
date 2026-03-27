@@ -32,9 +32,7 @@ Ensure that `select.hypervolt_charge_mode` is in 'Boost', when Predbat charging 
 
 ## Octopus Energy
 
-<https://github.com/BottlecapDave/HomeAssistant-OctopusEnergy>
-
-Can be used for energy rates, car charging and saving sessions
+The [Octopus Energy integration](https://github.com/BottlecapDave/HomeAssistant-OctopusEnergy) can be used to provide energy rates, Intelligent Octopus Go car charging and saving sessions information to Predbat
 
 **For Energy Rates**
 
@@ -54,7 +52,7 @@ Can be used for energy rates, car charging and saving sessions
 **For Octopus Saving Sessions**
 
 ```yaml
-  octopus_saving_session: 're:(binary_sensor.octopus_energy([0-9a-z_]+|)_saving_session(s|))'
+  octopus_saving_session: 're:(event.octopus_energy([0-9a-z_]+|)_saving_session_event(s|)'
   octopus_saving_session_octopoints_per_penny: 8
 ```
 

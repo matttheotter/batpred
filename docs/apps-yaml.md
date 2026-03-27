@@ -1417,7 +1417,7 @@ These are described in detail in [Energy Rates](energy-rates.md) and are listed 
 - **metric_octopus_export** - Export rates from the Octopus Energy integration
 - **metric_octopus_gas** - Gas rates from the Octopus Energy integration
 - **octopus_intelligent_slot** - Octopus Intelligent GO slot sensor from the Octopus Energy integration
-- **octopus_saving_session** - Energy saving sessions sensor from the Octopus Energy integration
+- **octopus_saving_session** - Energy saving sessions event sensor from the Octopus Energy integration
 - **octopus_saving_session_octopoints_per_penny** - Sets the Octopoints per pence
 - **rates_import_octopus_url** - Octopus pricing URL (over-rides metric_octopus_import)
 - **rates_export_octopus_url** - Octopus export pricing URL (over-rides metric_octopus_export)

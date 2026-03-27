@@ -264,7 +264,7 @@ octoplus_saving_session_query = """query {{
 	}}
 }}"""
 
-octoplus_saving_session_join_mutation = '''mutation {{
+octoplus_saving_session_join_mutation = """mutation {{
 	joinSavingSessionsEvent(input: {{
 		accountNumber: "{account_id}"
 		eventCode: "{event_code}"
@@ -272,7 +272,7 @@ octoplus_saving_session_join_mutation = '''mutation {{
 		joinedEventCodes
 	}}
 }}
-'''
+"""
 
 flexibility_campaign_query = """query {{
   customerFlexibilityCampaignEvents(

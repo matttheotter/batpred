@@ -2350,6 +2350,11 @@ input_text:
     max: 255
     mode: password
 
+  tesla_refresh_token_part5:
+    name: "Tesla Refresh Token - Part 5"
+    max: 255
+    mode: password
+
   tesla_access_token_part1:
     name: "Tesla Access Token - Part 1"
     max: 255
@@ -2481,8 +2486,8 @@ rest_command:
       grant_type=refresh_token&client_id=ownerapi&refresh_token={{
         (states('input_text.tesla_refresh_token_part1') or '') +
         (states('input_text.tesla_refresh_token_part2') or '') +
-        (states('input_text.tesla_refresh_token_part3') or '') +
-        (states('input_text.tesla_refresh_token_part4') or '') }}&scope=openid%20email%20offline_access"
+        (states('input_text.tesla_refresh_token_part4') or '') +
+        (states('input_text.tesla_refresh_token_part5') or '') }}&scope=openid%20email%20offline_access"
 
   tesla_api_get_products:
     url: "https://owner-api.teslamotors.com/api/1/products"

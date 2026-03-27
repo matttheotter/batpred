@@ -2482,7 +2482,7 @@ automation:
     - tesla_api_get_products - used to retrieve your Tesla site id,
     - tesla_api_get_current_tariff - retrieves your current Tariff information from the Powerwall,
     - tesla_api_set_export_now_tariff - sets a custom export rate tariff to force the Powerwall to export,
-    - tesla_api_set_iog_custom_tariff - returns the Powerwall to the Octopus IOG tariff.  If you are on a different tariff you will need to customise the REST payload to your tariff details
+    - tesla_api_set_iog_custom_tariff - returns the Powerwall to the Octopus IOG tariff. Check the rates in the payload match your current tariff rates, or if you are on a different tariff, you will need to customise the REST payload to your tariff details
 
   In `configuration.yaml` add the following lines:
 
@@ -2670,8 +2670,7 @@ rest_command:
               "AllYear": {
                 "rates": {
                   "SUPER_OFF_PEAK": 0.07,
-                  "PARTIAL_PEAK": 0.31,
-                  "ON_PEAK": 0.31
+                  "ON_PEAK": 0.29
                 }
               }
             },
@@ -2690,7 +2689,6 @@ rest_command:
                   },
                   "ON_PEAK": {
                     "periods": [
-                      { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 2, "fromMinute": 0, "toHour": 3, "toMinute": 0 },
                       { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 5, "fromMinute": 30, "toHour": 16, "toMinute": 0 },
                       { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 16, "fromMinute": 0, "toHour": 19, "toMinute": 0 },
                       { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 19, "fromMinute": 0, "toHour": 23, "toMinute": 30 }
@@ -2716,9 +2714,8 @@ rest_command:
                 "ALL": { "rates": { "ALL": 0 } },
                 "AllYear": {
                   "rates": {
-                    "SUPER_OFF_PEAK": 0.07,
-                    "PARTIAL_PEAK": 0.30,
-                    "ON_PEAK": 0.22
+                    "SUPER_OFF_PEAK": 0.00,
+                    "ON_PEAK": 0.00
                   }
                 }
               },
@@ -2737,7 +2734,6 @@ rest_command:
                     },
                     "ON_PEAK": {
                       "periods": [
-                        { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 2, "fromMinute": 0, "toHour": 3, "toMinute": 0 },
                         { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 5, "fromMinute": 30, "toHour": 16, "toMinute": 0 },
                         { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 16, "fromMinute": 0, "toHour": 19, "toMinute": 0 },
                         { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 19, "fromMinute": 0, "toHour": 23, "toMinute": 30 }

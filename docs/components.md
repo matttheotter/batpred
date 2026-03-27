@@ -22,6 +22,7 @@ This document provides a comprehensive overview of all Predbat components, their
     - [Alert Feed (alert_feed)](#alert-feed-alert_feed)
     - [Carbon Intensity API (carbon)](#carbon-intensity-api-carbon)
     - [Temperature API (temperature)](#temperature-api-temperature)
+    - [Kraken Energy (kraken)](#kraken-energy-kraken)
     - [ML Load Prediction (load_ml)](#ml-load-prediction-load_ml)
 - [Managing Components](#managing-components)
     - [Checking Component Status](#checking-component-status)
@@ -672,6 +673,107 @@ Temperature data is published to:
 - `sensor.predbat_temperature` - Current temperature with forecast in `results` attribute
 
 The `results` attribute contains a dictionary of timestamp strings (ISO format with timezone) to temperature values in °C.
+
+---
+
+### Kraken Energy (kraken)
+
+**Can be restarted:** Yes
+
+#### What it does (kraken)
+
+Connects to the Kraken GraphQL API used by **EDF** and **E.ON Next** to automatically discover your electricity tariff and download import (and optionally export) rates. Once the tariff is discovered, rates are fetched from the provider's public REST API and wired directly into Predbat — no manual rate configuration needed.
+
+On first run the component queries your account for active meter point agreements, identifies the correct tariff code and product code, then polls for fresh rates every 10 minutes and re-checks the tariff every 30 minutes so any mid-contract tariff changes are picked up automatically.
+
+#### When to enable (kraken)
+
+- You are an EDF or E.ON Next customer in the UK
+- You want Predbat to automatically track your tariff rates (including time-of-use and half-hourly tariffs)
+- You want export rates fetched automatically if you have a solar/battery export arrangement
+
+#### Important notes (kraken)
+
+- **EDF and E.ON Next only** — this component uses the Kraken GraphQL schema specific to those providers and will not work with Octopus Energy (use the `octopus` component instead)
+- The component automatically sets `metric_octopus_import`, `metric_octopus_export`, and `metric_standing_charge` in Predbat — no manual `apps.yaml` edits are needed for those settings once the component is running
+- E.ON Next customers who have solar export may have their import and export on **separate account numbers** — in this case the component will attempt to discover the export account automatically via an address-matching strategy, or you can provide `export_account_id` explicitly
+- For OSS (self-hosted) installations you need to supply credentials — either an API key (`api_key` auth method) or email/password (`email` auth method). SaaS/cloud-managed installations use OAuth and have credentials managed automatically
+
+#### Configuration Options (kraken)
+
+| Option | Type | Required | Default | Config Key | Description |
+| ------ | ---- | -------- | ------- | ---------- | ----------- |
+| `provider` | String | Yes | - | `kraken_provider` | Energy provider: `edf` or `eon` |
+| `account_id` | String | Yes | - | `kraken_account_id` | Your account number (shown on your bill or online account dashboard) |
+| `auth_method` | String | No | `oauth` | `kraken_auth_method` | Authentication method: `oauth` (SaaS/managed), `api_key`, or `email` |
+| `key` | String | No | - | `kraken_key` | API key — required when `auth_method` is `api_key` |
+| `email` | String | No | - | `kraken_email` | Account email — required when `auth_method` is `email` |
+| `password` | String | No | - | `kraken_password` | Account password — required when `auth_method` is `email` |
+| `mpan` | String | No | Auto | `kraken_mpan` | Preferred import MPAN — only needed if you have multiple meter points and the wrong one is selected |
+| `export_account_id` | String | No | Auto | `kraken_export_account_id` | Export account number — only needed for E.ON Next customers where import and export are on separate accounts and auto-discovery fails |
+| `export_mpan` | String | No | Auto | `kraken_export_mpan` | Preferred export MPAN — only needed if auto-discovery selects the wrong export meter point |
+| `base_url` | String | No | Auto | `kraken_base_url` | Override the API base URL — advanced use only (e.g. proxying GraphQL calls) |
+
+**Security note:** Store credentials in `secrets.yaml`:
+
+```yaml
+kraken_key: !secret kraken_key
+# or
+kraken_password: !secret kraken_password
+```
+
+#### apps.yaml configuration example (kraken)
+
+**EDF — API key authentication:**
+
+```yaml
+predbat:
+  kraken_provider: edf
+  kraken_account_id: A-12345678
+  kraken_auth_method: api_key
+  kraken_key: !secret kraken_key
+```
+
+**E.ON Next — email/password authentication:**
+
+```yaml
+predbat:
+  kraken_provider: eon
+  kraken_account_id: A-12345678
+  kraken_auth_method: email
+  kraken_email: myemail@example.com
+  kraken_password: !secret kraken_password
+```
+
+**E.ON Next — with explicit export account (split accounts):**
+
+```yaml
+predbat:
+  kraken_provider: eon
+  kraken_account_id: A-12345678        # import account
+  kraken_export_account_id: A-87654321 # export account (different number)
+  kraken_auth_method: email
+  kraken_email: myemail@example.com
+  kraken_password: !secret kraken_password
+```
+
+#### How to find your account number (kraken)
+
+Your account number is displayed on your bill and in your online account dashboard. It typically starts with `A-` followed by 8 digits.
+
+#### Published entities (kraken)
+
+All entities use the pattern `sensor.predbat_kraken_{account_id}_{suffix}` (account number with hyphens replaced by underscores). For example, account `A-12345678` produces:
+
+| Entity | Description |
+| ------ | ----------- |
+| `sensor.predbat_kraken_a_12345678_account_status` | Connection status: `discovering`, `connected`, or `error` |
+| `sensor.predbat_kraken_a_12345678_tariff_code` | Active import tariff code (e.g. `E-1R-FLEX-22-11-25-A`) |
+| `sensor.predbat_kraken_a_12345678_import_rates` | Import rate periods — consumed by Predbat automatically |
+| `sensor.predbat_kraken_a_12345678_import_standing` | Daily standing charge in £/day |
+| `sensor.predbat_kraken_a_12345678_export_rates` | Export rate periods — only present when an export tariff is found |
+
+Predbat is automatically configured to use these energy rates once Kraken is enabled.
 
 ---
 

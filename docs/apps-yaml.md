@@ -187,6 +187,8 @@ pred_bat:
   ge_cloud_key: !secret ge_cloud_key  # GivEnergy API key (if using GE Cloud)
   fox_key: !secret fox_key  # Fox ESS API key and username (if using Fox Cloud)
   axle_api_key: !secret axle_api_key  # Axle API key (if using Axle VPP)
+  kraken_key: !secret kraken_key  # Kraken API key (if using Kraken component)
+  kraken_password: !secret kraken_password  # Kraken password (if using Kraken component)
 ```
 
 When Predbat loads, it will automatically replace `!secret octopus_api_key` with the actual value from `secrets.yaml`.
@@ -1413,6 +1415,7 @@ There are a number of configuration items in `apps.yaml` for telling Predbat wha
 
 These are described in detail in [Energy Rates](energy-rates.md) and are listed here just for completeness:
 
+- **plan_interval_minutes** - Sets time duration of the slots used by Predbat for planning
 - **metric_octopus_import** - Import rates from the Octopus Energy integration
 - **metric_octopus_export** - Export rates from the Octopus Energy integration
 - **metric_octopus_gas** - Gas rates from the Octopus Energy integration
@@ -1440,7 +1443,13 @@ These are described in detail in [Energy Rates](energy-rates.md) and are listed 
 - **axle_automatic** - Optional, whether to use the default entity name **binary_sensor.predbat_axle_event** for axle event details (default `true`, use the default entity name)
 - **axle_session** - Optional, enables manual override of the Axle event entity name
 - **axle_control** - Optional, whether to switch Predbat to read-only mode during active Axle VPP events (default: false)
-- **plan_interval_minutes** - Sets time duration of the slots used by Predbat for planning
+- **kraken_provider** - Defines whether you are an EDF or Eon.Next customer
+- **kraken_account_id** - Kraken account id (EDF or Eon.Next customers only)
+- **kraken_export_account_id** - Separate export account id (if required) for Kraken
+- **kraken_auth_method** - How Predbat should authenticate to Kraken
+- **kraken_key** - API key to authenticate to Kraken
+- **kraken_email** - Email address to authenticate to Kraken
+- **kraken_password** - Password to be used with email address to authenticate to Kraken
 
 Note that gas rates are only required if you have a gas boiler, and an iBoost, and are [using Predbat to determine whether it's cheaper to heat your hot water with the iBoost or via gas](customisation.md#iboost-energy-rate-filtering)
 

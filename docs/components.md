@@ -727,7 +727,6 @@ kraken_password: YOUR_REAL_PASSWORD
 **EDF — API key authentication:**
 
 ```yaml
-predbat:
   kraken_provider: edf
   kraken_account_id: A-12345678
   kraken_auth_method: api_key
@@ -737,7 +736,6 @@ predbat:
 **E.ON Next — email/password authentication:**
 
 ```yaml
-predbat:
   kraken_provider: eon
   kraken_account_id: A-12345678
   kraken_auth_method: email
@@ -748,7 +746,6 @@ predbat:
 **E.ON Next — with explicit export account (split accounts):**
 
 ```yaml
-predbat:
   kraken_provider: eon
   kraken_account_id: A-12345678        # import account
   kraken_export_account_id: A-87654321 # export account (different number)

@@ -361,6 +361,8 @@ recorder:
   purge_keep_days: 14
 ```
 
+*Note:* If you are using [Load ML](load-ml.md) then Predbat uses the Load ML forecast and does not use days_previous in its forecasting.
+
 **days_previous_weight** - A list (again with one entry per line) of weightings to be applied to each of the days in days_previous.
 
 For example, to apply a 100% weighting for the first-day entry in days_previous, but only a 50% weighting to the second day in days_previous:

@@ -181,7 +181,7 @@ This allows the model to adapt quickly to recent changes (via time weighting) wi
 
 ### Basic Setup
 
-To enable ML load prediction, add to your `apps.yaml`:
+To configure ML load prediction, add to your `apps.yaml`:
 
 ```yaml
 predbat:
@@ -191,7 +191,7 @@ predbat:
   # Enable ML load prediction
   load_ml_enable: true
   # Use the output data in Predbat (can be false to explore the use without using the data)
-  load_ml_source: true
+  # load_ml_source: true
 
   # Optional: Maximum days of historical data to fetch from HA on each poll (default: 28)
   # load_ml_max_days_history: 28
@@ -202,8 +202,8 @@ predbat:
 
 **Configuration Parameter Details:**
 
-- `load_ml_enable`: Enables the ML component (required)
-- `load_ml_source`: When `true`, Predbat uses ML predictions for battery planning. Set to `false` to test predictions without affecting battery control
+- `load_ml_enable`: Enables the ML component (required), defaults to false.
+- `load_ml_source`: When `true`, Predbat uses ML predictions for battery planning. Set to `false` (the default) to test predictions without affecting battery control
 - `load_ml_max_days_history`: Optional maximum days of historical data to fetch from Home Assistant on each poll (every 30 minutes)
     - **Default**: 28 days
     - **Minimum**: 7 days
@@ -238,12 +238,6 @@ This means:
 - `load_ml_database_days` controls the total depth of the training dataset that accumulates on disk
 - Setting `load_ml_database_days` to 0 disables the database entirely — training only ever uses what entity history HA currently has
 - The age reported in logs and the `training_days` attribute reflects the actual depth of the accumulated dataset, computed from the furthest key present in memory
-
-Before enabling load_ml_source:
-
-- Ensure Load ML has been training itself and running with a least a weeks worth of data
-- Make sure you do not have [PredAI](https://github.com/springfall2008/predai) enabled at the same time
-- Disable in day adjustment (**switch.predbat_calculate_inday_adjustment**) as the Load ML model will do that for you and otherwise Predbat will double-count in-day load.
 
 ### Recommended: Enable Temperature Predictions
 
@@ -339,6 +333,23 @@ Once trained, the component publishes predictions to:
 - `sensor.predbat_load_ml_forecast` - Contains 48-hour prediction in `results` attribute
 
 You can visualize these predictions in the [Chart view](web-interface.md#charts-view) of the Predbat web interface, or by creating [Apex charts](creating-charts.md) in Home Assistant.
+
+### Step 5: Use Load ML for your load predictions
+
+It is recommended that you leave Load ML running for a period of time, at least a week, to learn your energy use patterns.
+
+Once you are happy with the predictions Load ML is producing you can set Predbat to use Load ML instead of the [days previous](apps-yaml.md#days_previous) load forecasting mechanism.
+
+Before enabling load_ml_source:
+
+- Make sure you do not have [PredAI](https://github.com/springfall2008/predai) enabled at the same time
+- Disable in day adjustment (**switch.predbat_calculate_inday_adjustment**) as the Load ML model will do that for you and otherwise Predbat will double-count in-day load
+
+Then set load_ml_source to true in `apps.yaml` so that the Load ML forecast is used in Predbat's planning:
+
+```yaml
+  load_ml_source: true
+```
 
 ## Understanding the Model
 
@@ -463,9 +474,16 @@ Large shifts in `mean` or `std` for a group (e.g. `import_rate` after a tariff c
 - **Cause**: Changing household patterns, insufficient features, or missing temperature data
 - **Solution**:
     - Enable temperature predictions for better accuracy
-    - Wait for fine-tuning to adapt to new patterns
-    - Verify historical data quality
+    - Wait for Load ML's fine-tuning to adapt to new patterns
+    - Verify historical data quality, check the load_today sensor
+    - If you have an EV, check that **switch.predbat_car_charging_hold** is On, **car_charging_energy** is set correctly in `apps.yaml` and that the sensor it is configured to looks correct
     - Consider adding PV data if you have solar panels
+
+**Issue**: Load ML predicts much greater load than expected**
+
+- **Cause**: In-day adjustment has been left turned on and both Load ML and inday adjustment are increasing the load in line with daily household use
+- **Solution**:
+    - Ensure that **switch.predbat_calculate_inday_adjustment** is turned off
 
 ### Viewing Predictions
 

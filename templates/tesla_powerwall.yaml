@@ -129,7 +129,7 @@ pred_bat:
       value: "0"
       repeat: True
   discharge_start_service:
-    - service: rest_command.powerwall_force_export_now
+    - service: rest_command.tesla_api_set_export_now_tariff
       repeat: True
     - service: select.select_option
       entity_id: select.my_home_allow_export
@@ -140,7 +140,7 @@ pred_bat:
       option: "autonomous"
       repeat: True
   discharge_stop_service:
-    - service: rest_command.powerwall_api_set_iog_custom_tariff
+    - service: rest_command.tesla_api_set_iog_custom_tariff
       repeat: True
     - service: select.select_option
       entity_id: select.my_home_allow_export

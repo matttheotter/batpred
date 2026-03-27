@@ -2355,6 +2355,11 @@ input_text:
     max: 255
     mode: password
 
+  tesla_refresh_token_part5:
+    name: "Tesla Refresh Token - Part 5"
+    max: 255
+    mode: password
+
   tesla_access_token_part1:
     name: "Tesla Access Token - Part 1"
     max: 255
@@ -2437,7 +2442,12 @@ automation:
       target:
         entity_id: input_text.tesla_refresh_token_part4
       data:
-        value: "{{ tesla_response.content.refresh_token[750:] }}"
+        value: "{{ tesla_response.content.refresh_token[750:1000] }}"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.tesla_refresh_token_part5
+      data:
+        value: "{{ tesla_response.content.refresh_token[1000:] }}"
     - service: persistent_notification.create
       data:
         title: "Tesla Tokens Updated"
@@ -2487,7 +2497,8 @@ rest_command:
         (states('input_text.tesla_refresh_token_part1') or '') +
         (states('input_text.tesla_refresh_token_part2') or '') +
         (states('input_text.tesla_refresh_token_part3') or '') +
-        (states('input_text.tesla_refresh_token_part4') or '') }}&scope=openid%20email%20offline_access"
+        (states('input_text.tesla_refresh_token_part4') or '') +
+        (states('input_text.tesla_refresh_token_part5') or '') }}&scope=openid%20email%20offline_access"
 
   tesla_api_get_products:
     url: "https://owner-api.teslamotors.com/api/1/products"

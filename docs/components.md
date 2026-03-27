@@ -717,9 +717,9 @@ On first run the component queries your account for active meter point agreement
 **Security note:** Store credentials in `secrets.yaml`:
 
 ```yaml
-kraken_key: !secret kraken_key
-# or
-kraken_password: !secret kraken_password
+# secrets.yaml
+kraken_key: YOUR_REAL_API_KEY
+kraken_password: YOUR_REAL_PASSWORD
 ```
 
 #### apps.yaml configuration example (kraken)

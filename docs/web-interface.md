@@ -67,6 +67,9 @@ Predbat's planned state for the battery (charging, discharging, etc), predicted 
 
 Buttons enable you to easily swap between 'Plan' which shows the current Predbat Plan from now going forwards, a 'History' view of the plan from Midnight yesterday up to now,
 and 'Yesterday without Predbat' which is a simulated plan without any Predbat battery optimisation and an [assumed number of charging periods](apps-yaml.md#savings-max-charge-slots).
+The starting battery SoC for this simulation is carried forward from the end of the previous day's 'Without Predbat' simulation (not the actual midnight SoC), so that the simulated
+'without Predbat' universe remains self-consistent — i.e. if Predbat had not been running, the battery may have had a different SoC at midnight than it actually did.
+This means the starting SoC shown in the 'Yesterday without Predbat' view can differ significantly from the 'History' view, which reflects what actually happened.
 
 You can easily change Predbat's planned activity for a slot by clicking on the slot time, then selecting Manual Demand, Manual Charge, Manual Export, Manual Freeze Charge or Manual Freeze Export to set the activity.
 If you have previously changed Predbat's planned activity for a slot, choose Clear to return Predbat to its planned activity.

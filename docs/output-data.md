@@ -588,7 +588,8 @@ They are used in the daily cost-saving and total cost-savings charts - see [crea
 - predbat.savings_total_actual - A running total in pence of the above cost_yesterday sensor, with attribute of the total in pounds
 - predbat.savings_total_predbat - A running total in pence of the below savings_yesterday_predbat sensor, with attribute of the total in pounds
 - predbat.savings_total_pvbat - A running total of the below savings_yesterday_pvbat sensor, with attribute of the total in pounds
-- predbat.savings_total_soc - A running total of what the final SoC in kWh would have been at the end of each day if you were not using Predbat
+- predbat.savings_total_soc - The simulated final SoC in kWh at the end of the most recent 'without Predbat' day simulation. This is used as the starting SoC for the next day's simulation,
+  so that the simulated 'without Predbat' universe is self-consistent across days. It will differ from the actual midnight SoC tracked in the 'History' view.
 - predbat.savings_yesterday_predbat - A sensor which tells you how much money Predbat saved you yesterday compared to not using Predbat,
 and only charging at the lowest import rate in the 24 hour period
 - predbat.savings_yesterday_pvbat - A sensor which tells you how much money you saved from using Predbat
@@ -597,6 +598,11 @@ vs not having a PV and battery system at all and all house load being met from g
 Note: The savings using Predbat are calculated by default compared to having one fixed nightly charge slot set to charge at the lowest import rate with a target of 100%
 You can change the number of simulated charge slots in apps.yaml by setting **calculate_savings_max_charge_slots** to the number of slots to allow.
 If set to 0 then Demand (ECO) mode will be used as the baseline or if non-zero then the maximum number of slots can be set (e.g. 2).
+
+Note: The 'without Predbat' simulation is a self-consistent parallel universe — each day's starting SoC is the ending SoC of the previous day's simulation, not the actual midnight SoC.
+This means the SoC shown in the 'Yesterday without Predbat' plan view can differ from what actually happened (shown in 'History').
+On tariffs such as Intelligent Octopus Go where Predbat charges to a lower target than 100%, the 'without Predbat' simulation may show a higher starting SoC than reality,
+because without Predbat the baseline assumes charging to 100% in the cheapest window each night.
 
 ## Solar forecast data
 

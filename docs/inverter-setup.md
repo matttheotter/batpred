@@ -2486,6 +2486,7 @@ rest_command:
       grant_type=refresh_token&client_id=ownerapi&refresh_token={{
         (states('input_text.tesla_refresh_token_part1') or '') +
         (states('input_text.tesla_refresh_token_part2') or '') +
+        (states('input_text.tesla_refresh_token_part3') or '') +
         (states('input_text.tesla_refresh_token_part4') or '') +
         (states('input_text.tesla_refresh_token_part5') or '') }}&scope=openid%20email%20offline_access"
 

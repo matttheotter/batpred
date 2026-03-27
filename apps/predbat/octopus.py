@@ -264,17 +264,15 @@ octoplus_saving_session_query = """query {{
 	}}
 }}"""
 
-octoplus_saving_session_join_mutation = """mutation {{
+octoplus_saving_session_join_mutation = '''mutation {{
 	joinSavingSessionsEvent(input: {{
 		accountNumber: "{account_id}"
 		eventCode: "{event_code}"
 	}}) {{
-		possibleErrors {{
-			message
-		}}
+		joinedEventCodes
 	}}
 }}
-"""
+'''
 
 flexibility_campaign_query = """query {{
   customerFlexibilityCampaignEvents(
@@ -830,7 +828,7 @@ class OctopusAPI(ComponentBase):
         if event_code:
             # Join the saving sessions
             self.log("OctopusAPI: Joining saving session event {}".format(event_code))
-            await self.async_graphql_query(octoplus_saving_session_join_mutation.format(account_id=account_id, event_code=event_code), "join-saving-session-event", returns_data=False)
+            await self.async_graphql_query(octoplus_saving_session_join_mutation.format(account_id=account_id, event_code=event_code), "join-saving-session-event", returns_data=False, use_backend=True)
             # Re-fetch the saving sessions if we have joined any
             self.saving_sessions = await self.async_get_saving_sessions(account_id)
 
@@ -1085,6 +1083,7 @@ class OctopusAPI(ComponentBase):
         if response_data is None:
             return self.saving_sessions
         else:
+            self.log("OctopusAPI: Fetched saving sessions data from GraphQL API: {}".format(response_data))
             savingSessions = response_data.get("savingSessions", {})
             if savingSessions is None:
                 savingSessions = {}
@@ -1548,6 +1547,7 @@ class OctopusAPI(ComponentBase):
             payload = {"query": query}
             auth_prefix = "" if use_backend else "JWT "
             headers = {"Authorization": f"{auth_prefix}{self.graphql_token}", integration_context_header: request_context}
+            self.log("OctopusAPI: Making GraphQL request to {} payload {} headers {}".format(url, payload, headers))
             async with client.post(url, json=payload, headers=headers) as response:
                 # Process response (which reads the text)
                 response_body = await self.async_read_response_retry(response, url, ignore_errors=ignore_errors)
@@ -2798,7 +2798,7 @@ async def test_octopus_api(api_key, account_id):  # pragma: no cover
     print("Saving session joined {}".format(joined_events))
 
     # Test joining a saving session event
-    octopus_api.join_saving_session_event("EVENT_3_210125")
+    octopus_api.join_saving_session_event("EVENT_26_270326")
     await octopus_api.run(1, False)
     await octopus_api.final()
 

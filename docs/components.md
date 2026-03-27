@@ -695,7 +695,7 @@ On first run the component queries your account for active meter point agreement
 #### Important notes (kraken)
 
 - **EDF and E.ON Next only** — this component uses the Kraken GraphQL schema specific to those providers and will not work with Octopus Energy (use the `octopus` component instead)
-- The component automatically sets `metric_octopus_import`, `metric_octopus_export`, and `metric_standing_charge` in Predbat — no manual `apps.yaml` edits are needed for those settings once the component is running
+- The component automatically sets `metric_octopus_import` and `metric_standing_charge` in Predbat, and will also set `metric_octopus_export` **when an export tariff is discovered** — no manual `apps.yaml` edits are needed for those settings once the relevant tariffs have been detected and the component is running
 - E.ON Next customers who have solar export may have their import and export on **separate account numbers** — in this case the component will attempt to discover the export account automatically via an address-matching strategy, or you can provide `export_account_id` explicitly
 - For OSS (self-hosted) installations you need to supply credentials — either an API key (`api_key` auth method) or email/password (`email` auth method). SaaS/cloud-managed installations use OAuth and have credentials managed automatically
 

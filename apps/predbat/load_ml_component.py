@@ -1050,7 +1050,7 @@ class LoadMLComponent(ComponentBase):
                 "power_today_now": dp2(power_today_now),
                 "power_today_h1": dp2(power_today_h1),
                 "power_today_h8": dp2(power_today_h8),
-                "mae_kwh": round(self.predictor.validation_mae, 4) if self.predictor and self.predictor.validation_mae else None,
+                "mae_kwh": round(float(self.predictor.validation_mae), 4) if self.predictor and self.predictor.validation_mae else None,
                 "bias_kwh": round(self.predictor.validation_bias, 4) if self.predictor and self.predictor.validation_bias is not None else None,
                 "last_trained": self.last_train_time.isoformat() if self.last_train_time else None,
                 "model_age_hours": round(model_age_hours, 1) if model_age_hours else None,

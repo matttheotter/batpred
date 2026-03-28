@@ -42,6 +42,9 @@ Some inverters have their own groups e.g.:
 If you want to buy me a beer then please use [Paypal](https://paypal.me/predbat?country.x=GB&locale.x=en_GB) or [GitHub sponsor](https://github.com/springfall2008)
 ![image](https://github.com/springfall2008/batpred/assets/48591903/b3a533ef-0862-4e0b-b272-30e254f58467)
 
+If you are finding Home Assistant and Predbat too difficult to set up yourself there is now [PredBat Cloud](https://predbat.com/) which is a paid for version of Predbat hosted in the cloud.
+Please note that while I have given permission for PredBat Cloud to operate this is not my company, PredBat will remain open source for personal use.
+
 ## Taster
 
 Once you are up and running you will get a chart that predicts your battery levels over time:

@@ -340,8 +340,8 @@ Web interface in `apps/predbat/web.py` runs on port 5052 (configurable via `web_
 3. **Time is always minutes since midnight** - Not timestamps in core logic
 4. **Multi-inverter indexing** - Many configs are lists: `inverter_limit[0]`, `inverter_limit[1]`
 5. **REST API fallback** - Code must work with both HA entities AND REST API for inverter control
-6. **File list is hardcoded** - `PREDBAT_FILES` in `predbat.py` must be updated when adding files
-7. **Test in coverage dir** - Unit tests MUST run from `coverage/` directory, not project root
+6. **Test in coverage dir** - Unit tests MUST run from `coverage/` directory, not project root
+7. **All deliverable source files must be in apps/predbat** - Test files in `apps/predbat/tests/`, not root or elsewhere
 
 ## Documentation
 

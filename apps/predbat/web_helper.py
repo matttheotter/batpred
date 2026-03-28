@@ -6787,7 +6787,7 @@ def get_plan_renderer_js():
     // Utility: Extract the timezone offset in minutes from an ISO timestamp string.
     // Handles both +HHMM and +HH:MM formats produced by Python strftime and isoformat().
     function getTimezoneOffsetMinutes(isoTimestamp) {
-        const match = isoTimestamp.match(/([+-])(\d{2}):?(\d{2})$/);
+        const match = isoTimestamp.match(/([+-])(\\d{2}):?(\\d{2})$/);
         if (!match) return 0;
         const sign = match[1] === '+' ? 1 : -1;
         return sign * (parseInt(match[2]) * 60 + parseInt(match[3]));

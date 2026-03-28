@@ -9,7 +9,7 @@ import math
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from proto import gateway_status_pb2 as pb
+import gateway_status_pb2 as pb
 
 import importlib.util
 

@@ -702,7 +702,7 @@ class UserInterface:
         debug = {}
         if os.path.exists(filename):
             with open(filename, "r") as file:
-                debug = yaml.safe_load(file)
+                debug = yaml.unsafe_load(file)
         else:
             self.log("Warn: Debug file {} not found".format(filename))
             return

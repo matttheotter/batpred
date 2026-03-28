@@ -19,7 +19,7 @@ from datetime import datetime
 from component_base import ComponentBase
 
 try:
-    from proto import gateway_status_pb2 as pb
+    import gateway_status_pb2 as pb
 
     HAS_PROTOBUF = True
 except (ImportError, Exception):

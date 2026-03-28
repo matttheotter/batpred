@@ -1,4 +1,5 @@
 aiohttp
+aiomqtt
 coverage
 matplotlib
 numpy==2.3.5

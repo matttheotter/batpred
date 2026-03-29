@@ -2293,10 +2293,10 @@ def _test_async_automatic_config(my_predbat):
         assert ge.config_args.get("inverter_mode") == ["switch.predbat_gecloud_BATTERY001_enable_eco_mode"], "inverter_mode should point to eco toggle switch"
 
         # Verify sensor entities
-        assert ge.config_args.get("load_today") == ["sensor.predbat_gecloud_BATTERY001_consumption_today"]
-        assert ge.config_args.get("import_today") == ["sensor.predbat_gecloud_BATTERY001_grid_import_today"]
-        assert ge.config_args.get("export_today") == ["sensor.predbat_gecloud_BATTERY001_grid_export_today"]
-        assert ge.config_args.get("pv_today") == ["sensor.predbat_gecloud_BATTERY001_solar_today"]
+        assert ge.config_args.get("load_today") == ["sensor.predbat_gecloud_BATTERY001_consumption_total"]
+        assert ge.config_args.get("import_today") == ["sensor.predbat_gecloud_BATTERY001_grid_import_total"]
+        assert ge.config_args.get("export_today") == ["sensor.predbat_gecloud_BATTERY001_grid_export_total"]
+        assert ge.config_args.get("pv_today") == ["sensor.predbat_gecloud_BATTERY001_solar_total"]
         assert ge.config_args.get("battery_power") == ["sensor.predbat_gecloud_BATTERY001_battery_power"]
         assert ge.config_args.get("pv_power") == ["sensor.predbat_gecloud_BATTERY001_solar_power"]
         assert ge.config_args.get("load_power") == ["sensor.predbat_gecloud_BATTERY001_consumption_power"]
@@ -2350,8 +2350,8 @@ def _test_async_automatic_config(my_predbat):
         assert ge.config_args.get("num_inverters") == 2, "num_inverters should be 2"
         assert ge.config_args.get("inverter_type") == ["GEC", "GEC"], "inverter_type should have 2 entries"
         assert len(ge.config_args.get("load_today")) == 2, "load_today should have 2 entries"
-        assert ge.config_args.get("load_today")[0] == "sensor.predbat_gecloud_BATTERY001_consumption_today"
-        assert ge.config_args.get("load_today")[1] == "sensor.predbat_gecloud_BATTERY002_consumption_today"
+        assert ge.config_args.get("load_today")[0] == "sensor.predbat_gecloud_BATTERY001_consumption_total"
+        assert ge.config_args.get("load_today")[1] == "sensor.predbat_gecloud_BATTERY002_consumption_total"
         assert ge.config_args.get("inverter_mode") == ["switch.predbat_gecloud_BATTERY001_enable_eco_mode", "switch.predbat_gecloud_BATTERY002_enable_eco_mode"], "inverter_mode should have 2 eco toggle entries"
 
         # Test 4: EMS configuration
@@ -2394,7 +2394,7 @@ def _test_async_automatic_config(my_predbat):
         await ge.async_automatic_config(devices)
 
         assert ge.config_args.get("num_inverters") == 1, "num_inverters should be 1 when using gateway"
-        assert ge.config_args.get("load_today") == ["sensor.predbat_gecloud_GATEWAY001_consumption_today"], "Should use gateway for control"
+        assert ge.config_args.get("load_today") == ["sensor.predbat_gecloud_GATEWAY001_consumption_total"], "Should use gateway for control"
 
         # Test 6: No battery devices (should log error and return)
         ge.config_args = {}

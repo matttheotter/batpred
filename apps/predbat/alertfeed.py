@@ -33,7 +33,7 @@ class AlertFeed(ComponentBase):
     """
 
     def initialize(self, alert_config):
-        """Initialize the AlertFeed component"""
+        """Initialise the AlertFeed component"""
         self.alert_cache = {}
         self.alert_config = alert_config
         self.alert_url = self.alert_config.get("url", "https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-united-kingdom")

@@ -357,7 +357,7 @@ class OctopusAPI(ComponentBase):
     """
 
     def initialize(self, key, account_id, automatic):
-        """Initialize the Octopus API component"""
+        """Initialise the Octopus API component"""
         self.api_key = key
         self.api = OctopusEnergyApiClient(key, self.log)
         self.account_id = account_id
@@ -389,7 +389,7 @@ class OctopusAPI(ComponentBase):
 
         # User-specific cache file (account_data, intelligent_device, saving_sessions only)
         self.user_cache_file = self.cache_path + "/octopus_user_{}.yaml".format(self.account_id)
-        self.log("OctopusAPI: Initialized with account ID {} cache {} shared {}".format(self.account_id, self.user_cache_file, self.shared_cache_path))
+        self.log("OctopusAPI: Initialised with account ID {}, cache {}, shared {}".format(self.account_id, self.user_cache_file, self.shared_cache_path))
 
     async def select_event(self, entity_id, value):
         suffix = self.get_entity_suffix(entity_id)
@@ -2446,7 +2446,7 @@ class Octopus:
                             # Python's floor division handles negative numbers correctly
                             day_offset = minute // (24 * 60)
 
-                            # Initialize counter for this day if needed
+                            # Initialise counter for this day if needed
                             if day_offset not in slots_per_day:
                                 slots_per_day[day_offset] = 0
 

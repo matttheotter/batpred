@@ -42,11 +42,11 @@ class SolarAPI(ComponentBase):
     including Solcast, Forecast.Solar, and direct sensor inputs. It periodically fetches, processes,
     and publishes solar production forecasts for use by the home battery system. SolarAPI operates
     as an asynchronous background component, ensuring up-to-date solar predictions are available
-    for system optimization and decision-making.
+    for system optimisation and decision-making.
     """
 
     def initialize(self, solcast_host, solcast_api_key, solcast_sites, solcast_poll_hours, forecast_solar, forecast_solar_max_age, pv_forecast_today, pv_forecast_tomorrow, pv_forecast_d3, pv_forecast_d4, pv_scaling):
-        """Initialize the Solar API component"""
+        """Initialise the Solar API component"""
         self.solcast_host = solcast_host
         self.solcast_api_key = solcast_api_key
         self.solcast_sites = solcast_sites
@@ -800,8 +800,8 @@ class SolarAPI(ComponentBase):
             if day < forecast_days:
                 slot = (int(minute / self.plan_interval_minutes) * self.plan_interval_minutes) % (24 * 60)
                 pv_value = pv_forecast_minute.get(minute, 0)
-                days_forecast_total[day] = days_forecast_total.get(day, 0) + pv_value
-                days_forecast_total_scaled_slot[day] = days_forecast_total_scaled_slot.get(day, 0) + pv_value * slot_adjustment.get(slot, 1.0)
+                days_forecast_total[day] = dp2(days_forecast_total.get(day, 0) + pv_value)
+                days_forecast_total_scaled_slot[day] = dp2(days_forecast_total_scaled_slot.get(day, 0) + pv_value * slot_adjustment.get(slot, 1.0))
 
         # Decide on the per day scaling factor
         days_use_scaling = {}

@@ -175,7 +175,7 @@ class OhmeAPI(ComponentBase):
     """Ohme API component for EV charger integration."""
 
     def initialize(self, email, password, ohme_automatic_octopus_intelligent):
-        """Initialize the Ohme API component"""
+        """Initialise the Ohme API component"""
         self.email = email
         self.password = password
         self.client = OhmeApiClient(email, password, self.log)

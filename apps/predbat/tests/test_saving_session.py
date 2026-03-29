@@ -83,9 +83,9 @@ friendly_name: Octoplus Saving Session Events (A-12345678)
         date_last_year=date_last_year, date_yesterday=date_yesterday, date_today=date_today, tz_offset=tz_offset
     )
     ha.dummy_items["binary_sensor.octopus_energy_a_12345678_octoplus_saving_sessions"] = yaml.safe_load(session_binary)
-    ha.dummy_items["event.octopus_energy_a_12345678_octoplus_saving_session_events"] = yaml.safe_load(session_sensor)
+    ha.dummy_items["event.octopus_energy_a_12345678_octoplus_saving_session_event"] = yaml.safe_load(session_sensor)
     ha.dummy_items["sensor.octopus_free_session"] = {}
-    my_predbat.args["octopus_saving_session"] = "binary_sensor.octopus_energy_a_12345678_octoplus_saving_sessions"
+    my_predbat.args["octopus_saving_session"] = "event.octopus_energy_a_12345678_octoplus_saving_session_event"
     my_predbat.args["octopus_free_session"] = "sensor.octopus_free_session"
     if "octopus_free_url" in my_predbat.args:
         del my_predbat.args["octopus_free_url"]
@@ -105,7 +105,7 @@ friendly_name: Octoplus Saving Session Events (A-12345678)
     # Example format Sat 25/01
     date_today_service = datetime.now().strftime("%a %d/%m")
     expected_service = [
-        ["octopus_energy/join_octoplus_saving_session_event", {"event_code": 987654, "entity_id": "event.octopus_energy_a_12345678_octoplus_saving_session_events"}],
+        ["octopus_energy/join_octoplus_saving_session_event", {"event_code": 987654, "entity_id": "event.octopus_energy_a_12345678_octoplus_saving_session_event"}],
         ["notify/notify", {"message": "Predbat: Joined Octopus saving event {} 18:30-19:30, 50.0 p/kWh".format(date_today_service)}],
     ]
 
@@ -200,9 +200,9 @@ friendly_name: Octopus Intelligent Saving Sessions
 """
 
     ha.dummy_items["binary_sensor.octopus_energy_a_12345678_octoplus_saving_sessions"] = yaml.safe_load(session_binary)
-    ha.dummy_items["event.octopus_energy_a_12345678_octoplus_saving_session_events"] = yaml.safe_load(session_sensor)
+    ha.dummy_items["event.octopus_energy_a_12345678_octoplus_saving_session_event"] = yaml.safe_load(session_sensor)
     ha.dummy_items["sensor.octopus_free_session"] = {}
-    my_predbat.args["octopus_saving_session"] = "binary_sensor.octopus_energy_a_12345678_octoplus_saving_sessions"
+    my_predbat.args["octopus_saving_session"] = "event.octopus_energy_a_12345678_octoplus_saving_session_event"
     my_predbat.args["octopus_free_session"] = "sensor.octopus_free_session"
     if "octopus_free_url" in my_predbat.args:
         del my_predbat.args["octopus_free_url"]
@@ -273,9 +273,9 @@ friendly_name: Octoplus Saving Session Events
     print("  Test 1: Notifications enabled (set_event_notify not set, should default to True)")
     ha.dummy_items.clear()
     ha.dummy_items["binary_sensor.octopus_energy_test_octoplus_saving_sessions"] = yaml.safe_load(session_binary)
-    ha.dummy_items["event.octopus_energy_test_octoplus_saving_session_events"] = yaml.safe_load(session_sensor)
+    ha.dummy_items["event.octopus_energy_test_octoplus_saving_session_event"] = yaml.safe_load(session_sensor)
     ha.dummy_items["sensor.octopus_free_session"] = {}
-    my_predbat.args["octopus_saving_session"] = "binary_sensor.octopus_energy_test_octoplus_saving_sessions"
+    my_predbat.args["octopus_saving_session"] = "event.octopus_energy_test_octoplus_saving_session_event"
     my_predbat.args["octopus_free_session"] = "sensor.octopus_free_session"
     if "octopus_free_url" in my_predbat.args:
         del my_predbat.args["octopus_free_url"]
@@ -305,7 +305,7 @@ friendly_name: Octoplus Saving Session Events
     print("  Test 2: Notifications explicitly enabled (set_event_notify=True)")
     ha.dummy_items.clear()
     ha.dummy_items["binary_sensor.octopus_energy_test_octoplus_saving_sessions"] = yaml.safe_load(session_binary)
-    ha.dummy_items["event.octopus_energy_test_octoplus_saving_session_events"] = yaml.safe_load(session_sensor)
+    ha.dummy_items["event.octopus_energy_test_octoplus_saving_session_event"] = yaml.safe_load(session_sensor)
     ha.dummy_items["sensor.octopus_free_session"] = {}
     my_predbat.args["set_event_notify"] = True
     # Reset the last joined try timer so it will attempt to join
@@ -330,7 +330,7 @@ friendly_name: Octoplus Saving Session Events
     print("  Test 3: Notifications disabled (set_event_notify=False)")
     ha.dummy_items.clear()
     ha.dummy_items["binary_sensor.octopus_energy_test_octoplus_saving_sessions"] = yaml.safe_load(session_binary)
-    ha.dummy_items["event.octopus_energy_test_octoplus_saving_session_events"] = yaml.safe_load(session_sensor)
+    ha.dummy_items["event.octopus_energy_test_octoplus_saving_session_event"] = yaml.safe_load(session_sensor)
     ha.dummy_items["sensor.octopus_free_session"] = {}
     # Update config_index to set the value to False
     my_predbat.expose_config("set_event_notify", False, quiet=True)
@@ -412,9 +412,9 @@ friendly_name: Octoplus Saving Session Events
 """
 
     ha.dummy_items["binary_sensor.octopus_energy_a_test1234_octoplus_saving_sessions"] = yaml.safe_load(session_binary)
-    ha.dummy_items["event.octopus_energy_a_test1234_octoplus_saving_session_events"] = yaml.safe_load(session_sensor)
+    ha.dummy_items["event.octopus_energy_a_test1234_octoplus_saving_session_event"] = yaml.safe_load(session_sensor)
     ha.dummy_items["sensor.octopus_free_session"] = {}
-    my_predbat.args["octopus_saving_session"] = "binary_sensor.octopus_energy_a_test1234_octoplus_saving_sessions"
+    my_predbat.args["octopus_saving_session"] = "event.octopus_energy_a_test1234_octoplus_saving_session_event"
     my_predbat.args["octopus_free_session"] = "sensor.octopus_free_session"
     if "octopus_free_url" in my_predbat.args:
         del my_predbat.args["octopus_free_url"]

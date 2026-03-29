@@ -23,9 +23,9 @@ or adjust your Solar forecast output. Battery loss charge and discharge are fact
 
 Also, set **switch.predbat_inverter_hybrid** to True or False depending upon if you have a Hybrid or AC-Coupled battery.
 
-The setting **input_number.predbat_metric_battery_cycle** (_expert mode_) can be used to put a 'virtual cost' in pence per kWh on using your battery for charging and discharging.<BR>
+The setting **input_number.predbat_metric_battery_cycle** (_expert mode_) can be used to allocate a 'virtual cost' in pence per kWh on using your battery for charging and discharging.<BR>
 If you configure this number higher then more expensive plans will be selected which avoids charging and discharging your battery as much.
-The default is 0.5p (meaning charging and discharging the battery would effectively cost an extra 1p per kWh) but can be set to 0 if you want to turn this feature off.
+The default is 0p (meaning no virtual cost is applied), but if you set it to 0.5p as an example, charging and discharging the battery would effectively cost an extra 1p per kWh and Predbat would use that in its determination of whether to charge or discharge the battery.
 
 Below is a guide to some of the electricity tariff options and a set of recommended Predbat settings for each tariff type.
 In theory, most tariffs will work out of the box but still, it's worth reviewing your settings.

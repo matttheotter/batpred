@@ -142,7 +142,7 @@ SOLIS_STORAGE_MODES = {
 """
 BIT Tag Number | Fault Status | Status Code
 BIT00 | Self-Consumption Mode Switch | 0—Off | 1—On
-BIT01 | Optimized Revenue Mode Switch | 0—Off | 1—On
+BIT01 | Optimised Revenue Mode Switch | 0—Off | 1—On
 BIT02 | Off-Grid Energy Storage Mode Switch | 0—Off | 1—On
 BIT03 | Battery Wake-up Switch (1—Wake-up Enabled | 0—Wake-up Disabled) | 0—Off | 1—On
 BIT04 | Backup Battery Mode Switch | 0—Off | 1—On
@@ -259,7 +259,7 @@ class SolisAPI(ComponentBase):
     """Solis Cloud API integration component"""
 
     def initialize(self, api_key, api_secret, inverter_sn=None, automatic=False, base_url=SOLIS_BASE_URL, control_enable=True):
-        """Initialize the Solis API component"""
+        """Initialise the Solis API component"""
         self.api_key = api_key
         self.api_secret = api_secret
         self.base_url = base_url
@@ -288,7 +288,7 @@ class SolisAPI(ComponentBase):
         # Tracking
         self.slots_reset = set()  # Track which inverters had slots reset
 
-        self.log(f"Solis API: Initialized with inverter_sn={self.inverter_sn} automatic={automatic}")
+        self.log(f"Solis API: Initialised with inverter_sn={self.inverter_sn}, automatic={automatic}")
 
     # ==================== Helper Methods ====================
 
@@ -579,7 +579,6 @@ class SolisAPI(ComponentBase):
         """
         slots_to_check = range(2, 7)
 
-
         for slot in slots_to_check:
             slot_data = self.charge_discharge_time_windows.get(inverter_sn, {}).get(slot)
             if not slot_data:
@@ -606,11 +605,11 @@ class SolisAPI(ComponentBase):
                 self.log(f"Warn: Solis API: No time windows cached for {inverter_sn}")
                 return True
 
-            # Make a copy as we will locally modify the data before writing it
+            #  Make a copy as we will locally modify the data before writing it
             time_windows = copy.deepcopy(self.charge_discharge_time_windows[inverter_sn])
 
             if self.is_tou_v2_mode(inverter_sn):
-                # V2 mode: check and write individual registers for changed values only
+                #  V2 mode: check and write individual registers for changed values only
                 slots_to_check = range(1, 7)
                 success = True
                 max_charge_current_amps = float(self.cached_values.get(inverter_sn, {}).get(SOLIS_CID_BATTERY_MAX_CHARGE_CURRENT, 60.0))
@@ -660,7 +659,7 @@ class SolisAPI(ComponentBase):
                         new_soc_str = str(int(slot_data['charge_soc']))
                         cached_soc = self.cached_values.get(inverter_sn, {}).get(soc_cid)
                         if cached_soc != new_soc_str:
-                            result = await self.read_and_write_cid(inverter_sn, soc_cid, new_soc_str,field_description=f"charge slot {slot} SOC")
+                            result = await self.read_and_write_cid(inverter_sn, soc_cid, new_soc_str, field_description=f"charge slot {slot} SOC")
                             success &= result
 
                     # Check and write charge current if changed
@@ -688,7 +687,7 @@ class SolisAPI(ComponentBase):
                         new_time_str = f"{slot_data['discharge_start_time']}-{slot_data['discharge_end_time']}"
                         cached_time = self.cached_values.get(inverter_sn, {}).get(time_cid)
                         if cached_time != new_time_str:
-                            result = await self.read_and_write_cid(inverter_sn, time_cid, new_time_str,field_description=f"discharge slot {slot} time")
+                            result = await self.read_and_write_cid(inverter_sn, time_cid, new_time_str, field_description=f"discharge slot {slot} time")
                             success &= result
 
                     # Check and write discharge SOC if changed
@@ -1132,18 +1131,21 @@ class SolisAPI(ComponentBase):
         self.set_arg("battery_power", [f"sensor.{self.prefix}_solis_{device}_battery_power" for device in devices])
         self.set_arg("battery_power_invert", [f"True" for device in devices])
         self.set_arg("grid_power", [f"sensor.{self.prefix}_solis_{device}_grid_power" for device in devices])
-        self.set_arg("load_power", [f"sensor.{self.prefix}_solis_{device}_load_power" for device in devices])
-        self.set_arg("pv_power", [f"sensor.{self.prefix}_solis_{device}_pv_power" for device in devices])
         self.set_arg("battery_voltage", [f"sensor.{self.prefix}_solis_{device}_battery_voltage" for device in devices])
-        #self.set_arg("battery_temperature", [f"sensor.{self.prefix}_solis_{device}_battery_temperature" for device in devices])
-        self.set_arg("load_today", [f"sensor.{self.prefix}_solis_{device}_total_load_energy" for device in devices])
+        # self.set_arg("battery_temperature", [f"sensor.{self.prefix}_solis_{device}_battery_temperature" for device in devices])
+
+        # if solis_cloud_pv_load_ignore is set to true, override Solis cloud sensors and use load/pv_today/power entries defined in apps.yaml
+        if not self.get_arg("solis_cloud_pv_load_ignore", default=False):
+            self.set_arg("load_today", [f"sensor.{self.prefix}_solis_{device}_total_load_energy" for device in devices])
+            self.set_arg("pv_today", [f"sensor.{self.prefix}_solis_{device}_pv_energy_total" for device in devices])
+            self.set_arg("load_power", [f"sensor.{self.prefix}_solis_{device}_load_power" for device in devices])
+            self.set_arg("pv_power", [f"sensor.{self.prefix}_solis_{device}_pv_power" for device in devices])
         self.set_arg("import_today", [f"sensor.{self.prefix}_solis_{device}_today_import_energy" for device in devices])
         self.set_arg("export_today", [f"sensor.{self.prefix}_solis_{device}_today_export_energy" for device in devices])
-        self.set_arg("pv_today", [f"sensor.{self.prefix}_solis_{device}_pv_energy_total" for device in devices])
 
         # Battery capacity and limits from cached details
         # XXX: This is currently broken, user must set manually in apps.yaml
-        #self.set_arg("soc_max", [f"sensor.{self.prefix}_solis_{device}_battery_capacity" for device in devices])
+        # self.set_arg("soc_max", [f"sensor.{self.prefix}_solis_{device}_battery_capacity" for device in devices])
 
         # Reserve and limits
         # Reserve isn't writable (so we don't use it for SolisCloud) instead we use it as the min SOC
@@ -1182,7 +1184,7 @@ class SolisAPI(ComponentBase):
                     values[cid] = value
                     infos[cid] = copy.deepcopy(info)
 
-            # Initialize cache for this inverter if not exists
+            # Initialise cache for this inverter if not exists
             if inverter_sn not in self.cached_values:
                 self.cached_values[inverter_sn] = {}
                 self.cached_infos[inverter_sn] = {}
@@ -1242,7 +1244,7 @@ class SolisAPI(ComponentBase):
         """
 
         sn_lower = sn.lower()
-        for slot in range (1,7):
+        for slot in range(1, 7):
             for direction in ['charge', 'discharge']:
                 if sn not in self.charge_discharge_time_windows:
                     self.charge_discharge_time_windows[sn] = {}
@@ -1279,7 +1281,6 @@ class SolisAPI(ComponentBase):
                         self.charge_discharge_time_windows[sn][slot][f"{direction}_current"] = value
                     except (ValueError, TypeError):
                         pass
-
 
     async def publish_entities(self):
         """Publish all entities to Home Assistant"""
@@ -1901,7 +1902,6 @@ class SolisAPI(ComponentBase):
                 },
                 app="solis"
             )
-
 
             # Battery reserve switch
             entity_id = f"switch.{prefix}_solis_{inverter_sn_lower}_battery_reserve"
@@ -2705,7 +2705,7 @@ class SolisAPI(ComponentBase):
         try:
             detail = await self.get_inverter_detail(sn)
             self.inverter_details[sn] = detail
-            #self.log(f"Solis API: Loaded details for inverter {sn} - {detail}")
+            # self.log(f"Solis API: Loaded details for inverter {sn} - {detail}")
 
             # Extract parallel battery count (format: "2.0" means 3 batteries total)
             parallel_battery = detail.get("parallelBattery", "0")
@@ -2783,12 +2783,12 @@ class SolisAPI(ComponentBase):
 
             if not self.inverter_sn:
                 self.log("Error: Solis API: No inverters to manage after discovery")
-                return False # Stop further processing if no inverters
+                return False  # Stop further processing if no inverters
 
         # Frequent polling (every minute)
         if first or (seconds % 60 == 0):
             for sn in self.inverter_sn:
-                success =  await self.fetch_inverter_details(sn) # Get inverter details for all inverters
+                success = await self.fetch_inverter_details(sn)  # Get inverter details for all inverters
                 if not success:
                     poll_success = False
 
@@ -2814,7 +2814,7 @@ class SolisAPI(ComponentBase):
                         await self.decode_time_windows_v2(sn)
                 else:
                     self.log("Solis API: Inverter is in standard Time of Use mode, polling standard TOU data")
-                    success =  await self.poll_inverter_data(sn, SOLIS_CID_SINGLE, batch=False)
+                    success = await self.poll_inverter_data(sn, SOLIS_CID_SINGLE, batch=False)
                     if not success:
                         poll_success = False
                     # Only decode them once, as for v1 we have to keep extra data that doesn't really exist in the windows
@@ -2851,7 +2851,6 @@ class SolisAPI(ComponentBase):
         # Mark API as started after first successful run
         self.log("Solis API: Run cycle complete with poll_success {} and first {}".format(poll_success, first))
         return poll_success
-
 
     async def final(self):
         """Cleanup on shutdown"""

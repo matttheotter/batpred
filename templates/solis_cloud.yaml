@@ -31,9 +31,24 @@ pred_bat:
   # Obtain the Solis Cloud KeyID and KeySecret from the Solis Cloud Web Site (under service/api management)
   # https://www.soliscloud.com/station?glyun_vue2=%2F%23%2FapiManage
   solis_api_key: 'xxxx'
-  solis_api_secret: xxxx'
-  solis_automatic: True
-  solis_control_enable: True
+  solis_api_secret: 'xxxx'
+  solis_automatic: true
+  solis_control_enable: true
+
+  #
+  # Inverter and battery sensors will be auto-configured from the Solis Cloud if solis_automatic is set to true and any entries in apps.yaml will be ignored
+  #
+  # If the Solis cloud does not provide accurate house load and PV data then you can override the Solis Cloud sensors and use custom sensors defined in apps.yaml
+  #
+  # solis_cloud_pv_load_ignore: true
+  # load_today:
+  #   - sensor.house_load_today
+  # load_power:
+  #   - sensor.house_load_power
+  # pv_today:
+  #   - sensor.pv_today
+  # pv_power:
+  #   - sensor.pv_power
 
   # Right now Solis Cloud can't determine the battery capacity so set it here in kwh
   soc_max: 7.5
@@ -181,7 +196,7 @@ pred_bat:
 
   # Octopus saving session points to the saving session Sensor in the Octopus plugin, when enabled saving sessions will be at the assumed
   # Rate is read automatically from the add-in and converted to pence using the conversion rate below (default is 8)
-  octopus_saving_session: 're:(binary_sensor.octopus_energy([0-9a-z_]+|)_saving_session(s|))'
+  octopus_saving_session: 're:(event.octopus_energy([0-9a-z_]+|)_saving_session_event(s|)'
   octopus_saving_session_octopoints_per_penny: 8
 
   # Octopus free session points to the free session Sensor in the Octopus plugin

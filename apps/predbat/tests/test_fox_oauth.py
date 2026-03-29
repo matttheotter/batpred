@@ -50,7 +50,7 @@ class MockFoxOAuth(FoxAPI):
         self.base.args = {"user_id": "test-instance-123"}
         self.base.midnight_utc = datetime.now(pytz.utc).replace(hour=0, minute=0, second=0, microsecond=0)
 
-        # Initialize OAuth
+        # Initialise OAuth
         self._init_oauth(auth_method, key, token_expires_at, "fox_ess")
 
     def log(self, message):

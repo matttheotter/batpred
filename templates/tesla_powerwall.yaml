@@ -129,7 +129,7 @@ pred_bat:
       value: "0"
       repeat: True
   discharge_start_service:
-    - service: rest_command.powerwall_force_export_now
+    - service: rest_command.tesla_api_set_export_now_tariff
       repeat: True
     - service: select.select_option
       entity_id: select.my_home_allow_export
@@ -140,7 +140,7 @@ pred_bat:
       option: "autonomous"
       repeat: True
   discharge_stop_service:
-    - service: rest_command.powerwall_api_set_iog_custom_tariff
+    - service: rest_command.tesla_api_set_iog_custom_tariff
       repeat: True
     - service: select.select_option
       entity_id: select.my_home_allow_export
@@ -262,7 +262,7 @@ pred_bat:
 
   # Octopus saving session points to the saving session Sensor in the Octopus plugin, when enabled saving sessions will be at the assumed
   # Rate is read automatically from the add-in and converted to pence using the conversion rate below (default is 8)
-  octopus_saving_session: 're:(binary_sensor.octopus_energy([0-9a-z_]+|)_saving_session(s|))'
+  octopus_saving_session: 're:(event.octopus_energy([0-9a-z_]+|)_saving_session_event(s|)'
   octopus_saving_session_octopoints_per_penny: 8
 
   # Energy rates

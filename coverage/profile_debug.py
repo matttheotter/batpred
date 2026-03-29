@@ -75,7 +75,7 @@ def profile_debug_case(debug_file, output_file=None, view=False, sort_by="cumula
 
     # Print focused stats on key functions
     print("\n" + "=" * 80)
-    print("PREDBAT OPTIMIZATION FUNCTIONS")
+    print("PREDBAT OPTIMISATION FUNCTIONS")
     print("=" * 80)
 
     stream = StringIO()
@@ -88,7 +88,7 @@ def profile_debug_case(debug_file, output_file=None, view=False, sort_by="cumula
     if output.strip() and "0 function calls" not in output:
         print(output)
     else:
-        print("No optimization functions found in profile")
+        print("No optimisation functions found in profile")
 
     # Print prediction functions
     print("\n" + "=" * 80)

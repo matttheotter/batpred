@@ -3446,7 +3446,7 @@ class MockFoxAPIWithRunTracking(MockFoxAPIWithRequests):
 
 def test_run_first_call_with_devices(my_predbat):
     """
-    Test run() with first=True initializes all device data
+    Test run() with first=True initialises all device data
     """
     print("  - test_run_first_call_with_devices")
 
@@ -3499,7 +3499,7 @@ def test_run_subsequent_call(my_predbat):
     result = run_async(fox.run(300, first=False))
 
     assert result == True
-    # Should NOT call initialization methods
+    # Should NOT call initialisation methods
     assert "get_device_list" not in fox.method_calls
     assert "get_device_detail:TEST123" not in fox.method_calls
     # Should call real-time data update
@@ -3585,7 +3585,7 @@ def test_run_midnight_reset(my_predbat):
     fox = MockFoxAPIWithRunTracking()
     fox.device_list = [{"deviceSN": "TEST123"}]
 
-    # First run - initialize counters on day 1
+    # First run - initialise counters on day 1
     day1_midnight = datetime(2025, 12, 22, 0, 0, 0, tzinfo=timezone.utc)
     my_predbat.midnight_utc = day1_midnight
     fox.base.midnight_utc = day1_midnight
@@ -3597,7 +3597,7 @@ def test_run_midnight_reset(my_predbat):
     result = run_async(fox.run(0, first=True))
     assert result == True
 
-    # Verify counters are initialized on first run
+    # Verify counters are initialised on first run
     initial_start_time = fox.start_time_today
     assert fox.last_midnight_utc == day1_midnight
     assert fox.requests_today == 45  # Unchanged from initial value
@@ -4213,10 +4213,10 @@ def test_write_battery_schedule_event_initialize_local_schedule(my_predbat):
     fox.local_schedule = {}
     fox.device_scheduler[deviceSN] = {"enable": False, "groups": []}
 
-    # Write reserve - should initialize local_schedule[deviceSN]
+    # Write reserve - should initialise local_schedule[deviceSN]
     run_async(fox.write_battery_schedule_event("number.predbat_fox_test123456_battery_schedule_reserve", "20"))
 
-    # Should initialize the dict and set reserve
+    # Should initialise the dict and set reserve
     assert deviceSN in fox.local_schedule
     assert fox.local_schedule[deviceSN]["reserve"] == 20
 

@@ -59,7 +59,7 @@ class DatabaseManager(ComponentBase):
 
     async def start(self):
         """
-        Initialize the database and clean up old data
+        Initialise the database and clean up old data
         """
 
         self.db_engine = DatabaseEngine(self.base, self.db_days)

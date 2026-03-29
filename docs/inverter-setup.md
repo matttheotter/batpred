@@ -1,13 +1,8 @@
 # Inverter setup
 
-PredBat was originally written for GivEnergy inverters using the GivTCP integration but has been extended to many other inverter models.
-
-The table below lists the inverters and required Home Assistant integrations that have had Predbat configurations developed.
+PredBat was originally written for GivEnergy inverters using the GivTCP integration but has now been extended to [many inverter models](#inverter-configurations).
 
 Follow the [Predbat installation guide](install.md) for full instructions to setup and configure Predbat. This document covers only the steps that are specific to different inverter types.
-
-Additionally, if your inverter type is not listed, you can create a [custom inverter definition for Predbat](#i-want-to-add-an-unsupported-inverter-to-predbat).
-Once you get everything working please share the configuration as a github issue so it can be incorporated into the Predbat documentation.
 
 To setup the inverter with Predbat you will need to:
 
@@ -31,11 +26,18 @@ To setup the inverter with Predbat you will need to:
 
 6. Follow the rest of the [Predbat install instructions](install.md), in particular review that `apps.yaml` is configured correctly for your inverter.
 
+## Inverter Configurations
+
+The table below lists the inverters and required Home Assistant integrations that have had Predbat configurations developed.
+
+Additionally, if your inverter type is not listed, you can create a [custom inverter definition for Predbat](#i-want-to-add-an-unsupported-inverter-to-predbat).
+Once you get everything working please share the configuration as a github issue so it can be incorporated into the Predbat documentation.
+
    | Name | Integration | Template |
    | :---------------------------- | :------------- | :------------ |
    | [GivEnergy with GivTCP](#givenergy-with-givtcp) | [GivTCP](https://github.com/britkat1980/ha-addons) | [givenergy_givtcp.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/givenergy_givtcp.yaml) |
    | [Givenergy with GE Cloud](#givenergy-with-ge-cloud) | [ge_cloud](https://github.com/springfall2008/ge_cloud) | [givenergy_cloud.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/givenergy_cloud.yaml) |
-   | [Givenergy with GE Cloud EMS](#givenergy-with-ge-cloud-ems | [ge_cloud EMS](https://github.com/springfall2008/ge_cloud) | [givenergy_ems.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/givenergy_ems.yaml) |
+   | [Givenergy with GE Cloud EMS](#givenergy-with-ge-cloud-ems) | [ge_cloud EMS](https://github.com/springfall2008/ge_cloud) | [givenergy_ems.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/givenergy_ems.yaml) |
    | [Givenergy/Octopus No Home Assistant](#givenergy-octopus-cloud-direct---no-home-assistant) | n/a | [ge_cloud_octopus_standalone.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/ge_cloud_octopus_standalone.yaml) |
    | [Fox](#fox) | [Foxess](https://github.com/nathanmarlor/foxess_modbus/) | [fox.yaml](https://raw.githubusercontent.com/springfall2008/batpred/main/templates/fox.yaml) |
    | [Fox Cloud](#fox-cloud) | Predbat | [fox_cloud.yaml](https://raw.githubusercontent.com/springfall2008/batpred/refs/heads/main/templates/fox_cloud.yaml) |
@@ -158,20 +160,22 @@ This is being worked on by the author of GivTCP, e.g. see [GivTCP issue: unable 
 
 ## GivEnergy with GE Cloud
 
-This is an experimental system, please discuss it on the ticket: <https://github.com/springfall2008/batpred/issues/905>
-
-- First set up ge_cloud integration using your API key <https://github.com/springfall2008/ge_cloud>
+- Firstly [create a GivEnergy API key](apps-yaml.md#givenergy-cloud-data) so that Predbat can control your inverters
 - Now copy the template `givenergy_cloud.yaml` from templates over the top of your `apps.yaml` and edit
     - Set geserial to your inverter serial number
-- Make sure that the 'discharge down to' registers are set to 4% and slots 2, 3 and 4 for charge and discharge are disabled in the portal (if you have them)
+- If you set **ge_cloud_automatic** to `true` in `apps.yaml` then Predbat will auto-configure itself to use the appropriate GE Cloud controls and will ignore any inverter and battery controls set in `apps.yaml`
+- Make sure that the 'discharge down to' registers are set to 4% and charge and discharge slots 2, 3 and 4 are disabled in the portal by setting the start and end times to 00:00 (if you have them).
+- If you have set **ge_cloud_automatic** to `true` and the GE Cloud does not return accurate **load_today** energy information, you can [override the GE Cloud load data](apps-yaml.md) by creating a custom template sensor and setting **ge_cloud_load_today_ignore** to true in `apps.yaml`.
 
 ## GivEnergy with GE Cloud EMS
 
-- First set up ge_cloud integration using your API key <https://github.com/springfall2008/ge_cloud>
+- First, [create a GivEnergy API key](apps-yaml.md#givenergy-cloud-data) so that Predbat can control your inverters
 - Now copy the template `givenergy_ems.yaml` from templates over the top of your `apps.yaml` and edit
     - Set geserial to your first inverter serial and geserial2 to the second (look in HA for entity names)
     - Set geseriale to the EMS inverter serial number (look in HA for the entity names)
-- Turn off charge, export and discharge slots 2, 3 and 4 as Predbat will only use slot 1 - set the start and end times for these to 00:00
+- Predbat will auto-configure itself to use the appropriate GE Cloud controls for the EMS and if you add extra inverter and battery controls to `apps.yaml`, these will be ignored
+- As Predbat will only use slot 1, turn off charge, export and discharge slots 2, 3 and 4  - set the start and end times for these to 00:00
+- If your EMS does not return accurate **load_today** energy information, you can [override the GE Cloud load data](apps-yaml.md) by creating a custom template sensor and setting **ge_cloud_load_today_ignore** to `true` in `apps.yaml`.
 
 ## GivEnergy Octopus Cloud Direct - No Home Assistant
 
@@ -2098,6 +2102,7 @@ max: 10
 The fix was to enable the hidden HA entity 'VPP Exit Idle Enable' and then change the entity value from Disabled to Enabled. Once this was Enabled the inverter responded correctly to Predbat commands.
 
 - When you first start Predbat, check the [Predbat log](output-data.md#predbat-logfile) to confirm that the correct sensor names are identified by the regular expressions in `apps.yaml`. Any non-matching expressions should be investigated and resolved.
+- You may well get a warning message in the logs that Predbat [cannot create battery charge/discharge curves](faq.md#info-cannot-find-battery-charge-curve). Either configure [battery charge and discharge rates](apps-yaml.md#battery-chargedischarge-curves) in `apps.yaml` using appropriate inverter sensors (if available) or create a dummy default curve based on manufacturers information.
 
 Please see this ticket in Github for ongoing discussion: <https://github.com/springfall2008/batpred/issues/259>
 
@@ -2350,6 +2355,11 @@ input_text:
     max: 255
     mode: password
 
+  tesla_refresh_token_part5:
+    name: "Tesla Refresh Token - Part 5"
+    max: 255
+    mode: password
+
   tesla_access_token_part1:
     name: "Tesla Access Token - Part 1"
     max: 255
@@ -2432,7 +2442,12 @@ automation:
       target:
         entity_id: input_text.tesla_refresh_token_part4
       data:
-        value: "{{ tesla_response.content.refresh_token[750:] }}"
+        value: "{{ tesla_response.content.refresh_token[750:1000] }}"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.tesla_refresh_token_part5
+      data:
+        value: "{{ tesla_response.content.refresh_token[1000:] }}"
     - service: persistent_notification.create
       data:
         title: "Tesla Tokens Updated"
@@ -2467,7 +2482,7 @@ automation:
     - tesla_api_get_products - used to retrieve your Tesla site id,
     - tesla_api_get_current_tariff - retrieves your current Tariff information from the Powerwall,
     - tesla_api_set_export_now_tariff - sets a custom export rate tariff to force the Powerwall to export,
-    - tesla_api_set_iog_custom_tariff - returns the Powerwall to the Octopus IOG tariff.  If you are on a different tariff you will need to customise the REST payload to your tariff details
+    - tesla_api_set_iog_custom_tariff - returns the Powerwall to the Octopus IOG tariff. Check the rates in the payload match your current tariff rates, or if you are on a different tariff, you will need to customise the REST payload to your tariff details
 
   In `configuration.yaml` add the following lines:
 
@@ -2482,7 +2497,8 @@ rest_command:
         (states('input_text.tesla_refresh_token_part1') or '') +
         (states('input_text.tesla_refresh_token_part2') or '') +
         (states('input_text.tesla_refresh_token_part3') or '') +
-        (states('input_text.tesla_refresh_token_part4') or '') }}&scope=openid%20email%20offline_access"
+        (states('input_text.tesla_refresh_token_part4') or '') +
+        (states('input_text.tesla_refresh_token_part5') or '') }}&scope=openid%20email%20offline_access"
 
   tesla_api_get_products:
     url: "https://owner-api.teslamotors.com/api/1/products"
@@ -2654,8 +2670,7 @@ rest_command:
               "AllYear": {
                 "rates": {
                   "SUPER_OFF_PEAK": 0.07,
-                  "PARTIAL_PEAK": 0.31,
-                  "ON_PEAK": 0.31
+                  "ON_PEAK": 0.29
                 }
               }
             },
@@ -2674,7 +2689,6 @@ rest_command:
                   },
                   "ON_PEAK": {
                     "periods": [
-                      { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 2, "fromMinute": 0, "toHour": 3, "toMinute": 0 },
                       { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 5, "fromMinute": 30, "toHour": 16, "toMinute": 0 },
                       { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 16, "fromMinute": 0, "toHour": 19, "toMinute": 0 },
                       { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 19, "fromMinute": 0, "toHour": 23, "toMinute": 30 }
@@ -2700,9 +2714,8 @@ rest_command:
                 "ALL": { "rates": { "ALL": 0 } },
                 "AllYear": {
                   "rates": {
-                    "SUPER_OFF_PEAK": 0.07,
-                    "PARTIAL_PEAK": 0.30,
-                    "ON_PEAK": 0.22
+                    "SUPER_OFF_PEAK": 0.00,
+                    "ON_PEAK": 0.00
                   }
                 }
               },
@@ -2721,7 +2734,6 @@ rest_command:
                     },
                     "ON_PEAK": {
                       "periods": [
-                        { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 2, "fromMinute": 0, "toHour": 3, "toMinute": 0 },
                         { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 5, "fromMinute": 30, "toHour": 16, "toMinute": 0 },
                         { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 16, "fromMinute": 0, "toHour": 19, "toMinute": 0 },
                         { "fromDayOfWeek": 0, "toDayOfWeek": 6, "fromHour": 19, "fromMinute": 0, "toHour": 23, "toMinute": 30 }

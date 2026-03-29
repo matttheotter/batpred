@@ -1530,14 +1530,14 @@ class PredBat(hass.Hass, Octopus, Energidataservice, Fetch, Plan, Execute, Outpu
             self.components = Components(self)
             self.components.initialize(phase=0)
 
-            # Initialize plugin system early so plugins can register web endpoints
+            # Initialise plugin system early so plugins can register web endpoints
             # before the web server starts
             try:
-                self.log("Initializing plugin system")
+                self.log("Initialising plugin system")
                 self.plugin_system = PluginSystem(self)
                 self.plugin_system.discover_plugins()
             except Exception as e:
-                self.log("Warning: Failed to initialize plugin system: {}".format(e))
+                self.log("Warning: Failed to initialise plugin system: {}".format(e))
                 self.plugin_system = None
 
             # Now start all sub-components (including web server which will pick up registered endpoints)
@@ -1548,7 +1548,7 @@ class PredBat(hass.Hass, Octopus, Energidataservice, Fetch, Plan, Execute, Outpu
             if not self.ha_interface:
                 raise ValueError("HA interface not found")
 
-            # Call plugin initialization hooks after components are ready
+            # Call plugin initialisation hooks after components are ready
             if self.plugin_system:
                 self.plugin_system.call_hooks("on_init")
 
@@ -1569,8 +1569,13 @@ class PredBat(hass.Hass, Octopus, Energidataservice, Fetch, Plan, Execute, Outpu
 
             self.components.initialize(phase=1)
             if not self.components.start(phase=1):
-                self.log("Error: Some components failed to start (phase1)")
-                self.record_status("Error: Some components failed to start (phase1)", had_errors=True)
+                self.log("Error: Some components failed to start (phase 1)")
+                self.record_status("Error: Some components failed to start (phase 1)", had_errors=True)
+
+            self.components.initialize(phase=2)
+            if not self.components.start(phase=2):
+                self.log("Error: Some components failed to start (phase 2)")
+                self.record_status("Error: Some components failed to start (phase 2)", had_errors=True)
 
             self.load_user_config(quiet=False, register=True)
             self.auto_config(final=True)

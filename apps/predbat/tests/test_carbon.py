@@ -78,7 +78,7 @@ def test_carbon(my_predbat=None):
     Comprehensive test suite for Carbon Intensity API.
 
     Tests all major functionality including:
-    - Initialization and configuration
+    - Initialisation and configuration
     - Data fetching (success, errors, timeouts)
     - Caching behavior
     - Data publishing
@@ -88,7 +88,7 @@ def test_carbon(my_predbat=None):
 
     # Registry of all sub-tests
     sub_tests = [
-        ("initialization", _test_carbon_initialization, "Carbon API initialization"),
+        ("initialisation", _test_carbon_initialization, "Carbon API initialisation"),
         ("fetch_success", _test_fetch_carbon_data_success, "Fetch carbon data success"),
         ("http_error", _test_fetch_carbon_data_http_error, "HTTP error handling (404, 500)"),
         ("timeout", _test_fetch_carbon_data_timeout, "Timeout handling"),
@@ -148,7 +148,7 @@ def test_carbon(my_predbat=None):
 
 
 def _test_carbon_initialization(my_predbat=None):
-    """Test CarbonAPI initialization"""
+    """Test CarbonAPI initialisation"""
     failed = 0
 
     api = MockCarbonAPI()
@@ -172,7 +172,7 @@ def _test_carbon_initialization(my_predbat=None):
         failed = 1
 
     if not failed:
-        print("  ✓ CarbonAPI initialized correctly")
+        print("  ✓ CarbonAPI initialised correctly")
     return failed
 
 

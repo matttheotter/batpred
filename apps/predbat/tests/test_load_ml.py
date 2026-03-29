@@ -46,7 +46,7 @@ def test_load_ml(my_predbat=None):
         ("dataset_with_temp", _test_dataset_with_temp, "Dataset creation with temperature features"),
         ("normalization", _test_normalization, "Z-score normalization correctness"),
         ("ema_normalization", _test_ema_normalization, "EMA normalization drift tracking during fine-tuning"),
-        ("adam_optimizer", _test_adam_optimizer, "Adam optimizer step"),
+        ("adam_optimizer", _test_adam_optimizer, "Adam optimiser step"),
         ("training_convergence", _test_training_convergence, "Training convergence on synthetic data"),
         ("training_with_pv", _test_training_with_pv, "Training with PV input features"),
         ("training_with_temp", _test_training_with_temp, "Training with temperature input features"),
@@ -642,7 +642,7 @@ def _test_ema_normalization():
 
 
 def _test_adam_optimizer():
-    """Test Adam optimizer update step"""
+    """Test Adam optimiser update step"""
     predictor = LoadPredictor(learning_rate=0.01)
     predictor._initialize_weights()
 

@@ -2092,7 +2092,7 @@ chart.render();
         # Include renderer JavaScript (which declares newestDataTimestamp variable)
         text += get_plan_renderer_js()
 
-        # Initialize newestDataTimestamp from the initial data loaded, and start automatic updates
+        # Initialise newestDataTimestamp from the initial data loaded, and start automatic updates
         text += "<script>"
         text += "// Find newest timestamp from initial data\n"
         text += "const initialTimestamps = [];\n"
@@ -2791,7 +2791,7 @@ chart.render();
 
         args = self.args
         row_id = 0
-        # Initialize nested values tracking and row counter
+        # Initialise nested values tracking and row counter
         self._nested_values = {}
         row_counter = [1000]  # Start nested rows at 1000 to avoid conflicts
 

@@ -109,24 +109,24 @@ def test_hahistory_initialize(my_predbat=None):
     ha_history = HAHistory(mock_base)
     ha_history.initialize()
 
-    # Verify initialization
+    # Verify initialisation
     if not isinstance(ha_history.history_entities, dict):
         print("ERROR: history_entities should be a dict")
         failed += 1
     elif len(ha_history.history_entities) != 0:
-        print("ERROR: history_entities should be empty after initialization")
+        print("ERROR: history_entities should be empty after initialisation")
         failed += 1
     else:
-        print("✓ history_entities initialized correctly")
+        print("✓ history_entities initialised correctly")
 
     if not isinstance(ha_history.history_data, dict):
         print("ERROR: history_data should be a dict")
         failed += 1
     elif len(ha_history.history_data) != 0:
-        print("ERROR: history_data should be empty after initialization")
+        print("ERROR: history_data should be empty after initialisation")
         failed += 1
     else:
-        print("✓ history_data initialized correctly")
+        print("✓ history_data initialised correctly")
 
     return failed
 

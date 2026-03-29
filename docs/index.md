@@ -2,17 +2,18 @@
 
 Home battery prediction and automatic charging for Home Assistant supporting multiple inverters including:
 
-- GivEnergy Hybrid, AC and AIO (Local & Cloud)
-- Solis
-- Solax (Local & Cloud)
-- Sunsynk
-- Huawei
-- SolarEdge
 - Fox (Local & Cloud)
-- Sofar
+- GivEnergy Hybrid, AC, AIO and EMS (Local & Cloud)
+- Huawei
 - LuxPower
+- SolarEdge
+- Solax (Local & Cloud)
+- Solis Cloud
+- Sofar
 - Solar Assistant
+- Sunsynk
 - Sigenergy Sigenstor
+- Tesla Powerwall
 
 Also known by some as Batpred or Batman!
 

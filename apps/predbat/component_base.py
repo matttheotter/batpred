@@ -48,7 +48,7 @@ class ComponentBase(ABC):
 
     def __init__(self, base, **kwargs):
         """
-        Initialize the component base.
+        Initialise the component base.
 
         Args:
             base: The main Predbat base object providing system-wide services
@@ -68,10 +68,10 @@ class ComponentBase(ABC):
     @abstractmethod
     def initialize(self, **kwargs):
         """
-        Additional initialization for subclasses.
+        Additional initialisation for subclasses.
 
         Subclasses can override this method to perform any additional setup
-        required during initialization.
+        required during initialisation.
         """
         pass
 
@@ -157,7 +157,7 @@ class ComponentBase(ABC):
         Start the component's main operation loop.
 
         This method should:
-        - Initialize any required resources
+        - Initialise any required resources
         - Set api_started to True when ready
         - Run the main processing loop until api_stop is True
         - Clean up resources before exiting

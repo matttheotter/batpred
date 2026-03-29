@@ -176,7 +176,7 @@ def get_entity_js(selected_entities_json, entity_attributes_json):
         + entity_attributes_json
         + """;
 
-        // Initialize entity data
+        // Initialise entity data
 
         document.addEventListener('DOMContentLoaded', function() {
             // Load entity data from API
@@ -4199,7 +4199,7 @@ body.dark-mode .charts-menu a.active {
 }
 </style>
 <script>
-// Initialize the charts menu scrolling functionality
+// Initialise the charts menu scrolling functionality
 document.addEventListener("DOMContentLoaded", function() {
     // Scroll active item into view
     setTimeout(function() {
@@ -5011,7 +5011,7 @@ def get_logfile_js(filter_type):
             }}
         }}
 
-        // Initialize
+        // Initialise
         document.addEventListener('DOMContentLoaded', function() {{
             lastLineNumber = 0; // Start from 0 since we're loading all initial data
             updateStatus('Log viewer loaded - fetching initial data...');
@@ -5223,7 +5223,7 @@ CodeMirror.registerHelper("lint", "yaml", function(text) {
     return found;
 });
 
-// Initialize CodeMirror and handle dark mode
+// Initialise CodeMirror and handle dark mode
 function initializeCodeMirror() {
     const textarea = document.getElementById('appsContent');
 
@@ -5414,7 +5414,7 @@ function initializeCodeMirror() {
                             jsyaml.load(content, { schema: CUSTOM_SCHEMA });
                         } catch (e) {
                             isValidYaml = false;
-                            console.log('YAML validation error in initialization:', e.message);
+                            console.log('YAML validation error in initialisation:', e.message);
                         }
 
                         // Update button states based on content validity
@@ -5462,7 +5462,7 @@ document.addEventListener('DOMContentLoaded', function() {
         textarea.placeholder = 'apps.yaml content could not be loaded';
     }
 
-    // Initialize CodeMirror
+    // Initialise CodeMirror
     initializeCodeMirror();
 
     // Handle Revert button click
@@ -5518,7 +5518,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             };
         }
-    }, 2000); // Wait longer for everything to initialize
+    }, 2000); // Wait longer for everything to initialise
 
     // Add a listener for dark mode toggle
     window.addEventListener('storage', function(e) {
@@ -7896,7 +7896,7 @@ function stopStatusUpdates() {
     }
 }
 
-// Initialize menu on page load
+// Initialise menu on page load
 document.addEventListener("DOMContentLoaded", function() {
 setActiveMenuItem();
 startStatusUpdates();

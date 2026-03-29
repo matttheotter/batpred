@@ -844,6 +844,19 @@ triggers:
         Predbat status is {{ states('predbat.status') }}, error={{
         state_attr('predbat.status', 'error') }}
   - trigger: state
+    alias: Predbat components are in error status for 10 minutes
+    entity_id: binary_sensor.predbat_components_healthy
+    to: "off"
+    for:
+      minutes: 10
+    variables:
+      alert_text: >-
+        Predbat components are unhealthy, {{
+        state_attr('binary_sensor.predbat_components_healthy', 'error_count') }}
+        of {{ state_attr('binary_sensor.predbat_components_healthy',
+        'active_count') }} in error status, restarting
+      restart_predbat: "Y"
+  - trigger: state
     alias: Predbat status.last_updated has not changed for 20 minutes
     entity_id: predbat.status
     attribute: last_updated
@@ -855,15 +868,6 @@ triggers:
         state_attr('predbat.status','last_updated')|as_timestamp|timestamp_custom('%a
         %H:%M') }}', unchanged for 20 mins; Status='{{ states('predbat.status')
         }}', restarting
-      restart_predbat: "Y"
-  - trigger: state
-    alias: Predbat app not running for 15 minutes
-    entity_id: binary_sensor.predbat_running
-    to: "off"
-    for:
-      minutes: 15
-    variables:
-      alert_text: Predbat app is not running, restarting
       restart_predbat: "Y"
   - trigger: state
     alias: predbat_active stuck on for 20 minutes
@@ -883,6 +887,15 @@ triggers:
       alert_text: >-
         Predbat plan is unknown for 20 minutes, possibly failed on startup,
         restarting
+      restart_predbat: "Y"
+  - trigger: state
+    alias: Predbat app not running for 15 minutes
+    entity_id: binary_sensor.predbat_running
+    to: "off"
+    for:
+      minutes: 15
+    variables:
+      alert_text: Predbat app is not running, restarting
       restart_predbat: "Y"
   - alias: "Heartbeat: check Predbat has populated output entities OK"
     trigger: time_pattern

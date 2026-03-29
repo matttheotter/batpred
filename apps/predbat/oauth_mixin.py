@@ -37,7 +37,7 @@ class OAuthMixin:
     """
 
     def _init_oauth(self, auth_method, key, token_expires_at, provider_name):
-        """Initialize OAuth state. Call from component's initialize()."""
+        """Initialise OAuth state. Call from component's initialise()."""
         self.auth_method = auth_method or "api_key"
         self.provider_name = provider_name
         self.oauth_failed = False

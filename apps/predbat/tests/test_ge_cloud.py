@@ -33,7 +33,7 @@ class MockGECloudDirect(GECloudDirect):
         self.config_args = {}
         self.prefix = "predbat"  # Add prefix attribute for entity naming
 
-        # Initialize instance variables that GECloudDirect expects
+        # Initialise instance variables that GECloudDirect expects
         self.requests_total = 0
         self.failures_total = 0
         self.register_list = {}
@@ -99,7 +99,7 @@ class MockGECloudData(GECloudData):
     """Mock GECloudData class for testing without ComponentBase dependencies"""
 
     def __init__(self, config_root="/tmp"):
-        # Don't call parent initialize
+        # Don't call parent initialise
         self.ge_cloud_key = "test_api_key"
         self.ge_cloud_serial_config_item = "ge_cloud_serial"
         self.ge_cloud_serial = "test123"
@@ -1815,7 +1815,7 @@ def _test_async_write_inverter_setting_success(my_predbat):
 
     async def test():
         ge_cloud = MockGECloudDirect()
-        ge_cloud.pending_writes["test123"] = []  # Initialize pending writes for serial
+        ge_cloud.pending_writes["test123"] = []  # Initialise pending writes for serial
 
         with patch("gecloud.asyncio.sleep", new_callable=AsyncMock):
 
@@ -1860,7 +1860,7 @@ def _test_async_write_inverter_setting_failure(my_predbat):
 
     async def test():
         ge_cloud = MockGECloudDirect()
-        ge_cloud.pending_writes["test123"] = []  # Initialize pending writes for serial
+        ge_cloud.pending_writes["test123"] = []  # Initialise pending writes for serial
 
         with patch("gecloud.asyncio.sleep", new_callable=AsyncMock):
             call_count = [0]
@@ -2197,11 +2197,11 @@ def _test_publish_evc_data(my_predbat):
         evc_data = {
             1: 16.5,  # Current.Import
             2: 32.0,  # Current.Offered
-            4: 150.5,  # Energy.Active.Import.Register
+            4: 150500,  # Energy.Active.Import.Register - updated test to scale result to watts which is what the EVC returns, GEcloud component returns kW
             11: 50.0,  # Frequency
-            13: 7200,  # Power.Active.Import
+            13: 7.2,  # Power.Active.Import - updated test to scale result to kW from the EVC, component returns W
             14: 0.95,  # Power.Factor
-            15: 7400,  # Power.Offered
+            15: 7.4,  # Power.Offered - scale result to kW from the EVC, component returns W
             19: 75,  # SoC
             20: 28.5,  # Temperature
             21: 230,  # Voltage
@@ -3033,7 +3033,7 @@ def _test_load_ge_cache_corrupt_file(my_predbat):
         ge_data.load_ge_cache()
 
         if ge_data.ge_url_cache != {}:
-            print("ERROR: Should initialize empty cache for corrupt file")
+            print("ERROR: Should initialise empty cache for corrupt file")
             return 1
 
         return 0

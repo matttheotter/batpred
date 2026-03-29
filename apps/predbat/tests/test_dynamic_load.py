@@ -25,7 +25,7 @@ def test_dynamic_load_car_slot_cancellation(my_predbat):
     my_predbat.battery_rate_max_discharge = 5.0 / 60.0  # 5kW converted to kW per minute
     my_predbat.car_charging_threshold = 3.0  # 3kW
     my_predbat.metric_dynamic_load_adjust = True
-    my_predbat.load_last_status = "baseline"  # Initialize status
+    my_predbat.load_last_status = "baseline"  # Initialise status
     my_predbat.load_last_car_slot = False
 
     # Test 1: High load - should set load_last_status to "high" but not cancel slots

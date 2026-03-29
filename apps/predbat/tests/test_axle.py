@@ -30,7 +30,7 @@ class MockAxleAPI(AxleAPI):
         self.config_args = {}
         self.prefix = "predbat"
 
-        # Initialize instance variables that AxleAPI expects
+        # Initialise instance variables that AxleAPI expects
         self.failures_total = 0
         self.last_updated_timestamp = None
         self.event_history = []
@@ -109,7 +109,7 @@ def test_axle(my_predbat=None):
     AXLE ENERGY VPP TEST SUITE
     ======================================================================
     Comprehensive test suite for Axle Energy Virtual Power Plant integration including:
-    - Initialization and configuration
+    - Initialisation and configuration
     - Event fetching (active, future, past, no events)
     - Error handling (HTTP errors, request exceptions, JSON parse errors)
     - Retry logic and datetime parsing
@@ -123,7 +123,7 @@ def test_axle(my_predbat=None):
 
     # Sub-test registry - each entry is (key, function, description)
     sub_tests = [
-        ("initialization", _test_axle_initialization, "Axle API initialization"),
+        ("initialisation", _test_axle_initialization, "Axle API initialisation"),
         ("list_api_key", _test_axle_list_api_key_validation, "List API key validation and error logging"),
         ("active_event", _test_axle_fetch_with_active_event, "Fetch with active event"),
         ("duplicate_event", _test_axle_duplicate_event_detection, "Duplicate event detection"),
@@ -143,7 +143,7 @@ def test_axle(my_predbat=None):
         ("load_slot_export", _test_axle_load_slot_export, "Load slot export integration"),
         ("load_slot_import", _test_axle_load_slot_import, "Load slot import integration"),
         ("active_function", _test_axle_active_function, "Active status checking"),
-        ("managed_init", _test_axle_managed_initialization, "Managed mode initialization"),
+        ("managed_init", _test_axle_managed_initialization, "Managed mode initialisation"),
         ("managed_price_curve", _test_axle_managed_price_curve_processing, "Managed mode price curve processing"),
         ("managed_dedup", _test_axle_managed_event_dedup, "Managed mode event deduplication"),
         ("managed_future", _test_axle_managed_future_events, "Managed mode future events"),
@@ -184,8 +184,8 @@ def test_axle(my_predbat=None):
 
 
 def _test_axle_initialization(my_predbat=None):
-    """Test AxleAPI component initialization"""
-    print("Test: Axle API initialization")
+    """Test AxleAPI component initialisation"""
+    print("Test: Axle API initialisation")
 
     axle = MockAxleAPI()
     axle.initialize(api_key="test_key_12345", pence_per_kwh=150, automatic=False)
@@ -199,7 +199,7 @@ def _test_axle_initialization(my_predbat=None):
     assert axle.event_history == [], "Event history should be empty on init"
     assert axle.history_loaded is False, "History should not be loaded on init"
 
-    print("  ✓ Initialization successful")
+    print("  ✓ Initialisation successful")
     return False
 
 
@@ -913,7 +913,7 @@ def _test_axle_load_slot_export(my_predbat=None):
             self.forecast_minutes = 24 * 60  # 24 hours
             self.prefix = "predbat"
 
-            # Initialize rate_export with base rates for each minute
+            # Initialise rate_export with base rates for each minute
             self.rate_export = {}
             for minute in range(self.forecast_minutes):
                 self.rate_export[minute] = 5.0  # Base rate of 5p/kWh
@@ -1006,7 +1006,7 @@ def _test_axle_load_slot_import(my_predbat=None):
             self.forecast_minutes = 24 * 60  # 24 hours
             self.prefix = "predbat"
 
-            # Initialize rate_import with base rates for each minute
+            # Initialise rate_import with base rates for each minute
             self.rate_import = {}
             for minute in range(self.forecast_minutes):
                 self.rate_import[minute] = 30.0  # Base rate of 30p/kWh
@@ -1125,8 +1125,8 @@ def _test_axle_active_function(my_predbat=None):
 
 
 def _test_axle_managed_initialization(my_predbat=None):
-    """Test managed mode initialization with valid and missing params"""
-    print("Test: Managed mode initialization")
+    """Test managed mode initialisation with valid and missing params"""
+    print("Test: Managed mode initialisation")
 
     # Valid managed mode config
     axle = MockAxleAPI()
@@ -1137,7 +1137,7 @@ def _test_axle_managed_initialization(my_predbat=None):
     assert axle.partner_password == "secret"
     assert axle.api_base_url == "https://api-sandbox.axle.energy"
     assert axle.api_key is None, "api_key should be None in managed mode"
-    print("  ✓ Valid managed mode initialization")
+    print("  ✓ Valid managed mode initialisation")
 
     # Missing site_id should disable managed mode
     axle2 = MockAxleAPI()

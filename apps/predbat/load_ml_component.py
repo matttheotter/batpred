@@ -53,7 +53,7 @@ class LoadMLComponent(ComponentBase):
 
     def initialize(self, load_ml_enable, load_ml_source=True, load_ml_max_days_history=28, load_ml_database_days=90):
         """
-        Initialize the ML load forecaster component.
+        Initialise the ML load forecaster component.
 
         Args:
             load_ml_enable: Whether ML forecasting is enabled
@@ -129,11 +129,11 @@ class LoadMLComponent(ComponentBase):
             self.log("Error: ML Component: ml_load_sensor must be configured when ml_enable is True")
             self.ml_enable = False
 
-        # Initialize predictor
+        # Initialise predictor
         self._init_predictor()
 
     def _init_predictor(self):
-        """Initialize or reinitialize the predictor."""
+        """Initialise or reinitialise the predictor."""
         self.predictor = LoadPredictor(log_func=self.log, learning_rate=self.ml_learning_rate, max_load_kw=self.ml_max_load_kw, weight_decay=self.ml_weight_decay, dropout_rate=self.ml_dropout_rate)
 
         # Determine model save path
@@ -160,8 +160,8 @@ class LoadMLComponent(ComponentBase):
                     self.model_status = "fallback_" + reason
             else:
                 # Model load failed (version mismatch, architecture change, etc.)
-                # Reinitialize predictor to ensure clean state
-                self.log("ML Component: Failed to load model, reinitializing predictor")
+                # Reinitialise predictor to ensure clean state
+                self.log("ML Component: Failed to load model, reinitialising predictor")
                 self.predictor = LoadPredictor(log_func=self.log, learning_rate=self.ml_learning_rate, max_load_kw=self.ml_max_load_kw, weight_decay=self.ml_weight_decay, dropout_rate=self.ml_dropout_rate)
 
     def is_calculating(self):

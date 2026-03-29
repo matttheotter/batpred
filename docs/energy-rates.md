@@ -10,9 +10,15 @@ Energy rates are all configured in the `apps.yaml` file that's stored in a direc
 You will need to use a file editor within Home Assistant (e.g. either the File editor or Studio Code Server apps)
 to edit this file - see [editing configuration files within Home Assistant](install.md#editing-configuration-files-in-home-assistant) if you need to install an editor.
 
-There are four different ways of configuring your Energy rates in `apps.yaml`, using [Octopus Energy Direct](#octopus-energy-direct),
-using the [Octopus Energy Integration](#octopus-energy-home-assistant-integration), using [Octopus Rates URL's](#octopus-rates-url),
-or manually [defining your rates and time periods](#rate-bands-to-manually-configure-energy-rates).
+There are a number of different ways of configuring your Energy rates in `apps.yaml`:
+
+- [Octopus Energy Direct](#octopus-energy-direct), Predbat directly connecting to your Octopus account
+- [Octopus Energy Integration](#octopus-energy-home-assistant-integration), Predbat getting Octopus rates from the Octopus Energy integration
+- [Octopus Rates URL's](#octopus-rates-url), configuring Predbat to directly use the correct URL's for your Octopus tariff (not recommended as can stop working when you change tariff)
+- [Kraken component](#kraken-integration-for-edf-or-eonnext), Predbat getting rates directly from Kraken for EDF or Eon.Next customers
+- [Energidataservice Integration](#energidataservice-integration), Predbat getting rates from the Energidataservice integration
+- [Spot rates](#other-energy-spot-rate-sensor-integrations), Predbat retrieving spot rates from a correctly formatted import and export rate sensor
+- [Manually defining your rates and time periods](#rate-bands-to-manually-configure-energy-rates).
 
 At least one of these methods must be used to define your import and export rates. If you don't then Predbat will assume zero for your energy rates.
 
@@ -146,16 +152,13 @@ Note: **You must have signed up to both the Octopus Octoplus and then the Saving
 For Predbat to automatically manage Octopus saving sessions the following additional configuration item in `apps.yaml` is used.
 Like the electricity rates, this is set in the `apps.yaml` template to a regular expression that should auto-discover the Octopus Energy integration.
 
-- **octopus_saving_session** - Indicates if a saving session is active, should point to the sensor binary_sensor.octopus_energy_ACCOUNT_ID_octoplus_saving_sessions.
+- **octopus_saving_session** - Indicates if a saving session is active, should point to the sensor 'event.octopus_energy_ACCOUNT_ID_saving_session_event'.
 
 When a saving session is available it will be automatically joined by Predbat and should then appear as a joined session within the next 30 minutes.
 
-Note: Predbat automatically joining the saving session relies upon the event being enabled and Predbat being able to find the saving session event as 'event.octopus_energy_ACCOUNT_ID_octoplus_saving_session_events' - there have been occasions
-with some Octopus Integration installations where the event name is different.  If this is the case then the event must be renamed to the correct format that Predbat can function correctly.
-
 In the Predbat plan, for joined saving sessions the energy rates for import and export will be overridden by adding the assumed saving rate to your normal rate.
 The assumed rate will be taken from the Octopus Energy integration and converted into pence
-using the **octopus_saving_session_octopoints_per_penny** configuration item in apps.yaml (default is 8).
+using the **octopus_saving_session_octopoints_per_penny** configuration item in `apps.yaml` (default is 8).
 
 If you normally cut back your house usage during a saving session then you can change **input_number.predbat_load_scaling_saving** to allow Predbat to assume an energy
 reduction in this period. E.g. setting to a value of 0.8 would indicate you will use 80% of the normal consumption in that period (a 20% reduction).
@@ -237,6 +240,24 @@ Look through that page to find the right URL for usage charges in your DNO area
 (For area A)
 
 Configuring the Octopus rates URL is an expert feature as Octopus change the available products from time to time, so for most users, the Octopus Direct or Octopus Energy integration are simpler solutions.
+
+## Kraken integration for EDF or Eon.Next
+
+If you are a customer or EDF or Eon.Next, you can use the [Kraken component](components.md#kraken-energy-kraken) to auto-discover your energy rates.
+
+The following entries are required for the Kraken component in `apps.yaml`:
+
+```yaml
+  kraken_provider: edf or eon
+  kraken_account_id: A-12345678
+  kraken_export_account_id: A-87654321
+  kraken_auth_method: api_key or email
+  kraken_key: !secret kraken_key
+  kraken_email: myemail@example.com
+  kraken_password: !secret kraken_password
+```
+
+Full details of what to configure are given in the [component documentation](components.md#kraken-energy-kraken)
 
 ## Energidataservice Integration
 

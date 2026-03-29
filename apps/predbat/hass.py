@@ -53,7 +53,7 @@ async def main():
     try:
         p_han.initialize()
     except Exception as e:
-        print("Error: Failed to initialize predbat {}".format(e))
+        print("Error: Failed to initialise predbat {}".format(e))
         print(traceback.format_exc())
         await p_han.stop_all()
         return

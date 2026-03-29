@@ -95,6 +95,10 @@ class MockSolisAPI(SolisAPI):
         """Mock set_arg method"""
         pass
 
+    def get_arg(self, name, default=None):
+        """Mock get_arg"""
+        return default
+
     def is_tou_v2_mode(self, sn):
         """Mock is_tou_v2_mode - can be overridden in tests"""
         # Default to V1 mode unless overridden

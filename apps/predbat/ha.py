@@ -251,7 +251,7 @@ class HAInterface(ComponentBase):
 
     def initialize(self, ha_url, ha_key, db_enable, db_mirror_ha, db_primary):
         """
-        Initialize the interface to Home Assistant.
+        Initialise the interface to Home Assistant.
         """
         self.ha_url = ha_url
         self.ha_key = ha_key

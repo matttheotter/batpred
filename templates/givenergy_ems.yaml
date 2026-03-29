@@ -14,7 +14,7 @@ pred_bat:
   timezone: Europe/London
 
   # XXX: Template configuration, delete this line once you have set up for your system
-  template: True
+  template: true
 
   # If you are using Predbat outside of HA then set the HA URL and Key (long lived access token here)
   #ha_url: 'http://homeassistant.local:8123'
@@ -33,31 +33,27 @@ pred_bat:
   # GESerial - Your first inverter
   # GESerial2 - Your second inverter
   # GESerialE - Your EMS
-
   geserial: 'cexxxx'
   geserial2: 'ceyyyy'
   geseriale: 'emszzzz'
+
+  # Configure your GE Cloud API key for Predbat to control your EMS
+  ge_cloud_key: 'xxxx'
+  ge_cloud_direct: true
+  ge_cloud_automatic: true
 
   # Sets the maximum period of zero load before the gap is filled, default 30 minutes
   # To disable set it to 1440
   load_filter_threshold: 30
 
   #
-  # Sensors, more than one can be specified and they will be summed up automatically
+  # Inverter and battery sensors will be auto-configured from the GE Cloud for the EMS and any entries in apps.yaml will be ignored
   #
-  # For two inverters the load today would normally be the master load sensor only (to cover the entire house)
-  # If you have three phase and one inverter per phase then you would need three load sensors
+  # If your EMS does not provide accurate house load energy then you can override the GE Cloud EMS load_today and use a custom house load sensor
   #
-  # For pv_today if you have multiple solar inverter inputs then you should include one entry for each inverter
-  #
-  load_today:
-    - sensor.ge_inverter_{geseriale}_consumption_total
-  import_today:
-    - sensor.ge_inverter_{geseriale}_grid_import_total
-  export_today:
-    - sensor.ge_inverter_{geseriale}_grid_export_total
-  pv_today:
-    - sensor.ge_inverter_{geseriale}_solar_total
+  # ge_cloud_load_today_ignore: true
+  # load_today:
+  #   - sensor.house_load_total
 
   # Load forecast can be used to add to the historical load data (heat-pump)
   # To link to Predheat
@@ -65,77 +61,6 @@ pred_bat:
   #load_forecast:
   #  - predheat.heat_energy$external
   #
-  # If you enable ge_cloud_data then the load/import and export data will be fetches from the GE cloud instead of from GivTCP sensors
-  # this is usually less efficient and of course prone to internet downtime, but could be useful if you lost your GivTCP data
-  # Set the serial to the inverter serial to pull the data from and the key to your API key
-  # When this is set load_today, import_today and export_today are not used
-  #
-  #ge_cloud_data: False
-  #ge_cloud_serial: '{geseriale}'
-  #ge_cloud_key: 'xxxx'
-
-  # Controls/status - must by 1 per inverter
-  #
-  num_inverters: 2
-  inverter_type:
-   - 'GEE'
-   - 'GEE'
-  #
-  # Run balance inverters every N seconds (0=disabled) - only for multi-inverter
-  balance_inverters_seconds: 0
-  #
-  # If not using REST then instead set the Control here (one for each inverter)
-  # - you can delete this section if using REST
-  charge_rate:
-    - number.ge_inverter_{geserial}_battery_charge_power
-    - number.ge_inverter_{geserial2}_battery_charge_power
-  discharge_rate:
-    - number.ge_inverter_{geserial}_battery_discharge_power
-    - number.ge_inverter_{geserial2}_battery_discharge_power
-  battery_power:
-    - sensor.ge_inverter_{geseriale}_battery_power
-    - 0
-  pv_power:
-    - sensor.ge_inverter_{geseriale}_solar_power
-    - 0
-  load_power:
-    - sensor.ge_inverter_{geseriale}_consumption_power
-    - 0
-  grid_power:
-    - sensor.ge_inverter_{geseriale}_grid_power
-    - 0
-  soc_percent:
-    - sensor.ge_inverter_{geserial}_battery_soc
-    - sensor.ge_inverter_{geserial2}_battery_soc
-  soc_max:
-    - sensor.ge_inverter_{geserial}_battery_size
-    - sensor.ge_inverter_{geserial2}_battery_size
-  reserve:
-    - number.ge_inverter_{geserial}_battery_reserve_limit
-    - number.ge_inverter_{geserial2}_battery_reserve_limit
-  #inverter_time:
-  #  - sensor.ge_inverter_{geseriale}_inverter_time
-  charge_start_time:
-    - select.ge_inverter_{geseriale}_charge_start_time_slot_1
-    - select.ge_inverter_{geseriale}_charge_start_time_slot_1
-  charge_end_time:
-    - select.ge_inverter_{geseriale}_charge_end_time_slot_1
-    - select.ge_inverter_{geseriale}_charge_end_time_slot_1
-  idle_start_time:
-    - select.ge_inverter_{geseriale}_discharge_start_time_slot_1
-    - select.ge_inverter_{geseriale}_discharge_start_time_slot_1
-  idle_end_time:
-    - select.ge_inverter_{geseriale}_discharge_end_time_slot_1
-    - select.ge_inverter_{geseriale}_discharge_end_time_slot_1
-  charge_limit:
-    - number.ge_inverter_{geseriale}_charge_soc_limit_1
-    - number.ge_inverter_{geseriale}_charge_soc_limit_1
-  discharge_start_time:
-    - select.ge_inverter_{geseriale}_export_start_time_slot_1
-    - select.ge_inverter_{geseriale}_export_start_time_slot_1
-  discharge_end_time:
-    - select.ge_inverter_{geseriale}_export_end_time_slot_1
-    - select.ge_inverter_{geseriale}_export_end_time_slot_1
 
   # Inverter max AC limit (one per inverter). E.g for a 3.6kw inverter set to 3600
   # If you have a second inverter for PV only please add the two values together
@@ -284,7 +209,7 @@ pred_bat:
 
   # Octopus saving session points to the saving session Sensor in the Octopus plugin, when enabled saving sessions will be at the assumed
   # Rate is read automatically from the add-in and converted to pence using the conversion rate below (default is 8)
-  octopus_saving_session: 're:(binary_sensor.octopus_energy([0-9a-z_]+|)_saving_session(s|))'
+  octopus_saving_session: 're:(event.octopus_energy([0-9a-z_]+|)_saving_session_event(s|)'
   octopus_saving_session_octopoints_per_penny: 8
 
   # Octopus free session points to the free session Sensor in the Octopus plugin

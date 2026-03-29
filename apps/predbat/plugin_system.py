@@ -116,7 +116,7 @@ class PluginSystem:
         plugin_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(plugin_module)
 
-        # Look for plugin classes or initialization functions
+        # Look for plugin classes or initialisation functions
         plugin_instance = None
 
         # Plugin discovery fallthrough (try in order of preference):
@@ -125,30 +125,30 @@ class PluginSystem:
         for name, obj in inspect.getmembers(plugin_module, inspect.isclass):
             if name.endswith("Plugin"):
                 try:
-                    self.log(f"Initializing plugin class (name-based): {name}")
+                    self.log(f"Initialising plugin class (name-based): {name}")
                     plugin_instance = obj(self.base)
                     break
                 except Exception as e:
-                    self.log(f"Failed to initialize plugin class {name}: {e}")
+                    self.log(f"Failed to initialise plugin class {name}: {e}")
 
         # 2. FALLBACK: Class has PREDBAT_PLUGIN = True attribute
         if plugin_instance is None:
             for name, obj in inspect.getmembers(plugin_module, inspect.isclass):
                 if hasattr(obj, "PREDBAT_PLUGIN") and getattr(obj, "PREDBAT_PLUGIN"):
                     try:
-                        self.log(f"Initializing plugin class (attribute-based): {name}")
+                        self.log(f"Initialising plugin class (attribute-based): {name}")
                         plugin_instance = obj(self.base)
                         break
                     except Exception as e:
-                        self.log(f"Failed to initialize plugin class {name}: {e}")
+                        self.log(f"Failed to initialise plugin class {name}: {e}")
 
-        # 3. FINAL FALLBACK: initialize_plugin function
+        # 3. FINAL FALLBACK: initialise_plugin function
         if plugin_instance is None and hasattr(plugin_module, "initialize_plugin"):
             try:
-                self.log(f"Calling initialize_plugin function in {plugin_name}")
+                self.log(f"Calling initialise_plugin function in {plugin_name}")
                 plugin_instance = plugin_module.initialize_plugin(self.base)
             except Exception as e:
-                self.log(f"Failed to call initialize_plugin in {plugin_name}: {e}")
+                self.log(f"Failed to call initialise_plugin in {plugin_name}: {e}")
 
         if plugin_instance:
             self.plugins[plugin_name] = plugin_instance
@@ -161,7 +161,7 @@ class PluginSystem:
                 except Exception as e:
                     self.log(f"Failed to register hooks for plugin {plugin_name}: {e}")
         else:
-            self.log(f"No plugin class or initialization function found in {plugin_name}")
+            self.log(f"No plugin class or initialisation function found in {plugin_name}")
 
     def get_plugin(self, plugin_name: str):
         """

@@ -30,7 +30,7 @@ class TemperatureAPI(ComponentBase):
     and charge/discharge rate adjustment calculations.
     """
     def initialize(self, temperature_enable, temperature_latitude, temperature_longitude, temperature_url):
-        """Initialize the Temperature API component"""
+        """Initialise the Temperature API component"""
         self.temperature_enable = temperature_enable
         self.temperature_latitude = temperature_latitude
         self.temperature_longitude = temperature_longitude

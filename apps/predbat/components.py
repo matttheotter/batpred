@@ -107,7 +107,7 @@ COMPONENT_LIST = {
             "pv_scaling": {"required": False, "config": "pv_scaling", "default": 1.0},
         },
         "required_or": ["solcast_api_key", "forecast_solar", "pv_forecast_today"],
-        "phase": 1,
+        "phase": 2,  # Solar component moved to phase 2 so that any Predbat cloud components (such as GEcloud) have been started and initialised pv_today, etc
     },
     "gecloud": {
         "class": GECloudDirect,
@@ -416,7 +416,7 @@ class Components:
         self.log = base.log
 
     def initialize(self, only=None, phase=0):
-        """Initialize components without starting them"""
+        """Initialise components without starting them"""
         for component_name, component_info in COMPONENT_LIST.items():
             if only and component_name != only:
                 continue
@@ -451,11 +451,11 @@ class Components:
                 if not any(arg_dict.get(arg, None) for arg in required_or):
                     have_all_args = False
             if have_all_args:
-                self.log(f"Initializing {component_info['name']} interface")
+                self.log(f"Initialising {component_info['name']} interface")
                 self.components[component_name] = component_info["class"](self.base, **arg_dict)
 
     def start(self, only=None, phase=0):
-        """Start all initialized components"""
+        """Start all initialised components"""
         failed = False
         for component_name, component_info in COMPONENT_LIST.items():
             if only and component_name != only:
@@ -504,7 +504,9 @@ class Components:
         self.log(f"Starting component(s) {only} again")
         self.initialize(only=only, phase=0)
         self.initialize(only=only, phase=1)
-        self.start(only=only)
+        self.initialize(only=only, phase=2)
+        for phase in (0, 1, 2):
+            self.start(only=only, phase=phase)
 
     """
     Pass through events to the appropriate component
@@ -533,7 +535,7 @@ class Components:
         return all(self.is_alive(name) for name in self.components.keys())
 
     def is_active(self, name):
-        """Check if a single component is active (initialized)"""
+        """Check if a single component is active (initialised)"""
         if name not in self.components:
             return False
         return self.components[name] is not None

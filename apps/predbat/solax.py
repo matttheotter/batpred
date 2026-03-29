@@ -29,9 +29,9 @@ SOLAX_RETRIES = 5
 SOLAX_COMMAND_RETRY_DELAY = 2.0
 SOLAX_COMMAND_MAX_RETRIES = 8
 SOLAX_REGIONS = {
-    "eu": "openapi-eu.solaxcloud.com", # cspell:disable-line
-    "us": "openapi-us.solaxcloud.com", # cspell:disable-line
-    "cn": "openapi.solaxcloud.com", # cspell:disable-line
+    "eu": "openapi-eu.solaxcloud.com",  # cspell:disable-line
+    "us": "openapi-us.solaxcloud.com",  # cspell:disable-line
+    "cn": "openapi.solaxcloud.com",  # cspell:disable-line
 }
 
 # Business type constants
@@ -210,44 +210,44 @@ SOLAX_API_CODES = {
 # Device model mapping for Residential (businessType=1)
 SOLAX_DEVICE_MODEL_RESIDENTIAL = {
     1: {  # Inverter
-        1: "X1-LX", 2: "X-Hybrid", 3: "X1-Hybrid-G3", 4: "X1-Boost/Air/Mini", 5: "X3-Hybrid-G1/G2", # cspell:disable-line
-        6: "X3-20K/30K", 7: "X3-MIC/PRO", 8: "X1-Smart", 9: "X1-AC", 10: "A1-Hybrid", # cspell:disable-line
-        11: "A1-FIT", 12: "A1", 13: "J1-ESS", 14: "X3-Hybrid-G4", 15: "X1-Hybrid-G4", # cspell:disable-line
-        16: "X3-MIC/PRO-G2", 17: "X1-SPT", 18: "X1-Boost-G4", 19: "A1-HYB-G2", 20: "A1-AC-G2", # cspell:disable-line
-        21: "A1-SMT-G2", 22: "X1-Mini-G4", 23: "X1-IES", 24: "X3-IES", 25: "X3-ULT", # cspell:disable-line
-        26: "X1-SMART-G2", 27: "A1-Micro 1 in 1", 28: "X1-Micro 2 in 1", 29: "X1-Micro 4 in 1", # cspell:disable-line
-        31: "X3-AELIO", 32: "X3-HYB-G4 PRO", 33: "X3-NEO-LV", 34: "X1-VAST", 35: "X3-IES-P", # cspell:disable-line
-        36: "J3-ULT-LV-16.5K", 37: "J3-ULT-30K", 38: "J1-ESS-HB-2", 39: "C3-IES", 40: "X3-IES-A", # cspell:disable-line
-        41: "X1-IES-A", 43: "X3-ULT-GLV", 44: "X1-MINI-G4 PLUS", 46: "X1-Reno-LV", 47: "A1-HYB-G3", # cspell:disable-line
-        100: "X3-FTH", 101: "X3-MGA-G2", 102: "X1-Hybrid-LV", 103: "X1-Lite-LV", 104: "X3-GRAND-HV", # cspell:disable-line
-        105: "X3-FORTH-PLUS", # cspell:disable-line
+        1: "X1-LX", 2: "X-Hybrid", 3: "X1-Hybrid-G3", 4: "X1-Boost/Air/Mini", 5: "X3-Hybrid-G1/G2",  # cspell:disable-line
+        6: "X3-20K/30K", 7: "X3-MIC/PRO", 8: "X1-Smart", 9: "X1-AC", 10: "A1-Hybrid",  # cspell:disable-line
+        11: "A1-FIT", 12: "A1", 13: "J1-ESS", 14: "X3-Hybrid-G4", 15: "X1-Hybrid-G4",  # cspell:disable-line
+        16: "X3-MIC/PRO-G2", 17: "X1-SPT", 18: "X1-Boost-G4", 19: "A1-HYB-G2", 20: "A1-AC-G2",  # cspell:disable-line
+        21: "A1-SMT-G2", 22: "X1-Mini-G4", 23: "X1-IES", 24: "X3-IES", 25: "X3-ULT",  # cspell:disable-line
+        26: "X1-SMART-G2", 27: "A1-Micro 1 in 1", 28: "X1-Micro 2 in 1", 29: "X1-Micro 4 in 1",  # cspell:disable-line
+        31: "X3-AELIO", 32: "X3-HYB-G4 PRO", 33: "X3-NEO-LV", 34: "X1-VAST", 35: "X3-IES-P",  # cspell:disable-line
+        36: "J3-ULT-LV-16.5K", 37: "J3-ULT-30K", 38: "J1-ESS-HB-2", 39: "C3-IES", 40: "X3-IES-A",  # cspell:disable-line
+        41: "X1-IES-A", 43: "X3-ULT-GLV", 44: "X1-MINI-G4 PLUS", 46: "X1-Reno-LV", 47: "A1-HYB-G3",  # cspell:disable-line
+        100: "X3-FTH", 101: "X3-MGA-G2", 102: "X1-Hybrid-LV", 103: "X1-Lite-LV", 104: "X3-GRAND-HV",  # cspell:disable-line
+        105: "X3-FORTH-PLUS",  # cspell:disable-line
     },
     3: {  # Meter
-        50: "Meter X", 176: "M1-40", 178: "M3-40", 179: "M3-40-Dual", 181: "M3-40-Wide", # cspell:disable-line
+        50: "Meter X", 176: "M1-40", 178: "M3-40", 179: "M3-40-Dual", 181: "M3-40-Wide",  # cspell:disable-line
     },
     4: {  # EV Charger
-        1: "X1/X3-EVC", 2: "X1/X3-EVC G1.1", 3: "X1/X3-HAC", 4: "J1-EVC", 5: "A1-HAC", 6: "C1/C3-HAC", # cspell:disable-line
+        1: "X1/X3-EVC", 2: "X1/X3-EVC G1.1", 3: "X1/X3-HAC", 4: "J1-EVC", 5: "A1-HAC", 6: "C1/C3-HAC",  # cspell:disable-line
     },
 }
 
 # Device model mapping for Commercial & Industrial (businessType=4)
 SOLAX_DEVICE_MODEL_COMMERCIAL = {
     1: {  # Inverter
-        1: "X3-AELIO", 2: "X3-TRENE-100KI", 3: "X3-TRENE-100K", 4: "X3-TRENE", 16: "X3-PRO G2", # cspell:disable-line
-        31: "X3-AELIO", 42: "X3-AELIO", 100: "X3-FORTH", 101: "X3-MEGA G2", 104: "X3-GRAND", # cspell:disable-line
-        105: "X3-FORTH PLUS", # cspell:disable-line
+        1: "X3-AELIO", 2: "X3-TRENE-100KI", 3: "X3-TRENE-100K", 4: "X3-TRENE", 16: "X3-PRO G2",  # cspell:disable-line
+        31: "X3-AELIO", 42: "X3-AELIO", 100: "X3-FORTH", 101: "X3-MEGA G2", 104: "X3-GRAND",  # cspell:disable-line
+        105: "X3-FORTH PLUS",  # cspell:disable-line
     },
     2: {  # Battery
-        1: "TB-HR140", 2: "TB-HR522", 145: "TSYS-HS51", 163: "TR-HR140", # cspell:disable-line
+        1: "TB-HR140", 2: "TB-HR522", 145: "TSYS-HS51", 163: "TR-HR140",  # cspell:disable-line
     },
     3: {  # Meter
-        0: "DTSU666-CT", 1: "DTSU666-CT", 2: "DTSU666-CT", 3: "DTSU666-CT", # cspell:disable-line
-        4: "Wi-BR DTSU666-CT", 5: "Wi-BR DTSU666-CT", 6: "CT", 7: "DTSU666-CT", # cspell:disable-line
-        8: "UMG 103-CBM", 9: "M3-40-Dual", 10: "M3-40", 11: "PRISMA-310A", # cspell:disable-line
+        0: "DTSU666-CT", 1: "DTSU666-CT", 2: "DTSU666-CT", 3: "DTSU666-CT",  # cspell:disable-line
+        4: "Wi-BR DTSU666-CT", 5: "Wi-BR DTSU666-CT", 6: "CT", 7: "DTSU666-CT",  # cspell:disable-line
+        8: "UMG 103-CBM", 9: "M3-40-Dual", 10: "M3-40", 11: "PRISMA-310A",  # cspell:disable-line
     },
     4: {  # EV Charger
-        8: "UMG 103-CBM", 9: "M3-40-Dual", 10: "M3-40", 11: "PRISMA-310A", # cspell:disable-line
-        1: "X1/X3-EVC", 2: "X1/X3-EVC G1.1", 3: "X1/X3-HAC", 4: "J1-EVC", 5: "A1-HAC", 6: "C1/C3-HAC", # cspell:disable-line
+        8: "UMG 103-CBM", 9: "M3-40-Dual", 10: "M3-40", 11: "PRISMA-310A",  # cspell:disable-line
+        1: "X1/X3-EVC", 2: "X1/X3-EVC G1.1", 3: "X1/X3-HAC", 4: "J1-EVC", 5: "A1-HAC", 6: "C1/C3-HAC",  # cspell:disable-line
     },
 }
 
@@ -313,7 +313,7 @@ class SolaxAPI(ComponentBase):
 
     def initialize(self, client_id, client_secret, region="eu", plant_id=None, automatic=False, enable_controls=True, plant_sn=None):
         """
-        Initialize the SolaX API component
+        Initialise the SolaX API component
 
         Args:
             client_id: SolaX Cloud client ID
@@ -359,7 +359,7 @@ class SolaxAPI(ComponentBase):
         else:
             self.plant_sn_filter = plant_sn
 
-        self.log(f"SolaX API: Initialized with region={region}, base_url={self.base_url}")
+        self.log(f"SolaX API: Initialised with region={region}, base_url={self.base_url}")
 
     async def automatic_config(self):
         """
@@ -378,8 +378,6 @@ class SolaxAPI(ComponentBase):
                     if device.get("plantId") == plant_id and device.get("deviceType") == 2:  # Battery
                         has_battery = True
                         break
-
-
                 if has_battery:
                     plants.append(plant_id)
                     self.log(f"SolaX API: Found plant {plant_id} with {len(inverter_sns)} inverter(s) and battery")
@@ -628,7 +626,6 @@ class SolaxAPI(ComponentBase):
         elif service == "toggle":
             current_value = not current_value
         return current_value
-
 
     async def apply_controls(self, plant_id):
         """
@@ -879,22 +876,21 @@ class SolaxAPI(ComponentBase):
                         app="solax",
                     )
             for field in ["reserve"]:
-                    item_name, ha_name, friendly_name, field_type, field_units, default, min_value, max_value = self.control_info(plant_id, None, field)
-                    value = self.controls.get(plant_id, {}).get(field, default)
-                    ha_name = field_type + '.' + self.prefix + "_" + item_name
-                    self.dashboard_item(
-                        ha_name,
-                        state=value,
-                        attributes={
-                            "friendly_name": friendly_name,
-                            "unit_of_measurement": field_units,
-                            "min": min_value,
-                            "max": max_value,
-                            "step": 1,
-                        },
-                        app="solax",
-                    )
-
+                item_name, ha_name, friendly_name, field_type, field_units, default, min_value, max_value = self.control_info(plant_id, None, field)
+                value = self.controls.get(plant_id, {}).get(field, default)
+                ha_name = field_type + '.' + self.prefix + "_" + item_name
+                self.dashboard_item(
+                    ha_name,
+                    state=value,
+                    attributes={
+                        "friendly_name": friendly_name,
+                        "unit_of_measurement": field_units,
+                        "min": min_value,
+                        "max": max_value,
+                        "step": 1,
+                    },
+                    app="solax",
+                )
 
     def decode_api_code(self, code):
         """
@@ -921,7 +917,7 @@ class SolaxAPI(ComponentBase):
         payload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
-            "grant_type": "CICS", # cspell:disable-line
+            "grant_type": "CICS",  # cspell:disable-line
         }
 
         try:
@@ -1213,7 +1209,7 @@ class SolaxAPI(ComponentBase):
             plant_id: Optional plant ID to filter devices
             device_type: Optional device type (1=Inverter, 2=Battery, 3=Meter, 4=EV Charger)
             device_sn: Optional device serial number to filter
-            business_type: Business type (1=Residential, 4=Commercial), defaults to initialized value
+            business_type: Business type (1=Residential, 4=Commercial), defaults to initialised value
 
         Returns:
             List of device records or None on failure
@@ -1353,7 +1349,6 @@ class SolaxAPI(ComponentBase):
         if result:
             self.log(f"SolaX API: Retrieved daily statistics for plant ID {plant_id} for {year_month}")
         return result
-
 
     async def query_plant_statistics(self, plant_id, date_type, date, business_type=None):
         """
@@ -1738,8 +1733,6 @@ class SolaxAPI(ComponentBase):
         # Send command and wait for result
         return await self.send_command_and_wait(endpoint, payload, "self-consume", sn_list)
 
-
-
     async def self_consume_charge_only_mode(self, sn_list, time_of_duration, next_motion=161,
                                             business_type=None):
         """
@@ -1816,9 +1809,9 @@ class SolaxAPI(ComponentBase):
         return success
 
     async def set_work_mode(self, mode, sn_list, min_soc, charge_upper_soc, charge_from_grid_enable,
-                                charge_start_time, charge_end_time,
-                                discharge_start_time, discharge_end_time,
-                                business_type=None):
+                            charge_start_time, charge_end_time,
+                            discharge_start_time, discharge_end_time,
+                            business_type=None):
         """
         Set inverter working mode to Self Use Mode (time period 1 only)
 
@@ -1920,7 +1913,7 @@ class SolaxAPI(ComponentBase):
         payload = {
             "snList": sn_list,
             "targetSoc": target_soc,
-            "chargeDischargPower": charge_discharge_power, # cSpell:disable-line
+            "chargeDischargPower": charge_discharge_power,  # cSpell:disable-line
             "businessType": business_type if business_type is not None else BUSINESS_TYPE_RESIDENTIAL,
         }
 
@@ -1996,7 +1989,7 @@ class SolaxAPI(ComponentBase):
                 ac_power = (ac_power1 if ac_power1 else 0) + (ac_power2 if ac_power2 else 0) + (ac_power3 if ac_power3 else 0)
                 gridPower = realtime.get("gridPower", 0)
                 pvMap = realtime.get("pvMap", {})
-                mpptMap = realtime.get("mpptMap", {}) # cSpell:disable-line
+                mpptMap = realtime.get("mpptMap", {})  # cSpell:disable-line
                 totalActivePower = realtime.get("totalActivePower", 0)
                 totalReactivePower = realtime.get("totalReactivePower", 0)
                 totalYield = realtime.get("totalYield", 0)
@@ -2009,10 +2002,10 @@ class SolaxAPI(ComponentBase):
                     for key in pvMap:
                         if "Power" in key:
                             pvPower += pvMap.get(key, 0)
-                elif mpptMap: # cSpell:disable-line
-                    for key in mpptMap: # cSpell:disable-line
+                elif mpptMap:  # cSpell:disable-line
+                    for key in mpptMap:  # cSpell:disable-line
                         if "Power" in key:
-                            pvPower += mpptMap.get(key, 0) # cSpell:disable-line
+                            pvPower += mpptMap.get(key, 0)  # cSpell:disable-line
 
                 self.dashboard_item(
                     f"sensor.{self.prefix}_solax_{plant_id}_{device_sn}_device_status",
@@ -2345,11 +2338,11 @@ class SolaxAPI(ComponentBase):
                 # Work out total load
                 # This is will total imported + total discharged - total exported - total charged + total yield
                 total_load = (
-                    realtime.get("totalImported", 0.0) +
-                    realtime.get("totalDischarged", 0.0) -
-                    realtime.get("totalExported", 0.0) -
-                    realtime.get("totalCharged", 0.0) +
-                    realtime.get("totalYield", 0.0)
+                    realtime.get("totalImported", 0.0)
+                    + realtime.get("totalDischarged", 0.0)
+                    - realtime.get("totalExported", 0.0)
+                    - realtime.get("totalCharged", 0.0)
+                    + realtime.get("totalYield", 0.0)
                 )
                 self.dashboard_item(
                     f"sensor.{self.prefix}_solax_{plant_id}_total_load",
@@ -2403,14 +2396,14 @@ class SolaxAPI(ComponentBase):
         # Check readonly mode
         is_readonly = self.get_state_wrapper(f'switch.{self.prefix}_set_read_only', default='off') == 'on'
 
-        if first or seconds % (30*60) == 0:
+        if first or seconds % (30 * 60) == 0:
             # Periodic plant info refresh every 30 minutes
             for plantID in self.plant_list:
                 self.log(f"SolaX API: Fetching device information for plant ID {plantID}...")
                 await self.query_device_info(plantID, device_type=SOLAX_DEVICE_TYPE_INVERTER)  # Inverter
                 await self.query_device_info(plantID, device_type=SOLAX_DEVICE_TYPE_BATTERY)  # Battery
-                #await self.query_device_info(plantID, device_type=SOLAX_DEVICE_TYPE_METER)  # Meter
-                #await self.query_plant_statistics_daily(plantID)
+                # await self.query_device_info(plantID, device_type=SOLAX_DEVICE_TYPE_METER)  # Meter
+                # await self.query_plant_statistics_daily(plantID)
 
         if first or seconds % 60 == 0:
             for plantID in self.plant_list:
@@ -2448,7 +2441,7 @@ class SolaxAPI(ComponentBase):
         return True
 
 
-class MockBase: # pragma: no cover
+class MockBase:  # pragma: no cover
     """Mock base class for standalone testing"""
 
     def __init__(self):
@@ -2498,7 +2491,7 @@ class MockBase: # pragma: no cover
         print(f"Set arg {key} = {value} (state={state})")
 
 
-async def test_solax_api(client_id, client_secret, region, plant_id, test_mode=None): # pragma: no cover
+async def test_solax_api(client_id, client_secret, region, plant_id, test_mode=None):  # pragma: no cover
     """
     Test function for standalone execution
 
@@ -2535,10 +2528,10 @@ async def test_solax_api(client_id, client_secret, region, plant_id, test_mode=N
     )
     result = await solax.run(first=True, seconds=0)
     if not result:
-        print("✗ Initialization failed")
+        print("✗ Initialisation failed")
         return
     else:
-        print("✓ Initialization successful")
+        print("✓ Initialisation successful")
 
     # If test_mode is specified, apply controls
     if test_mode and solax.plant_list:
@@ -2649,7 +2642,7 @@ async def test_solax_api(client_id, client_secret, region, plant_id, test_mode=N
     return 0
 
 
-def main(): # pragma: no cover
+def main():  # pragma: no cover
     """Main entry point for standalone testing"""
     parser = argparse.ArgumentParser(
         description="Test SolaX Cloud API and control modes",
@@ -2661,12 +2654,12 @@ def main(): # pragma: no cover
     parser.add_argument("--region", default="eu", choices=["eu", "us", "cn"], help="API region (default: eu)")
     parser.add_argument("--plant-id", help="Optional plant ID to filter")
     parser.add_argument("--test-mode", choices=["eco", "charge", "freeze_charge", "export", "freeze_export"],
-                       help="Test control mode: eco (no windows), charge (active charge), freeze_charge (at target), export (active export), freeze_export (at/above target)")
+                        help="Test control mode: eco (no windows), charge (active charge), freeze_charge (at target), export (active export), freeze_export (at/above target)")
 
     args = parser.parse_args()
 
     asyncio.run(test_solax_api(args.client_id, args.client_secret, args.region, args.plant_id, args.test_mode))
 
 
-if __name__ == "__main__": # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     main()

@@ -2177,6 +2177,6 @@ APPS_SCHEMA = {
     "load_ml_enable": {"type": "boolean"},
     "gateway_device_id": {"type": "string", "empty": False},
     "gateway_mqtt_host": {"type": "string", "empty": False},
-    "gateway_mqtt_port": {"type": "integer"},
+    "gateway_mqtt_port": {"type": "integer", "zero": False},
     "gateway_mqtt_token": {"type": "string", "empty": False},
 }

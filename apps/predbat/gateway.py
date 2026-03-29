@@ -15,7 +15,6 @@ import time
 import uuid
 import traceback
 
-from datetime import datetime
 from component_base import ComponentBase
 
 try:
@@ -412,7 +411,7 @@ class GatewayMQTT(ComponentBase):
         if status.timestamp > 0 and len(status.inverters) > 0:
             primary_inv = next((inv for inv in status.inverters if inv.primary), status.inverters[0])
             ts_suffix = primary_inv.serial[-6:].lower() if len(primary_inv.serial) > 6 else primary_inv.serial.lower()
-            dt = datetime.fromtimestamp(status.timestamp)
+            dt = datetime.datetime.fromtimestamp(status.timestamp)
             self.set_state_wrapper(
                 f"sensor.{self.prefix}_gateway_{ts_suffix}_inverter_time",
                 dt.strftime("%Y-%m-%d %H:%M:%S"),
@@ -508,9 +507,7 @@ class GatewayMQTT(ComponentBase):
 
         # Inverter time (from GatewayStatus timestamp for clock drift detection)
         if self._last_status and self._last_status.timestamp:
-            from datetime import datetime, timezone
-
-            dt = datetime.fromtimestamp(self._last_status.timestamp, tz=timezone.utc)
+            dt = datetime.datetime.fromtimestamp(self._last_status.timestamp, tz=datetime.timezone.utc)
             self.set_state_wrapper(f"sensor.{pfx}_inverter_time", dt.strftime("%Y-%m-%d %H:%M:%S"))
 
         # Battery scaling (depth of discharge) — from firmware pct, apps.yaml override, or 0.95 default
@@ -1066,7 +1063,7 @@ class GatewayMQTT(ComponentBase):
                         if isinstance(data["expires_at"], (int, float)):
                             self.mqtt_token_expires_at = float(data["expires_at"])
                         else:
-                            dt = datetime.fromisoformat(data["expires_at"].replace("Z", "+00:00"))
+                            dt = datetime.datetime.fromisoformat(data["expires_at"].replace("Z", "+00:00"))
                             self.mqtt_token_expires_at = dt.timestamp()
                     except (ValueError, AttributeError):
                         self.mqtt_token_expires_at = 0

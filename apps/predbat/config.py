@@ -2175,4 +2175,8 @@ APPS_SCHEMA = {
     "enable_coarse_fine_levels": {"type": "boolean"},
     "load_power_fill_enable": {"type": "boolean"},
     "load_ml_enable": {"type": "boolean"},
+    "gateway_device_id": {"type": "string", "empty": False},
+    "gateway_mqtt_host": {"type": "string", "empty": False},
+    "gateway_mqtt_port": {"type": "integer"},
+    "gateway_mqtt_token": {"type": "string", "empty": False},
 }

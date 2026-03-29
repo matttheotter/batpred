@@ -5,7 +5,7 @@ integration sensor, applies tariff adjustments, and converts to per-minute
 rate dictionaries.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from utils import dp4
 
 
@@ -68,55 +68,75 @@ class Energidataservice:
 
         return rate_data
 
-    def minute_data_hourly_rates(self, data, forecast_days, midnight_utc, rate_key, from_key, adjust_key=None, scale=1.0, use_cent=False):
+    def minute_data_hourly_rates(
+        self,
+        data,
+        forecast_days,
+        midnight_utc,
+        rate_key,
+        from_key,
+        adjust_key=None,
+        scale=1.0,
+        use_cent=False,
+    ):
         """
         Convert 15-minute rate data into a per-minute dict keyed by minute offset from midnight_utc.
+        FIXED: Handles timezone/DST correctly.
         """
         rate_data = {}
         min_minute = -forecast_days * 24 * 60
         max_minute = forecast_days * 24 * 60
-        interval_minutes = 15  # new feed granularity
+        interval_minutes = 15  # default granularity
 
-        # Find gap between two entries in minutes
-        if len(data) < 2:
-            pass
+        # Normalize midnight to naive (local comparison baseline)
+        if midnight_utc.tzinfo is not None:
+            midnight = midnight_utc.astimezone(timezone.utc).replace(tzinfo=None)
         else:
+            midnight = midnight_utc
+
+        # Detect interval dynamically
+        if len(data) >= 2:
             t0 = self._parse_iso(data[0].get(from_key))
             t1 = self._parse_iso(data[1].get(from_key))
             if t0 and t1:
-                interval_minutes = int((t1 - t0).total_seconds() / 60)
-                if interval_minutes <= 15 or interval_minutes > 60:
-                    interval_minutes = 15
+                delta = int((t1 - t0).total_seconds() / 60)
+                if 15 <= delta <= 60:
+                    interval_minutes = delta
 
         for entry in data:
             start_time_str = entry.get(from_key)
             rate = entry.get(rate_key, 0) * scale
+
             if not use_cent:
-                # Keep behavior: convert DKK → øre (or cents) if use_cent is False
                 rate = rate * 100.0
 
-            # Parse time robustly
             start_time = self._parse_iso(start_time_str)
             if start_time is None:
                 self.log(f"Warn: Invalid time format '{start_time_str}' in data")
                 continue
 
-            # Support naive/aware midnight_utc gracefully
-            try:
-                start_minute = int((start_time - midnight_utc).total_seconds() / 60)
-            except TypeError:
-                # If midnight_utc is naive, drop tzinfo from start_time for subtraction
-                start_minute = int((start_time.replace(tzinfo=None) - midnight_utc).total_seconds() / 60)
+            # 🔧 FIX: normalize timezone properly
+            if start_time.tzinfo is not None:
+                start_time = start_time.astimezone(timezone.utc).replace(tzinfo=None)
 
+            # Compute minute offset safely
+            start_minute = int((start_time - midnight).total_seconds() / 60)
             end_minute = start_minute + interval_minutes
 
-            # Fill each minute in the 15-min slot
+            # Fill each minute in interval
             for minute in range(start_minute, end_minute):
                 if min_minute <= minute < max_minute:
                     rate_data[minute] = dp4(rate)
 
+        # 🔧 SAFETY FIX: ensure minute 0 exists (prevents KeyError)
+        if rate_data:
+            if 0 not in rate_data:
+                min_key = min(rate_data.keys())
+                shift = min_key
+                self.log(f"Adjusting rate_data index by {-shift} to align minute 0")
+                rate_data = {k - shift: v for k, v in rate_data.items()}
+
         if adjust_key:
-            # hook for intelligent adjustments
             pass
 
         return rate_data
@@ -134,11 +154,13 @@ class Energidataservice:
     def _tariff_for(self, tariffs, start_time_str):
         if not tariffs or not start_time_str:
             return 0
-        s = str(start_time_str)
-        dt = self._parse_iso(s)
+
+        dt = self._parse_iso(start_time_str)
         if not dt:
-            return tariffs.get(s, 0)
-        hhmm = f"{dt.hour:02d}:{dt.minute:02d}"  # 08:15
-        h = str(dt.hour)  # "8"
-        hh = f"{dt.hour:02d}"  # "08"
-        return tariffs.get(hhmm, tariffs.get(h, tariffs.get(hh, tariffs.get(s, 0))))
+            return tariffs.get(str(start_time_str), 0)
+
+        hhmm = f"{dt.hour:02d}:{dt.minute:02d}"
+        h = str(dt.hour)
+        hh = f"{dt.hour:02d}"
+
+        return tariffs.get(hhmm, tariffs.get(h, tariffs.get(hh, tariffs.get(str(start_time_str), 0))))

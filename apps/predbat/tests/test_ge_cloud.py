@@ -2277,57 +2277,57 @@ def _test_async_automatic_config(my_predbat):
         ge.config_args = {}
 
         # Test 1: Single battery with all features
-        ge.settings = {"BATTERY001": {"reg1": {"name": "Inverter_Charge_Power_Percentage"}, "reg2": {"name": "Pause_Battery"}, "reg3": {"name": "Pause_Battery_Start_Time"}, "reg4": {"name": "DC_Discharge_1_Lower_SOC_Percent_Limit"}}}
+        ge.settings = {"battery001": {"reg1": {"name": "Inverter_Charge_Power_Percentage"}, "reg2": {"name": "Pause_Battery"}, "reg3": {"name": "Pause_Battery_Start_Time"}, "reg4": {"name": "DC_Discharge_1_Lower_SOC_Percent_Limit"}}}
 
-        devices = {"ems": None, "gateway": None, "battery": ["BATTERY001"]}
+        devices = {"ems": None, "gateway": None, "battery": ["battery001"]}
 
         await ge.async_automatic_config(devices)
 
         # Verify basic configuration
         assert ge.config_args.get("inverter_type") == ["GEC"], "inverter_type should be set to GEC"
         assert ge.config_args.get("num_inverters") == 1, "num_inverters should be 1"
-        assert ge.config_args.get("ge_cloud_serial") == "BATTERY001", "ge_cloud_serial should be first battery"
+        assert ge.config_args.get("ge_cloud_serial") == "battery001", "ge_cloud_serial should be first battery"
         assert ge.config_args.get("givtcp_rest") is None, "givtcp_rest should be None"
 
         # Verify eco mode toggle is configured as inverter_mode
-        assert ge.config_args.get("inverter_mode") == ["switch.predbat_gecloud_BATTERY001_enable_eco_mode"], "inverter_mode should point to eco toggle switch"
+        assert ge.config_args.get("inverter_mode") == ["switch.predbat_gecloud_battery001_enable_eco_mode"], "inverter_mode should point to eco toggle switch"
 
         # Verify sensor entities
-        assert ge.config_args.get("load_today") == ["sensor.predbat_gecloud_BATTERY001_consumption_today"]
-        assert ge.config_args.get("import_today") == ["sensor.predbat_gecloud_BATTERY001_grid_import_today"]
-        assert ge.config_args.get("export_today") == ["sensor.predbat_gecloud_BATTERY001_grid_export_today"]
-        assert ge.config_args.get("pv_today") == ["sensor.predbat_gecloud_BATTERY001_solar_today"]
-        assert ge.config_args.get("battery_power") == ["sensor.predbat_gecloud_BATTERY001_battery_power"]
-        assert ge.config_args.get("pv_power") == ["sensor.predbat_gecloud_BATTERY001_solar_power"]
-        assert ge.config_args.get("load_power") == ["sensor.predbat_gecloud_BATTERY001_consumption_power"]
-        assert ge.config_args.get("grid_power") == ["sensor.predbat_gecloud_BATTERY001_grid_power"]
-        assert ge.config_args.get("soc_percent") == ["sensor.predbat_gecloud_BATTERY001_battery_percent"]
+        assert ge.config_args.get("load_today") == ["sensor.predbat_gecloud_battery001_consumption_total"]
+        assert ge.config_args.get("import_today") == ["sensor.predbat_gecloud_battery001_grid_import_total"]
+        assert ge.config_args.get("export_today") == ["sensor.predbat_gecloud_battery001_grid_export_total"]
+        assert ge.config_args.get("pv_today") == ["sensor.predbat_gecloud_battery001_solar_total"]
+        assert ge.config_args.get("battery_power") == ["sensor.predbat_gecloud_battery001_battery_power"]
+        assert ge.config_args.get("pv_power") == ["sensor.predbat_gecloud_battery001_solar_power"]
+        assert ge.config_args.get("load_power") == ["sensor.predbat_gecloud_battery001_consumption_power"]
+        assert ge.config_args.get("grid_power") == ["sensor.predbat_gecloud_battery001_grid_power"]
+        assert ge.config_args.get("soc_percent") == ["sensor.predbat_gecloud_battery001_battery_percent"]
 
         # Verify control entities
-        assert ge.config_args.get("charge_rate") == ["number.predbat_gecloud_BATTERY001_battery_charge_power"]
-        assert ge.config_args.get("discharge_rate") == ["number.predbat_gecloud_BATTERY001_battery_discharge_power"]
-        assert ge.config_args.get("reserve") == ["number.predbat_gecloud_BATTERY001_battery_reserve_percent_limit"]
-        assert ge.config_args.get("charge_limit") == ["number.predbat_gecloud_BATTERY001_ac_charge_upper_percent_limit"]
+        assert ge.config_args.get("charge_rate") == ["number.predbat_gecloud_battery001_battery_charge_power"]
+        assert ge.config_args.get("discharge_rate") == ["number.predbat_gecloud_battery001_battery_discharge_power"]
+        assert ge.config_args.get("reserve") == ["number.predbat_gecloud_battery001_battery_reserve_percent_limit"]
+        assert ge.config_args.get("charge_limit") == ["number.predbat_gecloud_battery001_ac_charge_upper_percent_limit"]
 
         # Verify time controls
-        assert ge.config_args.get("charge_start_time") == ["select.predbat_gecloud_BATTERY001_ac_charge_1_start_time"]
-        assert ge.config_args.get("charge_end_time") == ["select.predbat_gecloud_BATTERY001_ac_charge_1_end_time"]
-        assert ge.config_args.get("discharge_start_time") == ["select.predbat_gecloud_BATTERY001_dc_discharge_1_start_time"]
-        assert ge.config_args.get("discharge_end_time") == ["select.predbat_gecloud_BATTERY001_dc_discharge_1_end_time"]
+        assert ge.config_args.get("charge_start_time") == ["select.predbat_gecloud_battery001_ac_charge_1_start_time"]
+        assert ge.config_args.get("charge_end_time") == ["select.predbat_gecloud_battery001_ac_charge_1_end_time"]
+        assert ge.config_args.get("discharge_start_time") == ["select.predbat_gecloud_battery001_dc_discharge_1_start_time"]
+        assert ge.config_args.get("discharge_end_time") == ["select.predbat_gecloud_battery001_dc_discharge_1_end_time"]
 
         # Verify feature flags
-        assert ge.config_args.get("pause_mode") == ["select.predbat_gecloud_BATTERY001_pause_battery"], "pause_mode should be set"
-        assert ge.config_args.get("pause_start_time") == ["select.predbat_gecloud_BATTERY001_pause_battery_start_time"], "pause_start_time should be set"
-        assert ge.config_args.get("pause_end_time") == ["select.predbat_gecloud_BATTERY001_pause_battery_end_time"], "pause_end_time should be set"
-        assert ge.config_args.get("discharge_target_soc") == ["number.predbat_gecloud_BATTERY001_dc_discharge_1_lower_soc_percent_limit"], "discharge_target_soc should be set"
-        assert ge.config_args.get("charge_rate_percent") == ["number.predbat_gecloud_BATTERY001_inverter_charge_power_percentage"], "charge_rate_percent should be set"
-        assert ge.config_args.get("discharge_rate_percent") == ["number.predbat_gecloud_BATTERY001_inverter_discharge_power_percentage"], "discharge_rate_percent should be set"
+        assert ge.config_args.get("pause_mode") == ["select.predbat_gecloud_battery001_pause_battery"], "pause_mode should be set"
+        assert ge.config_args.get("pause_start_time") == ["select.predbat_gecloud_battery001_pause_battery_start_time"], "pause_start_time should be set"
+        assert ge.config_args.get("pause_end_time") == ["select.predbat_gecloud_battery001_pause_battery_end_time"], "pause_end_time should be set"
+        assert ge.config_args.get("discharge_target_soc") == ["number.predbat_gecloud_battery001_dc_discharge_1_lower_soc_percent_limit"], "discharge_target_soc should be set"
+        assert ge.config_args.get("charge_rate_percent") == ["number.predbat_gecloud_battery001_inverter_charge_power_percentage"], "charge_rate_percent should be set"
+        assert ge.config_args.get("discharge_rate_percent") == ["number.predbat_gecloud_battery001_inverter_discharge_power_percentage"], "discharge_rate_percent should be set"
 
         # Test 2: Battery without optional features
         ge.config_args = {}
-        ge.settings = {"BATTERY002": {}}
+        ge.settings = {"battery002": {}}
 
-        devices = {"ems": None, "gateway": None, "battery": ["BATTERY002"]}
+        devices = {"ems": None, "gateway": None, "battery": ["battery002"]}
 
         await ge.async_automatic_config(devices)
 
@@ -2337,64 +2337,64 @@ def _test_async_automatic_config(my_predbat):
         assert ge.config_args.get("discharge_target_soc") is None, "discharge_target_soc should be None"
         assert ge.config_args.get("charge_rate_percent") is None, "charge_rate_percent should be None"
         assert ge.config_args.get("discharge_rate_percent") is None, "discharge_rate_percent should be None"
-        assert ge.config_args.get("inverter_mode") == ["switch.predbat_gecloud_BATTERY002_enable_eco_mode"], "inverter_mode should point to eco toggle switch"
+        assert ge.config_args.get("inverter_mode") == ["switch.predbat_gecloud_battery002_enable_eco_mode"], "inverter_mode should point to eco toggle switch"
 
         # Test 3: Multiple batteries
         ge.config_args = {}
-        ge.settings = {"BATTERY001": {}, "BATTERY002": {}}
+        ge.settings = {"battery001": {}, "battery002": {}}
 
-        devices = {"ems": None, "gateway": None, "battery": ["BATTERY001", "BATTERY002"]}
+        devices = {"ems": None, "gateway": None, "battery": ["battery001", "battery002"]}
 
         await ge.async_automatic_config(devices)
 
         assert ge.config_args.get("num_inverters") == 2, "num_inverters should be 2"
         assert ge.config_args.get("inverter_type") == ["GEC", "GEC"], "inverter_type should have 2 entries"
         assert len(ge.config_args.get("load_today")) == 2, "load_today should have 2 entries"
-        assert ge.config_args.get("load_today")[0] == "sensor.predbat_gecloud_BATTERY001_consumption_today"
-        assert ge.config_args.get("load_today")[1] == "sensor.predbat_gecloud_BATTERY002_consumption_today"
-        assert ge.config_args.get("inverter_mode") == ["switch.predbat_gecloud_BATTERY001_enable_eco_mode", "switch.predbat_gecloud_BATTERY002_enable_eco_mode"], "inverter_mode should have 2 eco toggle entries"
+        assert ge.config_args.get("load_today")[0] == "sensor.predbat_gecloud_battery001_consumption_total"
+        assert ge.config_args.get("load_today")[1] == "sensor.predbat_gecloud_battery002_consumption_total"
+        assert ge.config_args.get("inverter_mode") == ["switch.predbat_gecloud_battery001_enable_eco_mode", "switch.predbat_gecloud_battery002_enable_eco_mode"], "inverter_mode should have 2 eco toggle entries"
 
         # Test 4: EMS configuration
         ge.config_args = {}
-        ge.settings = {"EMS001": {}, "BATTERY001": {}}
+        ge.settings = {"ems001": {}, "battery001": {}}
 
-        devices = {"ems": "EMS001", "gateway": None, "battery": ["BATTERY001"]}
+        devices = {"ems": "ems001", "gateway": None, "battery": ["battery001"]}
 
         await ge.async_automatic_config(devices)
 
         assert ge.config_args.get("inverter_type") == ["GEE"], "inverter_type should be GEE for EMS"
-        assert ge.config_args.get("ge_cloud_serial") == "EMS001", "ge_cloud_serial should be EMS"
+        assert ge.config_args.get("ge_cloud_serial") == "ems001", "ge_cloud_serial should be EMS"
         assert ge.config_args.get("ge_cloud_data") is False, "ge_cloud_data should be False for EMS"
 
         # EMS-specific controls
-        assert ge.config_args.get("charge_start_time") == ["select.predbat_gecloud_EMS001_charge_start_time_slot_1"]
-        assert ge.config_args.get("charge_end_time") == ["select.predbat_gecloud_EMS001_charge_end_time_slot_1"]
-        assert ge.config_args.get("idle_start_time") == ["select.predbat_gecloud_EMS001_discharge_start_time_slot_1"]
-        assert ge.config_args.get("idle_end_time") == ["select.predbat_gecloud_EMS001_discharge_end_time_slot_1"]
-        assert ge.config_args.get("charge_limit") == ["number.predbat_gecloud_EMS001_charge_soc_percent_limit_1"]
-        assert ge.config_args.get("discharge_start_time") == ["select.predbat_gecloud_EMS001_export_start_time_slot_1"]
-        assert ge.config_args.get("discharge_end_time") == ["select.predbat_gecloud_EMS001_export_end_time_slot_1"]
+        assert ge.config_args.get("charge_start_time") == ["select.predbat_gecloud_ems001_charge_start_time_slot_1"]
+        assert ge.config_args.get("charge_end_time") == ["select.predbat_gecloud_ems001_charge_end_time_slot_1"]
+        assert ge.config_args.get("idle_start_time") == ["select.predbat_gecloud_ems001_discharge_start_time_slot_1"]
+        assert ge.config_args.get("idle_end_time") == ["select.predbat_gecloud_ems001_discharge_end_time_slot_1"]
+        assert ge.config_args.get("charge_limit") == ["number.predbat_gecloud_ems001_charge_soc_percent_limit_1"]
+        assert ge.config_args.get("discharge_start_time") == ["select.predbat_gecloud_ems001_export_start_time_slot_1"]
+        assert ge.config_args.get("discharge_end_time") == ["select.predbat_gecloud_ems001_export_end_time_slot_1"]
 
         # EMS-specific sensors
-        assert ge.config_args.get("load_today") == ["sensor.predbat_gecloud_EMS001_consumption_total"]
-        assert ge.config_args.get("pv_today") == ["sensor.predbat_gecloud_EMS001_solar_total"]
-        assert ge.config_args.get("import_today") == ["sensor.predbat_gecloud_EMS001_grid_import_total"]
-        assert ge.config_args.get("export_today") == ["sensor.predbat_gecloud_EMS001_grid_export_total"]
-        assert ge.config_args.get("battery_power") == ["sensor.predbat_gecloud_EMS001_battery_power"]
-        assert ge.config_args.get("pv_power") == ["sensor.predbat_gecloud_EMS001_solar_power"]
-        assert ge.config_args.get("load_power") == ["sensor.predbat_gecloud_EMS001_consumption_power"]
-        assert ge.config_args.get("grid_power") == ["sensor.predbat_gecloud_EMS001_grid_power"]
+        assert ge.config_args.get("load_today") == ["sensor.predbat_gecloud_ems001_consumption_total"]
+        assert ge.config_args.get("pv_today") == ["sensor.predbat_gecloud_ems001_solar_total"]
+        assert ge.config_args.get("import_today") == ["sensor.predbat_gecloud_ems001_grid_import_total"]
+        assert ge.config_args.get("export_today") == ["sensor.predbat_gecloud_ems001_grid_export_total"]
+        assert ge.config_args.get("battery_power") == ["sensor.predbat_gecloud_ems001_battery_power"]
+        assert ge.config_args.get("pv_power") == ["sensor.predbat_gecloud_ems001_solar_power"]
+        assert ge.config_args.get("load_power") == ["sensor.predbat_gecloud_ems001_consumption_power"]
+        assert ge.config_args.get("grid_power") == ["sensor.predbat_gecloud_ems001_grid_power"]
 
         # Test 5: Multiple batteries with gateway (should use gateway as control)
         ge.config_args = {}
-        ge.settings = {"GATEWAY001": {}, "BATTERY001": {}, "BATTERY002": {}}
+        ge.settings = {"gateway001": {}, "battery001": {}, "battery002": {}}
 
-        devices = {"ems": None, "gateway": "GATEWAY001", "battery": ["BATTERY001", "BATTERY002"]}
+        devices = {"ems": None, "gateway": "gateway001", "battery": ["battery001", "battery002"]}
 
         await ge.async_automatic_config(devices)
 
         assert ge.config_args.get("num_inverters") == 1, "num_inverters should be 1 when using gateway"
-        assert ge.config_args.get("load_today") == ["sensor.predbat_gecloud_GATEWAY001_consumption_today"], "Should use gateway for control"
+        assert ge.config_args.get("load_today") == ["sensor.predbat_gecloud_gateway001_consumption_total"], "Should use gateway for control"
 
         # Test 6: No battery devices (should log error and return)
         ge.config_args = {}
@@ -2412,17 +2412,17 @@ def _test_async_automatic_config(my_predbat):
 
         # Test 8: EMS with multiple inverters
         ge.config_args = {}
-        ge.settings = {"EMS001": {}, "BATTERY001": {}, "BATTERY002": {}}
+        ge.settings = {"ems001": {}, "battery001": {}, "battery002": {}}
 
-        devices = {"ems": "EMS001", "gateway": None, "battery": ["BATTERY001", "BATTERY002"]}
+        devices = {"ems": "ems001", "gateway": None, "battery": ["battery001", "battery002"]}
 
         await ge.async_automatic_config(devices)
 
         assert ge.config_args.get("num_inverters") == 2, "num_inverters should be 2 for EMS with multiple batteries"
         assert ge.config_args.get("inverter_type") == ["GEE", "GEE"], "inverter_type should have 2 GEE entries"
         # EMS produces data for all inverters, so additional inverters get 0
-        assert ge.config_args.get("battery_power") == ["sensor.predbat_gecloud_EMS001_battery_power", 0], "Second inverter should get 0 for battery_power"
-        assert ge.config_args.get("pv_power") == ["sensor.predbat_gecloud_EMS001_solar_power", 0], "Second inverter should get 0 for pv_power"
+        assert ge.config_args.get("battery_power") == ["sensor.predbat_gecloud_ems001_battery_power", 0], "Second inverter should get 0 for battery_power"
+        assert ge.config_args.get("pv_power") == ["sensor.predbat_gecloud_ems001_solar_power", 0], "Second inverter should get 0 for pv_power"
 
         return 0
 

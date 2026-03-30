@@ -115,7 +115,7 @@ class Energidataservice:
                 self.log(f"Warn: Invalid time format '{start_time_str}' in data")
                 continue
 
-            # 🔧 FIX: normalize timezone properly
+            # Normalize timezone properly
             if start_time.tzinfo is not None:
                 start_time = start_time.astimezone(timezone.utc).replace(tzinfo=None)
 
@@ -128,13 +128,14 @@ class Energidataservice:
                 if min_minute <= minute < max_minute:
                     rate_data[minute] = dp4(rate)
 
-        # 🔧 SAFETY FIX: ensure minute 0 exists (prevents KeyError)
-        if rate_data:
-            if 0 not in rate_data:
-                min_key = min(rate_data.keys())
-                shift = min_key
-                self.log(f"Adjusting rate_data index by {-shift} to align minute 0")
-                rate_data = {k - shift: v for k, v in rate_data.items()}
+        # Fill missing minutes at the start of the data set without shifting timestamps
+        if rate_data and 0 not in rate_data:
+            min_key = min(rate_data.keys())
+            if min_key > 0:
+                first_rate = rate_data[min_key]
+                for minute in range(0, min_key):
+                    # Use the rate from 24 hours ahead if available, otherwise replicate the first valid rate
+                    rate_data[minute] = rate_data.get(minute + 24 * 60, first_rate)
 
         if adjust_key:
             pass
